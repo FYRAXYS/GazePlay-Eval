@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PopupImportSaveComponent } from './popup-import-save.component';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 describe('PopupImportSaveComponent', () => {
   let component: PopupImportSaveComponent;
@@ -8,7 +9,11 @@ describe('PopupImportSaveComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PopupImportSaveComponent]
+      imports: [PopupImportSaveComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
+        { provide: MAT_DIALOG_DATA, useValue: "" }
+      ]
     })
     .compileComponents();
 

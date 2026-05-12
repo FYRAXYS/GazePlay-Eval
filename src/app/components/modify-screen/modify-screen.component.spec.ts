@@ -14,6 +14,7 @@ describe('ModifyScreenComponent', () => {
 
     fixture = TestBed.createComponent(ModifyScreenComponent);
     component = fixture.componentInstance;
+    component.screenToModify = { name: 'Screen1', type: 'transition', values: [false, 0, false, false, 0] };
     fixture.detectChanges();
   });
 

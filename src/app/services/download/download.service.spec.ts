@@ -6,15 +6,18 @@ import { SaveService } from '../save/save.service';
 
 class MockSaveService {
   dataAuto = {
+    format: 'Csv&Xlsx',
+    infoParticipant: [],
     listScreens: [
       { type: 'transition', values: ['t1', 't2'] },
-      { type: 'instruction', values: ['i1', 'i2', 'i3', 'text'] },
-      { type: 'instruction', values: ['i4', 'i5', 'i6', 'image', null, 'img.jpg'] },
-      { type: 'instruction', values: ['i7', 'i8', 'i9', 'video', null, 'vid.mp4'] },
-      { type: 'instruction', values: ['i10', 'i11', 'i12', 'audio', null, 'audio.mp3'] },
+      { type: 'instruction', values: [true, 10, false, 'Texte'] },
+      { type: 'instruction', values: [true, 10, false, 'Image', 'img.jpg', new Blob(['img'])] },
+      { type: 'instruction', values: [true, 10, false, 'Video', 'vid.mp4', new Blob(['vid'])] },
+      { type: 'instruction', values: [true, 10, false, 'Son',   'audio.mp3', new Blob(['audio'])] },
       { type: 'stimuli', values: ['s1', 's2'] }
     ]
   };
+  getEvalName() { return 'TestEval'; }
 }
 
 describe('DownloadService', () => {
@@ -48,17 +51,18 @@ describe('DownloadService', () => {
 
   it('devrait générer un zip avec toutes les ressources et appeler saveAs', async () => {
     await service.generateEvalZip(mockSaveService as unknown as SaveService);
+    await Promise.resolve(); // flush le .then() de generateAsync
 
-    // JSON evalData
-    expect(JSZip.prototype.file).toHaveBeenCalledWith('evalData.json', jasmine.any(String));
+    // JSON evalData (préfixé avec le nom de l'éval)
+    expect(JSZip.prototype.file).toHaveBeenCalledWith('TestEval/evalData.json', jasmine.any(String));
 
-    // Images, Videos et Audio
-    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^images\//), jasmine.any(Blob));
-    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^videos\//), jasmine.any(Blob));
-    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^audio\//), jasmine.any(Blob));
+    // Images, Videos et Audio (préfixés avec le nom de l'éval)
+    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^TestEval\/images\//), jasmine.anything());
+    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^TestEval\/videos\//), jasmine.anything());
+    expect(JSZip.prototype.file).toHaveBeenCalledWith(jasmine.stringMatching(/^TestEval\/audio\//), jasmine.anything());
 
     // Génération et Téléchargement
     expect(JSZip.prototype.generateAsync).toHaveBeenCalled();
-    expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'gazeplayEval.gpSave');
+    expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'TestEval-gazeplayEval.zip');
   });
 });
