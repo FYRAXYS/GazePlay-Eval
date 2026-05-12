@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CropImageComponent } from './crop-image.component';
 
 describe('CropImageComponent', () => {
@@ -8,7 +8,11 @@ describe('CropImageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CropImageComponent]
+      imports: [CropImageComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
+        { provide: MAT_DIALOG_DATA, useValue: { image: new File([], 'test.png') } }
+      ]
     })
     .compileComponents();
 

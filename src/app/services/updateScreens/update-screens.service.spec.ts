@@ -21,21 +21,23 @@ describe('UpdateScreensService', () => {
     const updated = service.updateTransitionScreen(screen, 'TestTransition', newValues);
 
     expect(updated.name).toBe('TestTransition');
-    expect(updated.values).toEqual([1, 2, 3, 4, 5]);
+    expect(updated.values).toEqual(['nomTest',1, 2, 3, 4]);
   });
 
   it('updateInstructionScreen met à jour le nom et les valeurs', () => {
-    const screen: instructionScreenModel = { type: 'instruction', name: '', values: [0, 0, 0, 0, 0, 0, 0] };
+    const screen: instructionScreenModel = { type: 'instruction', name: '', values: [0, 0, 0, 0, 0, 0, 0, 0] };
     const newValues = ['nomTest', 1, 2, 3, 4, 5];
 
     const updated = service.updateInstructionScreen(screen, 'TestInstruction', newValues);
 
     expect(updated.name).toBe('TestInstruction');
-    expect(updated.values[0]).toBe(1);
-    expect(updated.values[1]).toBe(2);
-    expect(updated.values[2]).toBe(3);
-    expect(updated.values[3]).toBe(4);
-    expect(updated.values[5]).toBe(5);
-    expect(updated.values[6]).toBeUndefined();
+    expect(updated.values[0]).toBe('nomTest');
+    expect(updated.values[1]).toBe(1);
+    expect(updated.values[2]).toBe(2);
+    expect(updated.values[3]).toBe(3);
+    expect(updated.values[4]).toBe(0);
+    expect(updated.values[5]).toBe(0);
+    expect(updated.values[6]).toBe(4);
+    expect(updated.values[7]).toBe(5);
   });
 });
