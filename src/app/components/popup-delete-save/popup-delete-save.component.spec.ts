@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PopupDeleteSave } from './popup-delete-save.component';
+import { PopupDeleteSaveComponent } from './popup-delete-save.component';
 
-describe('PopupDeleteSave', () => {
-  let component: PopupDeleteSave;
-  let fixture: ComponentFixture<PopupDeleteSave>;
-
+describe('PopupDeleteSaveComponent', () => {
+  let component: PopupDeleteSaveComponent;
+  let fixture: ComponentFixture<PopupDeleteSaveComponent>;
+  const mockDialogRef = {
+    close: jasmine.createSpy('close')
+  };
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PopupDeleteSave]
+      imports: [PopupDeleteSaveComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PopupDeleteSave);
+    fixture = TestBed.createComponent(PopupDeleteSaveComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

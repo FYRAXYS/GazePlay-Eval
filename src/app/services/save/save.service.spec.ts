@@ -34,7 +34,8 @@ describe('SaveService', () => {
       globalParamsTransitionScreen: [] as any[],
       globalParamsInstructionScreen: [] as any[],
       globalParamsStimuliScreen: [] as any[],
-      listScreens: [] as any[]
+      listScreens: [] as any[],
+      step: 0
     };
 
     spyOn(service, 'saveToSlot').and.callThrough();
@@ -46,7 +47,8 @@ describe('SaveService', () => {
       mockData.globalParamsTransitionScreen,
       mockData.globalParamsInstructionScreen,
       mockData.globalParamsStimuliScreen,
-      mockData.listScreens
+      mockData.listScreens,
+      mockData.step
     );
 
     expect(service.dataAuto).toEqual(mockData);
