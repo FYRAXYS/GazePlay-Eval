@@ -25,9 +25,9 @@ describe('AutoSaveService', () => {
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
     saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveToSlot'], {
-      dataAuto: { ...saveModelDefault, nomEval: 'TestEval', step: 0 },
-      activeSlotIndex: null
+      dataAuto: { ...saveModelDefault, nomEval: 'TestEval', step: 0 }
     });
+    saveServiceSpy.activeSlotIndex = null;
 
     flashServiceSpy = jasmine.createSpyObj('FlashService', ['show']);
     loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
@@ -72,7 +72,6 @@ describe('AutoSaveService', () => {
   });
 
   it('autoSave avec activeSlotIndex défini → slot 0 ET activeSlot sauvegardés', () => {
-    (Object.getOwnPropertyDescriptor(saveServiceSpy, 'activeSlotIndex')?.get as any)
     saveServiceSpy.activeSlotIndex = 2 as any;
 
     service.autoSave('/create-eval');
