@@ -1,20 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTooltip } from '@angular/material/tooltip';
-import { PopupDeleteSaveComponent } from '../../components/popup-delete-save/popup-delete-save.component';
 import { LoadService } from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import { saveModel } from '../../shared/saveModel';
 import { FormatTypeConfig } from '../../shared/dataBaseConfig';
 import { Router } from '@angular/router';
-import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import { SauvegardeComponent } from './sauvegarde.component';
-import {optionsModel} from '../../shared/optionsModel';
+import {of} from 'rxjs';
 
 describe('SauvegardeComponent', () => {
   let component: SauvegardeComponent;
@@ -27,6 +24,7 @@ describe('SauvegardeComponent', () => {
   let downloadServiceSpy: jasmine.SpyObj<DownloadService>
   let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>
   let indexedDBServiceSpy: jasmine.SpyObj<IndexedDBService>
+  let dialogSpy: jasmine.SpyObj<MatDialog>
 
 
   beforeEach(async () => {
@@ -51,6 +49,7 @@ describe('SauvegardeComponent', () => {
     downloadServiceSpy = jasmine.createSpyObj('DownloadService', ['generateSlotZip']);
     overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
     indexedDBServiceSpy = jasmine.createSpyObj('IndexedDBService', ['deleteFileByProject']);
+    dialogSpy = jasmine.createSpyObj('MatDialog', ['open'])
 
     await TestBed.configureTestingModule({
       imports: [SauvegardeComponent],
@@ -62,7 +61,8 @@ describe('SauvegardeComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: DownloadService, useValue: downloadServiceSpy },
         { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
-        { provide: IndexedDBService, useValue: indexedDBServiceSpy}
+        { provide: IndexedDBService, useValue: indexedDBServiceSpy},
+        { provide: MatDialog, useValue: dialogSpy}
       ]
     })
     .compileComponents();
@@ -261,4 +261,57 @@ describe('SauvegardeComponent', () => {
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'Votre évaluation a été sauvegardée avec succès.');
   });
 
+  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+    const slotToDelete: saveModel = {
+      nomEval: 'EvalToDelete',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 1) return slotToDelete;
+      return null;
+    });
+    indexedDBServiceSpy.deleteFileByProject.and.returnValue(Promise.resolve());
+
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of('delete')
+    } as any);
+
+    component.openDeletePopup({ index: 1, data: slotToDelete });
+
+    expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(1);
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'L\'évaluation a été supprimée avec succès.');
+  });
+
+  it('en cas de suppression (avec download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+    const slotToDelete: saveModel = {
+      nomEval: 'EvalToDelete',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of('download')
+    } as any);
+
+    component.openDeletePopup({ index: 1, data: slotToDelete });
+
+    expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotToDelete);
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
+  });
 });
