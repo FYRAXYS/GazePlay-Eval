@@ -15,7 +15,7 @@ describe('HomeComponent', () => {
   let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
   beforeEach(async () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['newSaveDataAuvto']);
+    saveServiceSpy = jasmine.createSpyObj('SaveService', ['newSaveDataAuto']);
     overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check']);
     overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
     autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
