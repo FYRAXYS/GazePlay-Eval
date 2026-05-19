@@ -1,21 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FlashService } from '../../services/flash-message/flash.service';
 
 import { FlashComponent} from './flash.component';
 
 describe('FlashComponent', () => {
   let component: FlashComponent;
   let fixture: ComponentFixture<FlashComponent>;
-  let flashServiceSpy: jasmine.SpyObj<FlashService>
 
 
   beforeEach(async () => {
-    flashServiceSpy = jasmine.createSpyObj('FlashService', ['show', 'remove']);
     await TestBed.configureTestingModule({
       imports: [FlashComponent],
-      providers: [
-        {provide: FlashService, useValue: flashServiceSpy}
-      ]
+      providers: []
     })
       .compileComponents();
 
