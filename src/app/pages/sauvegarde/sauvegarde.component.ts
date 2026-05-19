@@ -172,6 +172,9 @@ export class SauvegardeComponent implements OnInit {
     this.router.navigate(['/info-eval']);
   }
 
+  /**
+   * Supprime le contenu de la sauvegarde dynamique
+   */
   deleteAutoSave() {
     if (this.evalInProgress) {
       this.saveService.clearSlot(0);

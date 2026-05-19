@@ -314,4 +314,91 @@ describe('SauvegardeComponent', () => {
     expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotToDelete);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
   });
+
+  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+    const slotToDelete: saveModel = {
+      nomEval: 'EvalToDelete',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 1) return slotToDelete;
+      return null;
+    });
+    indexedDBServiceSpy.deleteFileByProject.and.returnValue(Promise.resolve());
+
+    dialogSpy.open.and.returnValue({
+      afterClosed: () => of('delete')
+    } as any);
+
+    component.openDeletePopup({ index: 1, data: slotToDelete });
+
+    expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(1);
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'L\'évaluation a été supprimée avec succès.');
+  });
+
+  it('la création d\'une nouvelle évaluation vérifie le nom, sauvegarde et amène vers la page info-eval', async () => {
+
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    saveServiceSpy.newSaveDataAuto.and.returnValue(<void>undefined);
+
+    await component.newEval();
+
+    expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0);
+    expect(saveServiceSpy.newSaveDataAuto).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
+  });
+
+  it('La suppression de la sauvegarde auto vide le slot dynamique', async () => {
+    const DynamicSlot: saveModel = {
+      nomEval: 'EvalInProgress',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 0) return DynamicSlot;
+      if (index === 1) return null;
+      if (index === 2) return null;
+      if (index === 3) return null;
+      return null;
+    });
+
+    saveServiceSpy.clearSlot.and.callFake(() => {
+      loadServiceSpy.getSlot.and.returnValue(null);
+    });
+
+    await component.saveToSlot({ index: 0, data: null }, DynamicSlot);
+
+    component.deleteAutoSave()
+
+    fixture.detectChanges();
+
+    expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(0);
+    expect(component.evalInProgress).toBeFalse();
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'Les dernières modifications ont été supprimés avec succès.');
+    expect(component.slots[0].data).toBeNull();
+    expect(component.slots).toEqual([
+      { index: 1, data: null },
+      { index: 2, data: null },
+      { index: 3, data: null }
+    ]);
+
+  });
+
 });
