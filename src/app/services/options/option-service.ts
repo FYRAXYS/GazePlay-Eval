@@ -1,5 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
-import {FlashService} from '../flash-message/flash.service';
+import {Injectable} from '@angular/core';
 import {optionsModel} from '../../shared/optionsModel';
 
 @Injectable({ providedIn: 'root' })

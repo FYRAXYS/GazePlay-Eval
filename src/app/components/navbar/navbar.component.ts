@@ -2,11 +2,10 @@ import {Component} from '@angular/core';
 import {ThemeService} from '../../services/theme/theme.service';
 import {MenuComponent} from '../menu/menu.component';
 import {Router} from '@angular/router';
-import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MenuComponent, NgOptimizedImage],
+  imports: [MenuComponent],
   templateUrl: './navbar.component.html',
   standalone: true,
   styleUrl: './navbar.component.css'
