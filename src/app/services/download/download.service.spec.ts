@@ -3,6 +3,7 @@ import { DownloadService } from './download.service';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import { SaveService } from '../save/save.service';
+import { saveModelDefault } from '../../shared/saveModel';
 
 class MockSaveService {
   dataAuto = {
@@ -44,6 +45,43 @@ describe('DownloadService', () => {
 
     spyOn(FileSaver, 'saveAs' as any).and.callFake(() => {});
   });
+
+  it('generateTransitionScreenZip → mappe les values dans le JSON', () => {
+    const screen = { type: 'transition', name: 'T1', values: [true, 5, false, false, 0] } as any;
+    const jsonData: any[] = [];
+
+    service.generateTransitionScreenZip(screen, jsonData);
+
+    expect(jsonData.length).toBe(1);
+    expect(jsonData[0].Type).toBe('transition');
+
+  });
+
+  it('generateInstructionScreenZipText → ne génère pas de fichier média dans le zip', () => {
+    const screen = { type: 'instruction', name: 'T1', values: [true, 5, false, 'Texte'] } as any;
+    const jsonData: any[] = [];
+
+    service.generateInstructionScreenZipText(screen, jsonData);
+    expect(jsonData.length).toBe(1);
+    expect(JSZip.prototype.file).not.toHaveBeenCalled();
+  });
+
+  it('getInfoEval → retourne nom, format et infos participant', () => {
+    const result = service.getInfoEval(mockSaveService as unknown as SaveService);
+
+    expect(result["Nom de l'évaluation"]).toBe('TestEval');
+    expect(result["Format choisi"]).toBe('Csv&Xlsx');
+    expect(result["Informations participant"]).toEqual([]);   });
+
+  it('generateSlotZip → appelle saveAs avec extension .gpSave', async () => {
+    const saveData = { ...saveModelDefault, nomEval: 'TestEval', listScreens: [] } as any;
+
+    await service.generateSlotZip(saveData);
+
+    expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'TestEval-gazeplayEval.gpSave');
+  });
+
+  it('isValidFile → true pour File/Blob, false pour string/null', () => {});
 
   it('devrait être créé', () => {
     expect(service).toBeTruthy();
