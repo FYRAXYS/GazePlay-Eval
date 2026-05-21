@@ -40,4 +40,15 @@ describe('OptionService', () => {
     expect(raw).not.toBeNull();
     expect(JSON.parse(raw!)).toEqual(optionsModelDefault);
   });
+
+  it('getOptions → JSON invalide → retourne null', () => {
+    localStorage.setItem('options', '{invalid_json}');
+    const result = service.getOptions();
+    expect(result).toBeNull();
+  });
+
+  it('setOptions → localStorage.setItem lance une erreur → propage l\'exception', () => {
+    spyOn(localStorage, 'setItem').and.throwError('QuotaExceededError');
+    expect(() => service.setOptions(optionsModelDefault)).toThrow();
+  });
 });
