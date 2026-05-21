@@ -357,6 +357,150 @@ describe('SauvegardeComponent', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
   });
 
+  it('getSlotAuto → retourne le contenu du slot dynamique (index 0)', () => {
+    const slot0 = { nomEval: 'InProgress', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? slot0 : null);
+    fixture.detectChanges();
+    expect(component.getSlotAuto()).toBe(slot0);
+  });
+
+  it('getSlotAuto → retourne null si le slot dynamique est vide', () => {
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+    expect(component.getSlotAuto()).toBeNull();
+  });
+
+  it('downloadSlot — slot avec données → generateSlotZip + message info', () => {
+    const slotData = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve());
+    fixture.detectChanges();
+
+    component.downloadSlot({ index: 1, data: slotData });
+
+    expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotData);
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
+  });
+
+  it('downloadSlot — slot vide → generateSlotZip non appelé', () => {
+    fixture.detectChanges();
+    component.downloadSlot({ index: 1, data: null });
+    expect(downloadServiceSpy.generateSlotZip).not.toHaveBeenCalled();
+  });
+
+  it('editSlot — slot vide → retourne sans rien faire', async () => {
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it('editSlot — overwriteGuard bloque → retourne sans charger', async () => {
+    const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it('editSlot — succès → charge le slot, sauvegarde dans slot 0 et appelle tryResume', async () => {
+    const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.objectContaining({ nomEval: 'E1' }));
+    expect(saveServiceSpy.activeSlotIndex).toBe(1);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+  });
+
+  it('editSlot — step < 0 → utilise step = 3', async () => {
+    const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: -1, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.objectContaining({ step: 3 }));
+  });
+
+  it('saveToSlot — slot.data non null et guard bloque → retourne sans sauvegarder', async () => {
+    const existingData = { nomEval: 'Existing', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 1, data: existingData });
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it('saveToSlot — uniqueName différent de nomEval → renomme', async () => {
+    const data = { nomEval: 'Eval', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    overwriteGuardSpy.getUniqueEvalName.and.returnValue('Eval (2)');
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 1, data: null }, data);
+
+    expect(data.nomEval).toBe('Eval (2)');
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(1, data);
+  });
+
+  it('saveToSlot — sans dataToSave → utilise le slot dynamique', async () => {
+    const autoSave = { nomEval: 'Auto', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    overwriteGuardSpy.getUniqueEvalName.and.returnValue('Auto');
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? autoSave : null);
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 2, data: null });
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(2, autoSave);
+  });
+
+  it('deleteAutoSave — evalInProgress false → clearSlot non appelé', () => {
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+    component.evalInProgress = false;
+
+    component.deleteAutoSave();
+
+    expect(saveServiceSpy.clearSlot).not.toHaveBeenCalled();
+  });
+
+  it('ngOnInit — autoSave nomEval vide → hasUnsavedEval false', () => {
+    const emptyAutoSave = { nomEval: '', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? emptyAutoSave : null);
+    fixture.detectChanges();
+    expect(component.hasUnsavedEval).toBeFalse();
+  });
+
+  it('ngOnInit — autoSave correspond à un slot sauvegardé → hasUnsavedEval false', () => {
+    const saved = { nomEval: 'MonEval', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => (i === 0 || i === 1) ? saved : null);
+    fixture.detectChanges();
+    expect(component.hasUnsavedEval).toBeFalse();
+  });
+
+  it('newEval — overwriteGuard bloque → navigate non appelé', async () => {
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.newEval();
+
+    expect(saveServiceSpy.newSaveDataAuto).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
   it('La suppression de la sauvegarde auto vide le slot dynamique', async () => {
     const DynamicSlot: saveModel = {
       nomEval: 'EvalInProgress',

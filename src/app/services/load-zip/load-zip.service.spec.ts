@@ -296,7 +296,64 @@ describe('LoadZipService', () => {
     expect(args[5]).toEqual(['default-stimuli'] as any);
   });
 
-  it('loadZipToSlot → appelle loadZip puis saveToSlot avec le bon index', async () => {
+  it('loadZip — fichier avec préfixe ._ → ignoré (addFile non appelé)', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: '{}' },
+      'evalData.json': { content: '[]' },
+      'EvalTest/images/._photo.png': { content: new Blob(['hidden']) }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+  });
+
+  it('loadZip — item sans champ "name" → utilise le nom de fallback', async () => {
+    const evalInfo = { "Nom de l'évaluation": 'FallbackEval' };
+    const evalData = [{
+      Type: transitionScreenConstModel,
+      // pas de champ 'name'
+      "Mettre un temps avant passage à l'écran suivant": false,
+      "Combien de temps": 0,
+      "Mettre une croix de fixation": false,
+      "Mettre un temps de fixation": false,
+      "Combien de temps de fixation": 0
+    }];
+
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify(evalInfo) },
+      'evalData.json': { content: JSON.stringify(evalData) }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    const listScreens = saveServiceSpy.saveDataAuto.calls.mostRecent().args[6];
+    expect(listScreens[0].name).toBe('Ecran 1');
+  });
+
+  it('loadZip — instruction sans "Lien du fichier" ni "Nom du fichier" → idbId vide', async () => {
+    const evalInfo = { "Nom de l'évaluation": 'EvalEmpty' };
+    const evalData = [{
+      Type: instructionScreenConstModel,
+      "Mettre un temps avant passage à l'écran suivant": false,
+      "Combien de temps": 1,
+      "Ajouter un media": false,
+      "Type de media": 'Texte',
+      "Combien de temps de fixation": 1
+    }];
+
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify(evalInfo) },
+      'evalData.json': { content: JSON.stringify(evalData) }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    const screen = saveServiceSpy.saveDataAuto.calls.mostRecent().args[6][0];
+    expect(screen.values[8]).toBe('');
+  });
+
+  it('loadZip — loadZipToSlot → appelle loadZip puis saveToSlot avec le bon index', async () => {
     spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
       'evalInfo.json': { content: '{}' },
       'evalData.json': { content: '[]' }
