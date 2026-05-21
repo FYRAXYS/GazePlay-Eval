@@ -165,6 +165,30 @@ describe('CreateEvalComponent', () => {
     expect(component.indexSelectedScreen).toBe(2);
   });
 
+  it('backToSetupEval → appelle saveDataAuto puis navigue vers /setup-eval', () => {
+    component.backToSetupEval();
+    expect(saveServiceSpy.saveDataAuto).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/setup-eval']);
+  });
+
+  it('exitInputScreen → remet editNameScreenDisable à true', () => {
+    component.editNameScreenDisable = false;
+    component.exitInputScreen();
+    expect(component.editNameScreenDisable).toBeTrue();
+  });
+
+  it('editNameScreen → selectionne l\'ecran et met editNameScreenDisable a false', () => {
+    const screen: screenTypeModel = { name: 'Ecran 1', type: 'transition', values: [] };
+    component.listScreens = [screen];
+    const mockInput = { nativeElement: { focus: jasmine.createSpy(), select: jasmine.createSpy() } };
+    component.inputs = { toArray: () => [mockInput] } as any;
+
+    component.editNameScreen(screen, false, 0);
+
+    expect(component.selectedScreen).toBe(screen);
+    expect(component.editNameScreenDisable).toBeFalse();
+  });
+
   // ── Cas 8 ────────────────────────────────────────────────────────────────────
   // goToDownloadEval doit d'abord persister les données (saveData → saveDataAuto)
   // puis naviguer vers /download-eval.

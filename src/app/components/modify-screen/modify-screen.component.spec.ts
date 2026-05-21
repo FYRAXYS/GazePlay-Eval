@@ -150,6 +150,94 @@ describe('ModifyScreenComponent', () => {
     expect(component.haveStimuliSoundFile).toBeTrue();
   });
 
+  it('ngOnInit — IDB retourne mauvais type pour image → haveInstructionFile false', async () => {
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'sound', lastEdit: new Date()
+    } as any));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+
+    expect(component.haveInstructionFile).toBeFalse();
+  });
+
+  it('ngOnInit — IDB retourne Blob (pas File) pour image → crée File → haveInstructionFile true', async () => {
+    const blob = new Blob(['img'], { type: 'image/png' });
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/photo.png', file: blob, type: 'image', lastEdit: new Date()
+    } as any));
+
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+
+    expect(component.haveInstructionFile).toBeTrue();
+  });
+
+  it('ngOnInit — image fallback getAllFiles avec File → haveInstructionFile true', async () => {
+    const mockFile = new File(['img'], 'photo.png', { type: 'image/png' });
+    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/photo.png', file: mockFile, type: 'image', lastEdit: new Date() }
+    ] as any));
+
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+
+    expect(component.haveInstructionFile).toBeTrue();
+  });
+
+  it('ngOnInit — image fallback getAllFiles avec Blob (pas File) → crée File → true', async () => {
+    const blob = new Blob(['img'], { type: 'image/png' });
+    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/photo.png', file: blob, type: 'image', lastEdit: new Date() }
+    ] as any));
+
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+
+    expect(component.haveInstructionFile).toBeTrue();
+  });
+
+  it('ngOnInit — son stimuli fallback getAllFiles avec File → haveStimuliSoundFile true', async () => {
+    const mockFile = new File(['snd'], 'son.mp3', { type: 'audio/mp3' });
+    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/son.mp3', file: mockFile, type: 'sound', lastEdit: new Date() }
+    ] as any));
+
+    createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
+    await fixture.whenStable();
+
+    expect(component.haveStimuliSoundFile).toBeTrue();
+  });
+
+  it('ngOnInit — son stimuli fallback getAllFiles avec Blob (pas File) → true', async () => {
+    const blob = new Blob(['snd'], { type: 'audio/mp3' });
+    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/son.mp3', file: blob, type: 'sound', lastEdit: new Date() }
+    ] as any));
+
+    createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
+    await fixture.whenStable();
+
+    expect(component.haveStimuliSoundFile).toBeTrue();
+  });
+
+  it('ngOnInit — son stimuli IDB mauvais type → fallback vide → false', async () => {
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'image', lastEdit: new Date()
+    } as any));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+
+    createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
+    await fixture.whenStable();
+
+    expect(component.haveStimuliSoundFile).toBeFalse();
+  });
+
   // ─── changeTypeScreen ─────────────────────────────────────────────────────────
 
   it('changeTypeScreen → transition — appelle updateTransitionScreen et met à jour screenToModify', async () => {

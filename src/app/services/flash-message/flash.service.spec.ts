@@ -68,6 +68,22 @@ describe('FlashService', () => {
     expect(service.flashs().length).toBe(0);
   }));
 
+  it('remove — plusieurs flashs → seul le flash ciblé passe fadingOut, l\'autre reste intact', fakeAsync(() => {
+    service.show('info', 'Flash A');
+    service.show('info', 'Flash B');
+    const idA = service.flashs()[0].id;
+    const idB = service.flashs()[1].id;
+
+    service.remove(idA);
+
+    expect(service.flashs().find(f => f.id === idA)?.fadingOut).toBeTrue();
+    expect(service.flashs().find(f => f.id === idB)?.fadingOut).toBeFalsy();
+
+    tick(300);
+    expect(service.flashs().some(f => f.id === idB)).toBeTrue();
+    expect(service.flashs().some(f => f.id === idA)).toBeFalse();
+  }));
+
   it('setDefaultDuration / getDefaultDuration → stocke en ms, retourne en secondes', () => {
     service.setDefaultDuration(8000);
 
@@ -84,10 +100,24 @@ describe('FlashService', () => {
 
   it('constructeur → ne bloque pas si les options sont corrompues', () => {
     optionsServiceSpy.getOptions.and.throwError('JSON corrompu');
-
-
     expect(() => new FlashService(optionsServiceSpy)).not.toThrow();
   });
 
+  it('constructeur — getOptions retourne null → setDefaultDuration non appelé', () => {
+    optionsServiceSpy.getOptions.and.returnValue(null);
+    const s = new FlashService(optionsServiceSpy);
+    expect(s.getDefaultDuration()).toBe(5);
+  });
 
+  it('getTimeout (private) — options non null → retourne flashDuration', () => {
+    optionsServiceSpy.getOptions.and.returnValue({ flashDuration: 7, fontSize: 12, theme: 'dark' });
+    const result = (service as any).getTimeout();
+    expect(result).toBe(7);
+  });
+
+  it('getTimeout (private) — options null → retourne 5000', () => {
+    optionsServiceSpy.getOptions.and.returnValue(null);
+    const result = (service as any).getTimeout();
+    expect(result).toBe(5000);
+  });
 });

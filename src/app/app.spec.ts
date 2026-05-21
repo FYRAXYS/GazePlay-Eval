@@ -70,4 +70,52 @@ describe('App Component (Angular 20)', () => {
     const progressBar = fixture.nativeElement.querySelector('app-progress-bar');
     expect(progressBar).not.toBeNull();
   });
+
+  it('URL /info-eval → currentStepIndex = 0', () => {
+    routerEvents$.next(new NavigationEnd(1, '/info-eval', '/info-eval'));
+    expect(component.currentStepIndex).toBe(0);
+  });
+
+  it('URL /info-participant → currentStepIndex = 1', () => {
+    routerEvents$.next(new NavigationEnd(1, '/info-participant', '/info-participant'));
+    expect(component.currentStepIndex).toBe(1);
+  });
+
+  it('URL /create-eval → currentStepIndex = 3', () => {
+    routerEvents$.next(new NavigationEnd(1, '/create-eval', '/create-eval'));
+    expect(component.currentStepIndex).toBe(3);
+  });
+
+  it('URL /download-eval → currentStepIndex = 4', () => {
+    routerEvents$.next(new NavigationEnd(1, '/download-eval', '/download-eval'));
+    expect(component.currentStepIndex).toBe(4);
+  });
+
+  it('URL inconnue → currentStepIndex = -1', () => {
+    component.currentStepIndex = 2;
+    routerEvents$.next(new NavigationEnd(1, '/home', '/home'));
+    expect(component.currentStepIndex).toBe(-1);
+  });
+
+  it('NavigationEnd → supprime les propriétés overflow et classes backdrop', () => {
+    document.body.style.setProperty('overflow', 'hidden');
+    document.body.style.setProperty('padding-right', '17px');
+    document.body.classList.add('modal-open');
+
+    routerEvents$.next(new NavigationEnd(1, '/home', '/home'));
+
+    expect(document.body.style.getPropertyValue('overflow')).toBe('');
+    expect(document.body.style.getPropertyValue('padding-right')).toBe('');
+    expect(document.body.classList.contains('modal-open')).toBeFalse();
+  });
+
+  it('isReload → navigue vers /home', async () => {
+    spyOn(performance, 'getEntriesByType').and.returnValue([{ type: 'reload' }] as any);
+    router.navigate.and.returnValue(Promise.resolve(true));
+
+    component.ngOnInit();
+    await Promise.resolve();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/home']);
+  });
 });
