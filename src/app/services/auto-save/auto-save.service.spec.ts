@@ -114,4 +114,30 @@ describe('AutoSaveService', () => {
 
     expect(sub.unsubscribe).toHaveBeenCalled();
   });
+
+  it('init — isResuming = true → NavigationStart n\'appelle pas autoSave', () => {
+    service.init();
+    (service as any).isResuming = true;
+
+    routerEvents$.next(new NavigationStart(1, '/create-eval'));
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it('autoSave — nomEvals différents → deleteFileByProject appelé', () => {
+    saveServiceSpy.dataAuto.nomEval = 'NouvelleEval';
+    loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, nomEval: 'AncienneEval', step: 0 });
+
+    service.autoSave('/create-eval');
+
+    expect(indexedDbSpy.deleteFileByProject).toHaveBeenCalled();
+  });
+
+  it('tryResume — step sans route → ne navigue pas', () => {
+    loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, step: 99 });
+
+    service.tryResume();
+
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
 });

@@ -117,6 +117,75 @@ describe('ConfigStimuliComponent', () => {
     expect(component.data.screen[0].soundFile).toBeTruthy();
   });
 
+  it('checkCell — cellule vide (pas d\'id ni de fichier) → previewImage et previewSound vides', async () => {
+    component.data.screen[0] = makeCell(); // tout vide
+    await component.checkCell();
+    expect(idbServiceSpy.getFile).not.toHaveBeenCalled();
+    expect(component.previewImage).toBe('');
+    expect(component.previewSound).toBe('');
+  });
+
+  it('checkCell — imageId présent mais IDB introuvable → match undefined → previewImage vide', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/missing.png', imageName: 'missing.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+
+    await component.checkCell();
+
+    expect(component.previewImage).toBe('');
+  });
+
+  it('checkCell — getFile retourne mauvais type → passe au candidat suivant → previewImage vide', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'sound', lastEdit: new Date()
+    } as any));
+    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+
+    await component.checkCell();
+
+    expect(component.previewImage).toBe('');
+  });
+
+  it('checkCell — getFile retourne Blob (pas File) → crée un File → previewImage défini', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+    const blob = new Blob(['img'], { type: 'image/png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: blob, type: 'image', lastEdit: new Date()
+    } as any));
+
+    await component.checkCell();
+
+    expect(component.previewImage).not.toBe('');
+  });
+
+  it('checkCell — getFile rejette mais getAllFiles retourne un match (File) → previewImage défini', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    const mockFile = new File(['img'], 'img.png', { type: 'image/png' });
+    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/img.png', file: mockFile, type: 'image', lastEdit: new Date() }
+    ] as any));
+
+    await component.checkCell();
+
+    expect(component.previewImage).not.toBe('');
+    expect(component.data.screen[0].imageFile).toBeTruthy();
+  });
+
+  it('checkCell — getAllFiles retourne Blob (pas File) → crée un File depuis Blob', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
+    const blob = new Blob(['img'], { type: 'image/png' });
+    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/img.png', file: blob, type: 'image', lastEdit: new Date() }
+    ] as any));
+
+    await component.checkCell();
+
+    expect(component.previewImage).not.toBe('');
+  });
+
   // ─── deleteImage ──────────────────────────────────────────────────────────
 
   it('deleteImage → réinitialise imageId/imageName/imageFile et appelle autoSave', async () => {
@@ -159,6 +228,27 @@ describe('ConfigStimuliComponent', () => {
     expect(cell.imageFile).toBeUndefined();
     expect(cell.soundFile).toBeUndefined();
     expect(cell.goodAnswer).toBeFalse();
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+  });
+
+  it('deleteImage — imageId et imageName vides → deleteFileFromIDB non appelé', async () => {
+    component.data.screen[0] = makeCell(); // ids vides
+    await component.deleteImage();
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+  });
+
+  it('deleteSound — soundId et soundName vides → deleteFileFromIDB non appelé', async () => {
+    component.data.screen[0] = makeCell();
+    await component.deleteSound();
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+  });
+
+  it('deleteCell — imageId/soundId vides → deleteFileFromIDB non appelé', async () => {
+    component.data.screen[0] = makeCell();
+    await component.deleteCell();
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
@@ -245,6 +335,33 @@ describe('ConfigStimuliComponent', () => {
     component.cropImage();
 
     expect(component.data.screen[0].imageFile).toBe(original);
+  });
+
+  // ─── resize ───────────────────────────────────────────────────────────────
+
+  it('resize — isResizing false → retourne sans modifier le style', () => {
+    component.isResizing = false;
+    spyOn(document, 'getElementById').and.returnValue(document.createElement('div'));
+    component.resize(new MouseEvent('mousemove'));
+    // Pas d'erreur et pas d'effet
+    expect(component.isResizing).toBeFalse();
+  });
+
+  it('resize — isResizing true et élément trouvé → style mis à jour', () => {
+    component.isResizing = true;
+    const el = document.createElement('div');
+    spyOn(document, 'getElementById').and.returnValue(el);
+
+    const event = new MouseEvent('mousemove', { clientX: 400 });
+    component.resize(event);
+
+    expect(el.style.getPropertyValue('--bs-offcanvas-width')).toBe('400px');
+  });
+
+  it('resize — isResizing true mais élément absent → aucune erreur', () => {
+    component.isResizing = true;
+    spyOn(document, 'getElementById').and.returnValue(null);
+    expect(() => component.resize(new MouseEvent('mousemove', { clientX: 300 }))).not.toThrow();
   });
 
   // ─── startResize / stopResize ─────────────────────────────────────────────
