@@ -160,6 +160,33 @@ describe('LoadSaveComponent', () => {
     expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
   });
 
+  it('goBack → navigue vers /home', () => {
+    fixture.detectChanges();
+    component.goBack();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  it('loadSlot — slot vide → retourne sans rien faire', async () => {
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it('loadSlot — overwriteGuard bloque → retourne sans charger', async () => {
+    const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
   it('le chargement d\'un slot avec un step incorrect le remet à 3', async () => {
     const slot1: saveModel = {
       nomEval: 'Eval1',
