@@ -83,14 +83,16 @@ describe('MenuComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('devrait retourner true pour isDark() si le thème est \'dark\'', () => {
-    themeServiceSpy.getTheme.and.returnValue('dark');
-    expect(component.isDark()).toBeTrue();
-  });
+  describe('getTheme', () => {
+      it('devrait retourner true pour isDark() si le thème est \'dark\'', () => {
+        themeServiceSpy.getTheme.and.returnValue('dark');
+        expect(component.isDark()).toBeTrue();
+      });
 
-  it('devrait retourner false pour isDark() si le thème est \'light\'', () => {
-    themeServiceSpy.getTheme.and.returnValue('light');
-    expect(component.isDark()).toBeFalse();
+      it('devrait retourner false pour isDark() si le thème est \'light\'', () => {
+        themeServiceSpy.getTheme.and.returnValue('light');
+        expect(component.isDark()).toBeFalse();
+      });
   });
 
   it('ngOnInit : devrait initialiser l\'instance Offcanvas et attacher l\'écouteur d\'événement', () => {
@@ -106,28 +108,30 @@ describe('MenuComponent', () => {
     expect(disposeSpy).toHaveBeenCalled();
   });
 
-  it('goToSauvegarde : devrait fermer le menu et naviguer vers \'/sauvegarde\'', () => {
-    component.ngOnInit();
-    component.goToSauvegarde();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/sauvegarde']);
-  });
+  describe('Navigation', () => {
+    it('goToSauvegarde : devrait fermer le menu et naviguer vers \'/sauvegarde\'', () => {
+      component.ngOnInit();
+      component.goToSauvegarde();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/sauvegarde']);
+    });
 
-  it('goToLoadSave : devrait fermer le menu et naviguer vers \'/load-save\'', () => {
-    component.ngOnInit();
-    component.goToLoadSave();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/load-save']);
-  });
+    it('goToLoadSave : devrait fermer le menu et naviguer vers \'/load-save\'', () => {
+      component.ngOnInit();
+      component.goToLoadSave();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/load-save']);
+    });
 
-  it('goToGuide : devrait fermer le menu et naviguer vers \'/no-page\'', () => {
-    component.ngOnInit();
-    component.goToGuide();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/no-page']);
-  });
+    it('goToGuide : devrait fermer le menu et naviguer vers \'/no-page\'', () => {
+      component.ngOnInit();
+      component.goToGuide();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/no-page']);
+    });
 
-  it('goToOptions : devrait fermer le menu et naviguer vers \'/option\'', () => {
-    component.ngOnInit();
-    component.goToOptions();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/option']);
+    it('goToOptions : devrait fermer le menu et naviguer vers \'/option\'', () => {
+      component.ngOnInit();
+      component.goToOptions();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/option']);
+    });
   });
 
   it('Fermeture du menu : devrait nettoyer le DOM lors de la navigation', () => {
@@ -144,81 +148,85 @@ describe('MenuComponent', () => {
     expect(document.body.classList.contains('offcanvas-open')).toBeFalse();
   });
 
-  it('devrait ouvrir le dialog avec la bonne configuration et les données des slots', () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+  describe('Popup d\'import', () => {
 
-    component.openImportPopup();
+    it('devrait ouvrir le dialog avec la bonne configuration et les données des slots', () => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(PopupImportSaveComponent, jasmine.objectContaining({
-      data: jasmine.objectContaining({
-        slots: jasmine.any(Array)
-      }),
-      disableClose: true
+      component.openImportPopup();
+
+      expect(dialogSpy.open).toHaveBeenCalledWith(PopupImportSaveComponent, jasmine.objectContaining({
+        data: jasmine.objectContaining({
+          slots: jasmine.any(Array)
+        }),
+        disableClose: true
+      }));
+    });
+
+    it('Annulation : ne devrait rien faire si la popup est fermée sans résultat', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+
+      component.openImportPopup();
+
+      expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
     }));
+
+    it('ne devrait pas continuer si overwriteGuard.check(0) retourne false', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: {} }) } as any);
+      overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+
+      component.openImportPopup();
+
+      expect(loadServiceZipSpy.loadZip).not.toHaveBeenCalled();
+    }));
+
+    it('devrait appeler loadZip et tryResume() si le résultat de la popup a mode: \'load\' et que le guard est passé', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: mockZipFile }) } as any);
+      overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+
+      component.openImportPopup();
+      tick();
+
+      expect(loadServiceZipSpy.loadZip).toHaveBeenCalledWith(mockZipFile);
+      expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+    }));
+
+    it('ne devrait pas charger le zip si overwriteGuard.check(slotIndex) retourne false pour le slot ciblé', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
+      overwriteGuardSpy.check.and.callFake((index) => Promise.resolve(index !== 1));
+
+      component.openImportPopup();
+
+      expect(loadServiceZipSpy.loadZipToSlot).not.toHaveBeenCalled();
+    }));
+
+    it('devrait charger le zip dans le slot et appeler tryResume() sans renommer ni sauvegarder manuellement, si getUniqueEvalName retourne le même nom.', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: mockZipFile }) } as any);
+      overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+      overwriteGuardSpy.getUniqueEvalName.and.returnValue('TestEval');
+
+      component.openImportPopup();
+      tick();
+
+      expect(loadServiceZipSpy.loadZipToSlot).toHaveBeenCalledWith(mockZipFile, 1);
+      expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+      expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+    }));
+
+    it('devrait changer le nom, sauvegarder dans le slot ciblé et le slot 0, puis tryResume() si getUniqueEvalName retourne un nouveau nom', fakeAsync(() => {
+      dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
+      overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+      overwriteGuardSpy.getUniqueEvalName.and.returnValue('New Name');
+
+      component.openImportPopup();
+      tick();
+
+      expect(saveServiceSpy.dataAuto.nomEval).toBe('New Name');
+      expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(1, jasmine.any(Object));
+      expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.any(Object));
+      expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+    }));
+
   });
-
-  it('Annulation : ne devrait rien faire si la popup est fermée sans résultat', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
-
-    component.openImportPopup();
-
-    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
-  }));
-
-  it('ne devrait pas continuer si overwriteGuard.check(0) retourne false', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: {} }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
-
-    component.openImportPopup();
-
-    expect(loadServiceZipSpy.loadZip).not.toHaveBeenCalled();
-  }));
-
-  it('devrait appeler loadZip et tryResume() si le résultat de la popup a mode: \'load\' et que le guard est passé', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: mockZipFile }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZip).toHaveBeenCalledWith(mockZipFile);
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
-
-  it('ne devrait pas charger le zip si overwriteGuard.check(slotIndex) retourne false pour le slot ciblé', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
-    overwriteGuardSpy.check.and.callFake((index) => Promise.resolve(index !== 1));
-
-    component.openImportPopup();
-
-    expect(loadServiceZipSpy.loadZipToSlot).not.toHaveBeenCalled();
-  }));
-
-  it('devrait charger le zip dans le slot et appeler tryResume() sans renommer ni sauvegarder manuellement, si getUniqueEvalName retourne le même nom.', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: mockZipFile }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    overwriteGuardSpy.getUniqueEvalName.and.returnValue('TestEval');
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZipToSlot).toHaveBeenCalledWith(mockZipFile, 1);
-    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
-
-  it('devrait changer le nom, sauvegarder dans le slot ciblé et le slot 0, puis tryResume() si getUniqueEvalName retourne un nouveau nom', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    overwriteGuardSpy.getUniqueEvalName.and.returnValue('New Name');
-
-    component.openImportPopup();
-    tick();
-
-    expect(saveServiceSpy.dataAuto.nomEval).toBe('New Name');
-    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(1, jasmine.any(Object));
-    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.any(Object));
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
 
 });
