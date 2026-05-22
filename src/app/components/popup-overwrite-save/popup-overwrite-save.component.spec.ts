@@ -29,7 +29,6 @@ describe('PopupOverwriteSaveComponent', () => {
     fixture.detectChanges();
   });
 
-  // ─── Création ─────────────────────────────────────────────────────────────
 
   it('devrait être créé', () => {
     expect(component).toBeTruthy();
@@ -40,28 +39,29 @@ describe('PopupOverwriteSaveComponent', () => {
     expect(component.data.slotLabel).toBe('Emplacement 1');
   });
 
-  // ─── download ─────────────────────────────────────────────────────────────
+  describe('différentes actions', () => {
 
-  it('download → dialogRef.close(\'download\')', () => {
-    component.download();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('download');
+    it('download → dialogRef.close(\'download\')', () => {
+      component.download();
+      expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('download');
+    });
+
+
+
+    it('overwrite → dialogRef.close(\'overwrite\')', () => {
+      component.overwrite();
+      expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('overwrite');
+    });
+
+
+
+    it('cancel → dialogRef.close(null)', () => {
+      component.cancel();
+      expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(null);
+    });
   });
 
-  // ─── overwrite ────────────────────────────────────────────────────────────
-
-  it('overwrite → dialogRef.close(\'overwrite\')', () => {
-    component.overwrite();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('overwrite');
-  });
-
-  // ─── cancel ───────────────────────────────────────────────────────────────
-
-  it('cancel → dialogRef.close(null)', () => {
-    component.cancel();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(null);
-  });
-
-  // ─── exclusivité des actions ──────────────────────────────────────────────
+  // exclusivité des actions
 
   it('chaque action ferme le dialog une seule fois', () => {
     component.download();
