@@ -69,14 +69,17 @@ describe('MenuComponent', () => {
     fixture = TestBed.createComponent(MenuComponent);
     component = fixture.componentInstance;
 
+    // Faux fichier utilisé pour les imports
     mockZipFile = new File(['dummy'], 'test.zip', { type: 'application/zip' });
 
+    // Faux élément de menu qui se rajoute à la page
     const menuEl = document.createElement('div');
     menuEl.id = 'menu';
     document.body.appendChild(menuEl);
   });
 
   afterEach(() => {
+    // on enlève l'élément de menu et on clear l'effet assombri
     document.getElementById('menu')?.remove();
     document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
   });
@@ -133,6 +136,7 @@ describe('MenuComponent', () => {
   });
 
   it('Fermeture du menu : devrait nettoyer le DOM lors de la navigation', () => {
+    // On ajoute un backdrop au DOM
     const backdrop = document.createElement('div');
     backdrop.className = 'offcanvas-backdrop';
     document.body.appendChild(backdrop);
@@ -140,6 +144,7 @@ describe('MenuComponent', () => {
 
     component.goToSauvegarde();
 
+    // Une fois qu'on a changé de page, le backdrop devrait être supprimé et le menu fermé
     expect(document.querySelectorAll('.offcanvas-backdrop').length).toBe(0);
     expect(document.body.classList.contains('offcanvas-open')).toBeFalse();
   });
@@ -161,7 +166,6 @@ describe('MenuComponent', () => {
     dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
 
     component.openImportPopup();
-    tick();
 
     expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
   }));
@@ -171,7 +175,6 @@ describe('MenuComponent', () => {
     overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
 
     component.openImportPopup();
-    tick();
 
     expect(loadServiceZipSpy.loadZip).not.toHaveBeenCalled();
   }));
@@ -192,7 +195,6 @@ describe('MenuComponent', () => {
     overwriteGuardSpy.check.and.callFake((index) => Promise.resolve(index !== 1));
 
     component.openImportPopup();
-    tick();
 
     expect(loadServiceZipSpy.loadZipToSlot).not.toHaveBeenCalled();
   }));
