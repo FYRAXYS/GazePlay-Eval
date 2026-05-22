@@ -29,7 +29,7 @@ describe('NavbarComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    localStorage.clear();
+    localStorage.clear(); // on clear le localStorage entre chaque test
   });
 
   it('should create', () => {
@@ -39,16 +39,18 @@ describe('NavbarComponent', () => {
   it('getTheme → \'dark\' retourne \'sun\', sinon \'moon\'', () => {
     let currentTheme: 'light' | 'dark' = 'light';
 
+    // On définit ce que renvoient initialement les méthodes
+    // On est initialement en mode clair
     themeServiceSpy.toggleTheme.and.callFake(() => {
       currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     });
-
     themeServiceSpy.getTheme.and.callFake((): 'light' | 'dark' => {
       return currentTheme;
     });
 
     expect(component.getTheme()).toEqual('moon');
 
+    // On passe en mode sombre
     component.changeTheme();
 
     expect(component.getTheme()).toEqual('sun');
