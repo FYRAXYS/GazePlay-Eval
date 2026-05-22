@@ -3,7 +3,6 @@ import { Offcanvas } from 'bootstrap';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadZipService } from '../../services/load-zip/load-zip.service';
-import { LoadService} from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
 import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
@@ -20,7 +19,6 @@ describe('MenuComponent', () => {
   let dialogSpy: jasmine.SpyObj<MatDialog>;
   let loadServiceZipSpy: jasmine.SpyObj<LoadZipService>;
   let autoSaveServiceSpy: jasmine.SpyObj<AutoSaveService>;
-  let loadServiceSpy: jasmine.SpyObj<LoadService>;
   let saveServiceSpy: jasmine.SpyObj<SaveService>;
   let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>;
   let themeServiceSpy: jasmine.SpyObj<ThemeService>;
@@ -45,8 +43,6 @@ describe('MenuComponent', () => {
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     loadServiceZipSpy = jasmine.createSpyObj('LoadZipService', ['loadZipToSlot', 'loadZip']);
     themeServiceSpy = jasmine.createSpyObj('ThemeService', ['getTheme']);
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.returnValue(null);
 
     autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
     overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
@@ -58,7 +54,6 @@ describe('MenuComponent', () => {
         { provide: MatDialog, useValue: dialogSpy },
         { provide: LoadZipService, useValue: loadServiceZipSpy },
         { provide: AutoSaveService, useValue: autoSaveServiceSpy },
-        { provide: LoadService, useValue: loadServiceSpy },
         { provide: SaveService, useValue: saveServiceSpy },
         { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
         { provide: ThemeService, useValue: themeServiceSpy}
