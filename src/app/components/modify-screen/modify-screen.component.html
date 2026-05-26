@@ -333,8 +333,13 @@
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Pour quel choix de sélection ?</span>
-                <div class="param-control">
+                <span class="param-label">Pour quel choix de sélection ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
+                  <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
                     <label class="form-check-label" for="choiceSelectionY">Tout</label>
