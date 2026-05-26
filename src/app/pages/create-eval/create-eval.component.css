@@ -143,3 +143,27 @@ input:focus {
 [cdkDrag]:active {
   cursor: grabbing;
 }
+
+/* Scroll sur la liste des écrans */
+.screen-list-scroll {
+  max-height: calc(5 * 52px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.screen-list-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.screen-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.screen-list-scroll::-webkit-scrollbar-thumb {
+  background: var(--bs-border-color);
+  border-radius: 4px;
+}
+
+.screen-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--bs-secondary-color);
+}
