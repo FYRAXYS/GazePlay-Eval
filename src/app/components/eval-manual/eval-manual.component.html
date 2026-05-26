@@ -118,21 +118,6 @@
                 </div>
               </div>
 
-              <div class="param-section-title">Qu'est-ce qu'il se passe si le stimuli est validé</div>
-              <div class="param-row">
-                <span class="param-label">Désactivation de celui-ci ?</span>
-                <div class="param-control">
-                  <div class="form-check mb-0">
-                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]">
-                    <label class="form-check-label" for="disableStimuliYes">Oui</label>
-                  </div>
-                  <div class="form-check mb-0">
-                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]">
-                    <label class="form-check-label" for="disableStimuliNo">Non</label>
-                  </div>
-                </div>
-              </div>
-
               <div class="param-section-title">Emplacement stimuli</div>
               <div class="param-row">
                 <span class="param-label">Placer les stimuli aléatoirement ?</span>
@@ -144,6 +129,21 @@
                   <div class="form-check mb-0">
                     <input type="radio" name="randomStimuli" class="form-check-input" id="randomStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[7]">
                     <label class="form-check-label" for="randomStimuliNo">Non</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-section-title">Quand un stimuli est validé</div>
+              <div class="param-row">
+                <span class="param-label">Cacher le stimuli après sélection ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]">
+                    <label class="form-check-label" for="disableStimuliYes">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]">
+                    <label class="form-check-label" for="disableStimuliNo">Non</label>
                   </div>
                 </div>
               </div>
