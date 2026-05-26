@@ -44,13 +44,19 @@ export class App implements OnInit{
     this.autoSaveService.init(); // pour la sauvegarde automatique
 
     // Pour éviter le bug de scroll en cas de chargement d'évaluation
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    const cleanOverflow = () => {
       document.body.style.removeProperty('overflow');
       document.body.style.removeProperty('padding-right');
       document.body.classList.remove('modal-open', 'offcanvas-open');
       document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(el => el.remove());
+    };
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      cleanOverflow();
+      // Re-passe après l'animation de fermeture Bootstrap (~300ms) qui peut reposer overflow:hidden
+      setTimeout(cleanOverflow, 400);
     });
 
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;

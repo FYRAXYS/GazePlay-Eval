@@ -412,25 +412,83 @@
                 </div>
               }
 
-              <div class="wrapper mt-3">
+              <div class="wrapper mt-3" [class.duplicate-mode]="duplicateMode" [class.delete-mode]="deleteMode">
+                <div class="stimuli-toolbar">
+                  <button type="button" class="stimuli-tool-btn" [class.active]="duplicateMode" data-tooltip="Dupliquer : copie le contenu d'une case vers une autre" (click)="toggleDuplicateMode()">
+                    <i class="bi bi-files"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn stimuli-tool-btn-danger" [class.active]="deleteMode" data-tooltip="Supprimer : masque la case sélectionnée" (click)="toggleDeleteMode()">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [class.active]="swapMode" data-tooltip="Échanger : intervertit le contenu de deux cases" (click)="toggleSwapMode()">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" data-tooltip="Sélection multiple : agir sur plusieurs cases à la fois">
+                    <i class="bi bi-ui-checks-grid"></i>
+                  </button>
+                  <div class="stimuli-tool-separator"></div>
+                  <button type="button" class="stimuli-tool-btn" data-tooltip="Zoom + : agrandit l'aperçu de la grille">
+                    <i class="bi bi-zoom-in"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" data-tooltip="Zoom − : réduit l'aperçu de la grille">
+                    <i class="bi bi-zoom-out"></i>
+                  </button>
+                </div>
+                @if (duplicateMode) {
+                  @if (duplicateSourceIndex === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la case à dupliquer</div>
+                  } @else if (pendingDuplicateTarget === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez maintenant sur la case de destination</div>
+                  }
+                }
+                @if (pendingDuplicateTarget !== null) {
+                  <div class="overwrite-confirm">
+                    <div class="overwrite-confirm-text">⚠ Cette case contient déjà du contenu. Êtes-vous sûr de vouloir l'écraser ?</div>
+                    <div class="overwrite-confirm-actions">
+                      <button type="button" class="btn btn-sm btn-warning fw-semibold" (click)="confirmOverwrite()">Oui, écraser</button>
+                      <button type="button" class="btn btn-sm btn-outline-light" (click)="cancelOverwrite()">Annuler</button>
+                    </div>
+                  </div>
+                }
+                @if (deleteMode) {
+                  <div class="stimuli-toolbar-hint danger">Cliquez sur la case à vider</div>
+                }
+                @if (swapMode) {
+                  @if (swapSourceIndex === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la 1re case à échanger</div>
+                  } @else {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la 2e case</div>
+                  }
+                }
                 <div class="grid-container"
                      [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'"
                      [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                   @for (n of totalCells; track n; let i = $index) {
-                    <div [id]="i" class="cell" [class.cell-active]="activeCellIndex === i" (click)="openStimuliData(i)">
-                      @if (screenToModify.values[12][i].goodAnswer === true) {
-                        <span class="cell-text icon valid">✓</span>
-                      } @else {
-                        <span class="cell-text icon invalid">✕</span>
-                      }
-                      @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
-                        <span class="cell-text">{{ i + 1 }}</span>
-                      }
-                      @if (screenToModify.values[12][i].imageName !== "") {
-                        <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
-                      }
-                      @if (screenToModify.values[12][i].soundName !== "") {
-                        <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
+                    <div [id]="i" class="cell"
+                         [class.cell-active]="activeCellIndex === i"
+                         [class.cell-hidden]="screenToModify.values[12][i]?.hidden"
+                         [class.cell-dup-source]="duplicateSourceIndex === i"
+                         [class.cell-swap-source]="swapSourceIndex === i"
+                         [class.cell-dup-target]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && !screenToModify.values[12][i]?.hidden && !screenToModify.values[12][i]?.imageName && !screenToModify.values[12][i]?.soundName"
+                         [class.cell-dup-target-hidden]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && screenToModify.values[12][i]?.hidden"
+                         [class.cell-dup-warning]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && !screenToModify.values[12][i]?.hidden && (screenToModify.values[12][i]?.imageName || screenToModify.values[12][i]?.soundName)"
+                         [class.cell-dup-pending]="pendingDuplicateTarget === i"
+                         (click)="openStimuliData(i)">
+                      @if (!screenToModify.values[12][i]?.hidden) {
+                        @if (screenToModify.values[12][i].goodAnswer === true) {
+                          <span class="cell-text icon valid">✓</span>
+                        } @else {
+                          <span class="cell-text icon invalid">✕</span>
+                        }
+                        @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
+                          <span class="cell-text">{{ i + 1 }}</span>
+                        }
+                        @if (screenToModify.values[12][i].imageName !== "") {
+                          <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
+                        }
+                        @if (screenToModify.values[12][i].soundName !== "") {
+                          <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
+                        }
                       }
                     </div>
                   }
