@@ -47,23 +47,33 @@ export class App implements OnInit{
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
-      document.body.classList.remove('modal-open', 'offcanvas-open');
-      document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(el => el.remove());
-    });
+      const cleanOverflow = () => {
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.body.classList.remove('modal-open', 'offcanvas-open');
+        document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(el => el.remove());
+      };
 
-    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    const isReload = nav?.type === 'reload';
-
-    // Si on recharge le site, on redirige vers la page d'accueil
-    if (isReload) {
-      this.router.navigate(['/home']).then(() => {
-        // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
-        // S'il n'y en a pas, on reste sur la page d'accueil
-        this.autoSaveService.tryResume();
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe(() => {
+        cleanOverflow();
+        // Re-passe après l'animation de fermeture Bootstrap (~300ms) qui peut reposer overflow:hidden
+        setTimeout(cleanOverflow, 400);
       });
-      return ;
-    }
+
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const isReload = nav?.type === 'reload';
+
+      // Si on recharge le site, on redirige vers la page d'accueil
+      if (isReload) {
+        this.router.navigate(['/home']).then(() => {
+          // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
+          // S'il n'y en a pas, on reste sur la page d'accueil
+          this.autoSaveService.tryResume();
+        });
+        return ;
+      }
+    });
   }
 }
