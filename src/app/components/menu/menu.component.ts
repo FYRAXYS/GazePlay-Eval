@@ -82,6 +82,11 @@ export class MenuComponent implements OnInit, OnDestroy {
     document.body.style.removeProperty('padding-right');
   }
 
+  goToAccueil() {
+    this.closeMenu();
+    this.router.navigate(['/home']);
+  }
+
   goToSauvegarde() {
     this.closeMenu();
     this.router.navigate(['/sauvegarde']);
