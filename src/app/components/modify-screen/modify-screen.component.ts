@@ -60,6 +60,12 @@ export class ModifyScreenComponent implements OnInit{
   }
   stimuliOffcanvasReady: boolean = false;
   activeCellIndex: number | null = null;
+  duplicateMode: boolean = false;
+  deleteMode: boolean = false;
+  duplicateSourceIndex: number | null = null;
+  pendingDuplicateTarget: number | null = null;
+  swapMode: boolean = false;
+  swapSourceIndex: number | null = null;
 
   constructor(
     private updateScreenService: UpdateScreensService,
@@ -534,6 +540,7 @@ export class ModifyScreenComponent implements OnInit{
           soundName: "",
           soundFile: undefined,
           goodAnswer: false,
+          hidden: false,
         }
       }
     }else {
@@ -546,6 +553,48 @@ export class ModifyScreenComponent implements OnInit{
   }
 
   openStimuliData(cellNumber: number) {
+    const listScreenAll = this.screenToModify.values[12];
+    if (this.swapMode) {
+      if (this.swapSourceIndex === null) {
+        if (listScreenAll[cellNumber]?.hidden) return;
+        this.swapSourceIndex = cellNumber;
+        return;
+      }
+      if (this.swapSourceIndex === cellNumber) {
+        this.swapSourceIndex = null;
+        return;
+      }
+      this.swapCells(this.swapSourceIndex, cellNumber);
+      this.swapSourceIndex = null;
+      this.swapMode = false;
+      return;
+    }
+    if (this.duplicateMode) {
+      if (this.pendingDuplicateTarget !== null) return;
+      if (this.duplicateSourceIndex === null) {
+        if (listScreenAll[cellNumber]?.hidden) return;
+        this.duplicateSourceIndex = cellNumber;
+        return;
+      }
+      const target = listScreenAll[cellNumber];
+      if (!target) return;
+      if (this.duplicateSourceIndex === cellNumber) return;
+      if (!target.hidden && (target.imageName || target.soundName)) {
+        this.pendingDuplicateTarget = cellNumber;
+        return;
+      }
+      this.duplicateCell(this.duplicateSourceIndex, cellNumber);
+      this.duplicateSourceIndex = null;
+      this.duplicateMode = false;
+      return;
+    }
+    if (listScreenAll[cellNumber]?.hidden) {
+      return;
+    }
+    if (this.deleteMode) {
+      this.deleteCellContent(cellNumber);
+      return;
+    }
     const listScreen = this.screenToModify.values[12];
     this.activeCellIndex = cellNumber;
     this.dataStimuli = {
@@ -557,6 +606,209 @@ export class ModifyScreenComponent implements OnInit{
     this.stimuliOffcanvasReady = true;
     setTimeout(() => {
       this.openOffcanvasStimuli();
+    });
+  }
+
+  toggleDuplicateMode() {
+    this.duplicateMode = !this.duplicateMode;
+    this.duplicateSourceIndex = null;
+    this.pendingDuplicateTarget = null;
+    if (this.duplicateMode) {
+      this.deleteMode = false;
+      this.swapMode = false;
+      this.swapSourceIndex = null;
+    }
+  }
+
+  confirmOverwrite() {
+    if (this.duplicateSourceIndex !== null && this.pendingDuplicateTarget !== null) {
+      this.duplicateCell(this.duplicateSourceIndex, this.pendingDuplicateTarget);
+    }
+    this.pendingDuplicateTarget = null;
+    this.duplicateSourceIndex = null;
+    this.duplicateMode = false;
+  }
+
+  cancelOverwrite() {
+    this.pendingDuplicateTarget = null;
+  }
+
+  private emptyCell() {
+    return {
+      imageName: "",
+      imageFile: undefined,
+      soundName: "",
+      soundFile: undefined,
+      goodAnswer: false,
+      hidden: false,
+    };
+  }
+
+  private hiddenCell() {
+    return {
+      imageName: "",
+      imageFile: undefined,
+      soundName: "",
+      soundFile: undefined,
+      goodAnswer: false,
+      hidden: true,
+    };
+  }
+
+  addAdjacent(event: Event, cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right') {
+    event.stopPropagation();
+    const rows = Number(this.screenToModify.values[0]);
+    const cols = Number(this.screenToModify.values[1]);
+    const listScreen = this.screenToModify.values[12];
+    const r = Math.floor(cellIndex / cols);
+    const c = cellIndex % cols;
+
+    let targetR = r;
+    let targetC = c;
+    if (direction === 'top') targetR = r - 1;
+    if (direction === 'bottom') targetR = r + 1;
+    if (direction === 'left') targetC = c - 1;
+    if (direction === 'right') targetC = c + 1;
+
+    if (targetR >= 0 && targetR < rows && targetC >= 0 && targetC < cols) {
+      const targetIdx = targetR * cols + targetC;
+      if (listScreen[targetIdx]?.hidden) {
+        listScreen[targetIdx] = this.emptyCell();
+      }
+      return;
+    }
+
+    if (direction === 'bottom') {
+      this.screenToModify.values[0] = rows + 1;
+      this.checkStimuliCells();
+      const newRowStart = rows * cols;
+      for (let cc = 0; cc < cols; cc++) {
+        listScreen[newRowStart + cc] = cc === c ? this.emptyCell() : this.hiddenCell();
+      }
+      return;
+    }
+
+    if (direction === 'top') {
+      const snapshot: { [key: number]: any } = {};
+      for (let i = 0; i < rows * cols; i++) snapshot[i] = listScreen[i];
+      this.screenToModify.values[0] = rows + 1;
+      for (let cc = 0; cc < cols; cc++) {
+        listScreen[cc] = cc === c ? this.emptyCell() : this.hiddenCell();
+      }
+      for (let rr = 0; rr < rows; rr++) {
+        for (let cc = 0; cc < cols; cc++) {
+          listScreen[(rr + 1) * cols + cc] = snapshot[rr * cols + cc];
+        }
+      }
+      return;
+    }
+
+    const newCols = cols + 1;
+    const snapshot: { [key: number]: any } = {};
+    for (let i = 0; i < rows * cols; i++) snapshot[i] = listScreen[i];
+    this.screenToModify.values[1] = newCols;
+    this.checkStimuliCells();
+
+    for (let rr = 0; rr < rows; rr++) {
+      const newCell = rr === r ? this.emptyCell() : this.hiddenCell();
+      if (direction === 'right') {
+        for (let cc = 0; cc < cols; cc++) {
+          listScreen[rr * newCols + cc] = snapshot[rr * cols + cc];
+        }
+        listScreen[rr * newCols + cols] = newCell;
+      } else {
+        listScreen[rr * newCols] = newCell;
+        for (let cc = 0; cc < cols; cc++) {
+          listScreen[rr * newCols + cc + 1] = snapshot[rr * cols + cc];
+        }
+      }
+    }
+  }
+
+  toggleDeleteMode() {
+    this.deleteMode = !this.deleteMode;
+    if (this.deleteMode) {
+      this.duplicateMode = false;
+      this.duplicateSourceIndex = null;
+      this.pendingDuplicateTarget = null;
+      this.swapMode = false;
+      this.swapSourceIndex = null;
+    }
+  }
+
+  deleteCellContent(cellNumber: number) {
+    const listScreen = this.screenToModify.values[12];
+    if (!listScreen[cellNumber] || listScreen[cellNumber].hidden) {
+      this.deleteMode = false;
+      return;
+    }
+
+    const rows = Number(this.screenToModify.values[0]);
+    const cols = Number(this.screenToModify.values[1]);
+
+    listScreen[cellNumber] = {
+      imageName: "",
+      imageFile: undefined,
+      soundName: "",
+      soundFile: undefined,
+      goodAnswer: false,
+      hidden: true,
+    };
+
+    let lastColAllHidden = cols > 1;
+    for (let r = 0; r < rows && lastColAllHidden; r++) {
+      if (!listScreen[r * cols + (cols - 1)]?.hidden) {
+        lastColAllHidden = false;
+      }
+    }
+
+    if (lastColAllHidden) {
+      const newCols = cols - 1;
+      const snapshot: { [key: number]: any } = {};
+      for (let i = 0; i < rows * cols; i++) snapshot[i] = listScreen[i];
+
+      this.screenToModify.values[1] = newCols;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < newCols; c++) {
+          listScreen[r * newCols + c] = snapshot[r * cols + c];
+        }
+      }
+      for (let i = rows * newCols; i < rows * cols; i++) {
+        delete listScreen[i];
+      }
+    } else if (rows > 1) {
+      let lastRowAllHidden = true;
+      for (let c = 0; c < cols && lastRowAllHidden; c++) {
+        if (!listScreen[(rows - 1) * cols + c]?.hidden) {
+          lastRowAllHidden = false;
+        }
+      }
+      if (lastRowAllHidden) {
+        this.screenToModify.values[0] = rows - 1;
+        for (let i = (rows - 1) * cols; i < rows * cols; i++) {
+          delete listScreen[i];
+        }
+      }
+    }
+
+    if (this.activeCellIndex === cellNumber) {
+      this.activeCellIndex = null;
+    }
+    this.deleteMode = false;
+  }
+
+  duplicateCell(sourceIndex: number, targetIndex: number) {
+    const listScreen = this.screenToModify.values[12];
+    const source = listScreen[sourceIndex];
+    if (!source || sourceIndex === targetIndex) return;
+
+    listScreen[targetIndex] = structuredClone({
+      imageName: source.imageName ?? '',
+      imageFile: source.imageFile,
+      soundName: source.soundName ?? '',
+      soundFile: source.soundFile,
+      goodAnswer: source.goodAnswer ?? false,
+      hidden: false,
     });
   }
 
@@ -594,8 +846,28 @@ export class ModifyScreenComponent implements OnInit{
     this.autoSaveService.autoSave('backToScreenList');
   }
 
+  toggleSwapMode() {
+    this.swapMode = !this.swapMode;
+    this.swapSourceIndex = null;
+    if (this.swapMode) {
+      this.duplicateMode = false;
+      this.duplicateSourceIndex = null;
+      this.pendingDuplicateTarget = null;
+      this.deleteMode = false;
+    }
+  }
+
+  swapCells(a: number, b: number) {
+    const list = this.screenToModify.values[12];
+    const tmp = list[a];
+    list[a] = list[b];
+    list[b] = tmp;
+  }
+
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
   protected readonly transitionScreenConstModel = transitionScreenConstModel;
   protected readonly Number = Number;
 }
+
+
