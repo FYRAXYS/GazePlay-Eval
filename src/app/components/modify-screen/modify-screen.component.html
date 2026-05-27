@@ -327,7 +327,12 @@
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Combien de stimuli à sélectionner ?</span>
+                <span class="param-label">Combien de stimuli à sélectionner ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <input type="number" class="form-control" min="1" value="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
                 </div>

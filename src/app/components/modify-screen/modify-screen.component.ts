@@ -36,7 +36,7 @@ import {MatTooltip} from '@angular/material/tooltip';
   standalone: true,
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent implements OnInit{
+export class ModifyScreenComponent implements OnInit {
   tooltipSelectionChoice: string = (
     ` Le choix de sélection détermine comment l'application doit tenir compte du type des cellules de stimuli:
 
@@ -46,6 +46,10 @@ export class ModifyScreenComponent implements OnInit{
     - Bonnes réponses :
     Seules les cellules étant considérée comme des bonnes réponses sont comptées dans la validation.`
   );
+
+  tooltipMaxSelection: string = (
+    `Le nombre de stimuli ne peut pas être plus grand que le nombre de lignes multiplié par le nombre de colonnes.`
+  )
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
