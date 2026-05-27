@@ -37,6 +37,11 @@ import {MatTooltip} from '@angular/material/tooltip';
   styleUrl: './modify-screen.component.css'
 })
 export class ModifyScreenComponent implements OnInit {
+  tooltipFileSave: string = (
+    `Tout les fichiers que vous importez dans le site sont sauvés dans le stockage de votre navigateur.
+
+    Vous pouvez donc déplacer ou supprimer les fichiers de votre disque sans risquer d'altérer l'évaluation en cours.`
+  );
   tooltipSelectionChoice: string = (
     ` Le choix de sélection détermine comment l'application doit tenir compte du type des cellules de stimuli:
 

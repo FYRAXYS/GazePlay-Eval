@@ -129,7 +129,12 @@
 
               <div class="param-section-title">Média</div>
               <div class="param-row">
-                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?</span>
+                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="screenToModify.values[2]">
@@ -386,7 +391,12 @@
 
               <div class="param-section-title">Son</div>
               <div class="param-row">
-                <span class="param-label">Jouer un son ?</span>
+                <span class="param-label">Jouer un son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">
