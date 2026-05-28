@@ -6,6 +6,6 @@ import {Component} from '@angular/core';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './guide-import.component.html',
-  styleUrl: './guide-import.component.css'
+  styleUrl: '../guide.component.css'
 })
 export class GuideImportComponent {}
