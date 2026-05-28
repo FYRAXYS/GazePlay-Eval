@@ -64,7 +64,7 @@ export class FlashService {
   /**
    * Supprime le flash message à partir de l'id.
    *
-   * *Note : Cette méthode ne devrait pas être normalement appelé dans d'autres parties du code,
+   * *Note : Cette méthode ne devrait pas être normalement appelé dans d'autres parties du code (sauf pour fermer le flash-message),
    * car la méthode show() gère déjà la suppression automatique une fois que la durée est écoulée.*
    * @param id l'identifiant unique du flash-message.
    */
