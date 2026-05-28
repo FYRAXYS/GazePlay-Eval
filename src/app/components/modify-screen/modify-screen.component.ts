@@ -24,6 +24,7 @@ import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component
 import {Offcanvas} from 'bootstrap';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {FlashService} from '../../services/flash-message/flash.service';
 import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
@@ -80,6 +81,7 @@ export class ModifyScreenComponent implements OnInit {
     cols: number;
   }
   stimuliOffcanvasReady: boolean = false;
+  configStimuliOpen: boolean = false;
   activeCellIndex: number | null = null;
   duplicateMode: boolean = false;
   deleteMode: boolean = false;
@@ -904,6 +906,7 @@ export class ModifyScreenComponent implements OnInit {
     this.selectedCells.clear();
     this.pendingDeleteCells = null;
     this.deleteMode = false;
+    this.multiSelectMode = false;
   }
 
   /** Masque/vide une case et retire ses fichiers de l'IDB s'ils ne sont plus référencés. */
@@ -1007,6 +1010,10 @@ export class ModifyScreenComponent implements OnInit {
 
     if (element) {
       const instance = Offcanvas.getOrCreateInstance(element);
+      this.configStimuliOpen = true;
+      element.addEventListener('hidden.bs.offcanvas', () => {
+        this.configStimuliOpen = false;
+      }, { once: true });
       instance.show();
     }
   }
