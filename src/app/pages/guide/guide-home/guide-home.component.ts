@@ -6,7 +6,7 @@ import {Component} from '@angular/core';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './guide-home.component.html',
-  styleUrl: './guide-home.component.css',
+  styleUrl: '../guide.component.css',
 
 })
 export class GuideHomeComponent {}
