@@ -81,6 +81,7 @@ export class ModifyScreenComponent implements OnInit {
     cols: number;
   }
   stimuliOffcanvasReady: boolean = false;
+  configStimuliOpen: boolean = false;
   activeCellIndex: number | null = null;
   duplicateMode: boolean = false;
   deleteMode: boolean = false;
@@ -905,6 +906,7 @@ export class ModifyScreenComponent implements OnInit {
     this.selectedCells.clear();
     this.pendingDeleteCells = null;
     this.deleteMode = false;
+    this.multiSelectMode = false;
   }
 
   /** Masque/vide une case et retire ses fichiers de l'IDB s'ils ne sont plus référencés. */
@@ -1008,6 +1010,10 @@ export class ModifyScreenComponent implements OnInit {
 
     if (element) {
       const instance = Offcanvas.getOrCreateInstance(element);
+      this.configStimuliOpen = true;
+      element.addEventListener('hidden.bs.offcanvas', () => {
+        this.configStimuliOpen = false;
+      }, { once: true });
       instance.show();
     }
   }
