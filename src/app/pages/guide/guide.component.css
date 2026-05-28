@@ -52,15 +52,24 @@
   border-radius: 10px;
   border: 1px solid var(--bs-border-color);
   overflow: hidden;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.guide-section-intro {
+  font-size: 1rem;
+}
+
+.guide-section-important {
+
 }
 
 .guide-section-title {
   padding: 0.6rem 1rem;
   background-color: var(--bs-secondary-bg);
   border-bottom: 1px solid var(--bs-border-color);
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: var(--bs-secondary-color);
 }
 
 .guide-section-body {
