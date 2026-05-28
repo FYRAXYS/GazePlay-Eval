@@ -21,7 +21,7 @@ export class NavbarComponent {
   }
 
   getTheme(){
-    return this.themeService.getTheme() === 'dark' ? 'sun' : 'moon';
+    return this.themeService.getTheme() === 'dark' ? '☀️' : '🌙';
   }
 
   goToHome(): void {

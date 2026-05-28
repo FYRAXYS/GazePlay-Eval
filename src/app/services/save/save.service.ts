@@ -10,8 +10,6 @@ export class SaveService {
 
   defaultEvalName: string = "GazePlayEvalDefaultName";
 
-  activeSlotIndex: FormatTypeConfig | null = null;
-
   dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
     nomEval: '',
     format: 'Csv&Xlsx',
@@ -19,13 +17,11 @@ export class SaveService {
     globalParamsTransitionScreen: [],
     globalParamsInstructionScreen: [],
     globalParamsStimuliScreen: [],
-    listScreens: [],
-    step: 0
+    listScreens: []
   };
 
   newSaveDataAuto(){
     this.dataAuto = structuredClone(saveModelDefault);
-    this.activeSlotIndex = null;
     this.saveToSlot(0, this.dataAuto);
   }
 
@@ -35,8 +31,7 @@ export class SaveService {
                globalParamsTransitionScreen: any[],
                globalParamsInstructionScreen: any[],
                globalParamsStimuliScreen: string[],
-               listScreens: screenTypeModel[],
-               step: number){
+               listScreens: screenTypeModel[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
@@ -44,13 +39,12 @@ export class SaveService {
       globalParamsTransitionScreen: globalParamsTransitionScreen,
       globalParamsInstructionScreen: globalParamsInstructionScreen,
       globalParamsStimuliScreen: globalParamsStimuliScreen,
-      listScreens: listScreens,
-      step: step
+      listScreens: listScreens
     };
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveToSlot(slotIndex: FormatTypeConfig, data:any): void {
+  saveToSlot(slotIndex: FormatTypeConfig, data: Omit<saveModel, 'createdAt' | 'version'>): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
     const saveData: saveModel = {
       ...data,
@@ -59,7 +53,6 @@ export class SaveService {
     };
     localStorage.setItem(slotKey, JSON.stringify(saveData));
   }
-
 
   clearSlot(slotIndex: FormatTypeConfig): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];

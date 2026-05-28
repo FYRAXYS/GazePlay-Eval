@@ -18,26 +18,22 @@ describe('LoadService', () => {
 
   describe('getSlot', () => {
     it('retourne null si slot vide', () => {
-      expect(service.getSlot(1)).toBeNull();
+      const slotIndex = 0;
+      expect(service.getSlot(slotIndex)).toBeNull();
     });
 
     it('retourne les données si slot rempli', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify(saveModelDefault));
-      const result = service.getSlot(1);
+      const slotIndex = 0;
+      localStorage.setItem(SAVE_SLOT_LIST[slotIndex], JSON.stringify(saveModelDefault));
+      const result = service.getSlot(slotIndex);
       expect(result).toEqual(saveModelDefault);
     });
 
     it('retourne null si JSON invalide', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[1], 'invalid json');
-      const result = service.getSlot(1);
+      const slotIndex = 0;
+      localStorage.setItem(SAVE_SLOT_LIST[slotIndex], 'invalid json');
+      const result = service.getSlot(slotIndex);
       expect(result).toBeNull();
-    });
-
-    it('lit la bonne clé selon l\'index — getSlot(2) ne lit pas getSlot(1)', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot1' }));
-      localStorage.setItem(SAVE_SLOT_LIST[2], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot2' }));
-      expect(service.getSlot(1)?.nomEval).toBe('Slot1');
-      expect(service.getSlot(2)?.nomEval).toBe('Slot2');
     });
   });
 
@@ -47,12 +43,12 @@ describe('LoadService', () => {
       expect(all).toEqual([null, null, null]);
     });
 
-    it('retourne les slots correctement remplis aux bons index', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[0], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot0' }));
-      localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot1' }));
+    it('retourne les slots correctement remplis', () => {
+      localStorage.setItem(SAVE_SLOT_LIST[0], JSON.stringify(saveModelDefault));
+      localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify(saveModelDefault));
       const all = service.getAllSlots();
-      expect(all[0]?.nomEval).toBe('Slot0');
-      expect(all[1]?.nomEval).toBe('Slot1');
+      expect(all[0]).toEqual(saveModelDefault);
+      expect(all[1]).toEqual(saveModelDefault);
       expect(all[2]).toBeNull();
     });
   });

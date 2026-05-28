@@ -1,15 +1,16 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-
+import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
 import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
+import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
+  imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
   templateUrl: './eval-manual.component.html',
   standalone: true,
   styleUrl: './eval-manual.component.css'
@@ -21,7 +22,6 @@ export class EvalManualComponent implements OnInit{
   globalTransitionScreenInfos: any[] = saveModelDefault.globalParamsTransitionScreen;
   globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
   globalStimuliScreenInfos: any[] = saveModelDefault.globalParamsStimuliScreen;
-  openAccordion: string | null = null;
 
   constructor(private router: Router,
               private saveService: SaveService,) {
@@ -39,8 +39,7 @@ export class EvalManualComponent implements OnInit{
       this.globalTransitionScreenInfos,
       this.globalInstructionScreenInfos,
       this.globalStimuliScreenInfos,
-      this.saveService.dataAuto.listScreens,
-      this.saveService.dataAuto.step);
+      this.saveService.dataAuto.listScreens);
 
   }
 
@@ -58,14 +57,6 @@ export class EvalManualComponent implements OnInit{
   backToEvalChoice(){
     this.saveData();
     this.selectedModeChange.emit(null);
-  }
-
-  /**
-   * Méthode pour ouvrir/fermer un accordéon des paramètres globaux des écrans
-   * @param id - l'identifiant de l'accordéon (transition|instruction|stimuli)
-   */
-  toggleAccordion(id: string): void {
-    this.openAccordion = this.openAccordion === id ? null : id;
   }
 
   protected readonly Number = Number;
