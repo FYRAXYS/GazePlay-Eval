@@ -1,0 +1,41 @@
+<!-- popup-delete-save.component.html -->
+<div class="popup-container">
+
+  <!-- Header -->
+  <div class="popup-header">
+    <img class="icon-light me-2" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
+    <img class="icon-dark me-2" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
+    Suppression de sauvegarde
+  </div>
+
+  <!-- Body -->
+  <div class="popup-body">
+
+    <!-- Alerte -->
+    <div class="popup-alert">
+      <img class="icon-light alert-icon" src="assets/icons/warning/warning-dark.png" alt="">
+      <img class="icon-dark alert-icon" src="assets/icons/warning/warning.png" alt="">
+      <span>Attention, la suppression de cette évaluation est définitive.</span>
+    </div>
+
+    <!-- Bouton télécharger -->
+    <button class="btn-download fw-semibold w-100" (click)="download()">
+      <img class="icon-light me-2" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
+      <img class="icon-dark me-2" src="assets/icons/save/save.png" width="16" height="16" alt="">
+      Télécharger mon ancienne évaluation
+    </button>
+
+    <!-- Boutons annuler / supprimer -->
+    <div class="d-flex justify-content-between gap-3 mt-2">
+      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
+        Annuler
+      </button>
+      <button class="btn-delete fw-semibold flex-grow-1" (click)="delete()">
+        <img class="icon-light me-1" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark me-1" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
+        Supprimer
+      </button>
+    </div>
+
+  </div>
+</div>

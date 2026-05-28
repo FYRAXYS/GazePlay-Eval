@@ -1,0 +1,217 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { LoadService } from '../../services/load/load.service';
+import { SaveService } from '../../services/save/save.service';
+import { AutoSaveService } from '../../services/auto-save/auto-save.service';
+import { saveModel } from '../../shared/saveModel';
+import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {MatTooltip} from '@angular/material/tooltip';
+
+import { LoadSaveComponent } from './load-save.component';
+import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+
+describe('LoadSaveComponent', () => {
+  let component: LoadSaveComponent;
+  let fixture: ComponentFixture<LoadSaveComponent>;
+  let saveServiceSpy: jasmine.SpyObj<SaveService>
+  let loadServiceSpy: jasmine.SpyObj<LoadService>
+  let autoSaveServiceSpy: jasmine.SpyObj<AutoSaveService>
+  let routerSpy: jasmine.SpyObj<Router>
+  let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>
+
+
+  beforeEach(async () => {
+    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName']);
+    saveServiceSpy.dataAuto = {
+      format: 'Csv',
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      globalParamsTransitionScreen: [],
+      infoParticipant: [],
+      listScreens: [],
+      step: 0,
+      nomEval: '' };
+    saveServiceSpy.activeSlotIndex = null;
+
+    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
+    loadServiceSpy.getSlot.and.returnValue(null);
+
+    autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
+
+    await TestBed.configureTestingModule({
+      imports: [LoadSaveComponent],
+      providers : [
+        { provide: SaveService, useValue: saveServiceSpy },
+        { provide: LoadService, useValue: loadServiceSpy },
+        { provide: AutoSaveService, useValue: autoSaveServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
+      ]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(LoadSaveComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('Les slots 1, 2 et 3 devraient être chargés à l\'arrivée sur la page', () => {
+    const slot1: saveModel = {
+      nomEval: 'Eval1',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+    const slot2: saveModel = {
+      nomEval: 'Eval2',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+    const slot3: saveModel = {
+      nomEval: 'Eval3',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    // V1
+
+    // loadServiceSpy.getSlot.withArgs(1).and.returnValue(slot1)
+    // loadServiceSpy.getSlot.withArgs(2).and.returnValue(slot2)
+    // loadServiceSpy.getSlot.withArgs(3).and.returnValue(slot3)
+
+    // V2
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 0) return null; // le slot auto est vide
+      if (index === 1) return slot1;
+      if (index === 2) return slot2;
+      if (index === 3) return slot3;
+      return null;
+    });
+
+    fixture.detectChanges();
+
+    const expectedSlots: { index: FormatTypeConfig; data: saveModel | null }[] = [
+      { index: 1, data: slot1 },
+      { index: 2, data: slot2 },
+      { index: 3, data: slot3 }
+    ]
+
+    expect(component.slots).toEqual(expectedSlots);
+    expect(loadServiceSpy.getSlot).toHaveBeenCalled();
+  });
+
+  it('formatDate → convertit une date ISO en format français', () => {
+    const result = component.formatDate('2024-05-11T10:30:00Z');
+    expect(result).toBe('11/05/2024');
+  });
+
+  it('le chargement d\'un slot appelle l`\`overwriteGuard, met à jour le slot dynamique et charge la sauvegarde', async () => {
+    const slot1: saveModel = {
+      nomEval: 'Eval1',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: 0,
+      createdAt: '',
+      version: 1
+    };
+
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 1) return slot1;
+      return null;
+    });
+
+    await component.loadSlot(1);
+
+    fixture.detectChanges();
+
+    expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0, slot1.nomEval)
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, component.saveService.dataAuto);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+  });
+
+  it('goBack → navigue vers /home', () => {
+    fixture.detectChanges();
+    component.goBack();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  it('loadSlot — slot vide → retourne sans rien faire', async () => {
+    loadServiceSpy.getSlot.and.returnValue(null);
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it('loadSlot — overwriteGuard bloque → retourne sans charger', async () => {
+    const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it('le chargement d\'un slot avec un step incorrect le remet à 3', async () => {
+    const slot1: saveModel = {
+      nomEval: 'Eval1',
+      format: 'Csv',
+      infoParticipant: ['Nom', 'Âge'],
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: [],
+      listScreens: [],
+      step: -1,
+      createdAt: '',
+      version: 1
+    };
+
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+
+    loadServiceSpy.getSlot.and.callFake((index: number) => {
+      if (index === 1) return slot1;
+      return null;
+    });
+
+    await component.loadSlot(1);
+
+    fixture.detectChanges();
+
+    expect(component.saveService.dataAuto.step).toBe(3);
+  });
+});
