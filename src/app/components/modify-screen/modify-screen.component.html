@@ -129,7 +129,12 @@
 
               <div class="param-section-title">Média</div>
               <div class="param-row">
-                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?</span>
+                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="screenToModify.values[2]">
@@ -327,14 +332,24 @@
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Combien de stimuli à sélectionner ?</span>
+                <span class="param-label">Combien de stimuli à sélectionner ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <input type="number" class="form-control" min="1" value="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Pour quel choix de sélection ?</span>
-                <div class="param-control">
+                <span class="param-label">Pour quel choix de sélection ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
+                  <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
                     <label class="form-check-label" for="choiceSelectionY">Tout</label>
@@ -351,11 +366,11 @@
                 <span class="param-label">Position des stimuli aléatoire ?</span>
                 <div class="param-control">
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
                     <label class="form-check-label" for="randomStimuliY">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
                     <label class="form-check-label" for="randomStimuliN">Non</label>
                   </div>
                 </div>
@@ -364,11 +379,11 @@
                 <span class="param-label">Cacher les stimuli après sélection ?</span>
                 <div class="param-control">
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
                     <label class="form-check-label" for="disableStimuliY">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
                     <label class="form-check-label" for="disableStimuliN">Non</label>
                   </div>
                 </div>
@@ -376,7 +391,12 @@
 
               <div class="param-section-title">Son</div>
               <div class="param-row">
-                <span class="param-label">Jouer un son ?</span>
+                <span class="param-label">Jouer un son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">

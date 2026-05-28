@@ -13,5 +13,6 @@ export const ROUTE_TO_STEP: Record<string, number> = {
   'info-participant': 1,
   'setup-eval': 2,
   'create-eval': 3,
+  'backToScreenList': 3,
   'download-eval': 4
 };

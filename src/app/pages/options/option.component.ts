@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { OptionService } from '../../services/options/option-service';
 import { optionsModel, optionsModelDefault } from '../../shared/optionsModel';
 import { FlashService } from '../../services/flash-message/flash.service';
+import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
 
 @Component({
   selector: 'app-option',
@@ -19,7 +20,8 @@ export class OptionComponent implements OnInit {
   constructor(
     private router: Router,
     private optionService: OptionService,
-    public flashService: FlashService
+    public flashService: FlashService,
+    private indexedDBService: IndexedDBService
   ) {}
 
   ngOnInit(): void {
@@ -31,10 +33,22 @@ export class OptionComponent implements OnInit {
     try {
       this.optionService.setOptions(this.options);
       this.flashService.setDefaultDuration(this.options.flashDuration * 1000);
-      this.flashService.show('success', 'Options sauvegardées !');
+
+      // La durée des flash-message est hardcoded, car si l'utilisateur met un temps de 0 il n'aura pas de confirmation.
+      this.flashService.show('success', 'Options sauvegardées !', 1000);
     } catch (e) {
-      this.flashService.show('error', 'Une erreur est survenue lors de l\'enregistrement des options');
+      this.flashService.show('error', 'Une erreur est survenue lors de l\'enregistrement des options', 1000);
     }
+  }
+
+  async emptyDB(): Promise<void> {
+    try {
+      await this.indexedDBService.deleteAll()
+      this.flashService.show('success', 'Les fichiers ont été supprimés avec succès.');
+    } catch (e) {
+      this.flashService.show('error', 'Une erreur est survenue lors de la suppression des fichiers.');
+    }
+
   }
 
   goBack(): void {

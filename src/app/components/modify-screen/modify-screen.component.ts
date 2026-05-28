@@ -24,19 +24,38 @@ import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component
 import {Offcanvas} from 'bootstrap';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
-import {FlashService} from '../../services/flash-message/flash.service';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-modify-screen',
   imports: [
     FormsModule,
     ConfigStimuliComponent,
+    MatTooltip,
   ],
   templateUrl: './modify-screen.component.html',
   standalone: true,
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent implements OnInit{
+export class ModifyScreenComponent implements OnInit {
+  tooltipFileSave: string = (
+    `Tout les fichiers que vous importez dans le site sont sauvés dans le stockage de votre navigateur.
+
+    Vous pouvez donc déplacer ou supprimer les fichiers de votre disque sans risquer d'altérer l'évaluation en cours.`
+  );
+  tooltipSelectionChoice: string = (
+    ` Le choix de sélection détermine comment l'application doit tenir compte du type des cellules de stimuli:
+
+    - Tout :
+    Le type des cellules n'est pas compté dans la validation, du moment que l'utilisateur sélectionne le nombre requis. Le type des cellules reste cependant toujours accessible.
+
+    - Bonnes réponses :
+    Seules les cellules étant considérée comme des bonnes réponses sont comptées dans la validation.`
+  );
+
+  tooltipMaxSelection: string = (
+    `Le nombre de stimuli ne peut pas être plus grand que le nombre de lignes multiplié par le nombre de colonnes.`
+  )
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();

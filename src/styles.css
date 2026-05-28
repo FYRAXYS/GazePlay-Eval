@@ -190,10 +190,16 @@ Classe pour les infobulles qu'on affiche lors d'un hover d'élément
   color: white !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
-  max-width: 280px !important;
+  max-width: 250px !important;
+  max-height: 5000px !important;
   line-height: 1.5 !important;
   box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2) !important;
 }
+
+.custom-tooltip-class .mdc-tooltip__surface {
+  max-height: none !important; /* Affiche tout le texte s'il est long */
+}
+
 
 .mat-mdc-tooltip-panel {
   pointer-events: none !important;
