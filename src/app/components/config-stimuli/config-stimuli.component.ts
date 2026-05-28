@@ -1,12 +1,8 @@
-import {Component, ElementRef, Input, OnChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, Input, OnChanges, ViewChild} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {stimuliScreenConstModel, stimuliScreenValues} from '../../shared/screenModel';
+import {stimuliScreenValues} from '../../shared/screenModel';
 import {CropImageComponent} from '../crop-image/crop-image.component';
 import {MatDialog} from '@angular/material/dialog';
-import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
-import {SaveService} from '../../services/save/save.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-config-stimuli',
@@ -30,57 +26,28 @@ export class ConfigStimuliComponent implements OnChanges{
 
   pageElement: HTMLElement | null = document.getElementById('configStimuli');
   isResizing = false;
-  previewImage: SafeUrl | string = '';
-  previewSound: string = '';
+  previewImage: any = "";
+  previewSound: any = "";
 
-  constructor(
-    private dialog: MatDialog,
-    private idbService: IndexedDBService,
-    private saveService: SaveService,
-    private saveAutoService: AutoSaveService,
-    private sanitizer: DomSanitizer){
+  constructor(private dialog: MatDialog){
   }
 
-  async ngOnChanges() {
-    await this.checkCell();
+  ngOnChanges() {
+    this.checkCell();
   }
 
-  async checkCell(): Promise<void> {
+  checkCell() {
     const cellData = this.data.screen[this.data.cell];
-    const hasUsableImageFile = cellData.imageFile instanceof Blob;
-    const hasUsableSoundFile = cellData.soundFile instanceof Blob;
 
-    // si l'image n'est pas dans la mémoire
-    if (!hasUsableImageFile && (cellData.imageId || cellData.imageName)) {
-      cellData.imageFile = undefined;
-      const imageRef = cellData.imageId || cellData.imageName!;
-      const match = await this.findFileInIDB(imageRef, 'image');
-      if (match) {
-        cellData.imageFile = match.file;
-        cellData.imageId = match.id;
-      }
-    }
-
-    if (cellData.imageFile instanceof Blob) {
-      this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(cellData.imageFile));
-    } else {
+    if (cellData.imageFile) {
+      this.previewImage = URL.createObjectURL(cellData.imageFile);
+    }else {
       this.previewImage = '';
     }
 
-    // si le son n'est pas dans la mémoire
-    if (!hasUsableSoundFile && (cellData.soundId || cellData.soundName)) {
-      cellData.soundFile = undefined;
-      const soundRef = cellData.soundId || cellData.soundName!;
-      const match = await this.findFileInIDB(soundRef, 'sound');
-      if (match) {
-        cellData.soundFile = match.file;
-        cellData.soundId = match.id;
-      }
-    }
-
-    if (cellData.soundFile instanceof Blob) {
+    if (cellData.soundFile){
       this.previewSound = URL.createObjectURL(cellData.soundFile);
-    } else {
+    }else {
       this.previewSound = '';
     }
 
@@ -90,248 +57,33 @@ export class ConfigStimuliComponent implements OnChanges{
     }
   }
 
-  async deleteImage(): Promise<void> {
-    const cell = this.data.screen[this.data.cell];
-
-    // On ne supprime de l'IDB que si aucune autre case ne référence ce fichier
-    if ((cell.imageId || cell.imageName) && this.countFileReferences(cell.imageName, 'image') <= 1) {
-      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
-    }
-
-
-    cell.imageId = '';
-    cell.imageName = '';
-    cell.imageFile = undefined;
-
-
-    this.checkCell();
-    this.saveAutoService.autoSave('stimuli');
-  }
-
-  async deleteSound(): Promise<void> {
-
-    const cell = this.data.screen[this.data.cell];
-
-    if ((cell.soundId || cell.soundName) && this.countFileReferences(cell.soundName, 'sound') <= 1) {
-      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
-    }
-
-
-    cell.soundId = '';
-    cell.soundName = '';
-    cell.soundFile = undefined;
-
-
-    this.checkCell();
-    this.saveAutoService.autoSave('stimuli');
-
-  }
-
-  async deleteCell(): Promise<void> {
-    const cell = this.data.screen[this.data.cell];
-
-    // On ne supprime de l'IDB que si aucune autre case ne référence ces fichiers
-    if ((cell.imageId || cell.imageName) && this.countFileReferences(cell.imageName, 'image') <= 1) {
-      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
-    }
-
-    if ((cell.soundId || cell.soundName) && this.countFileReferences(cell.soundName, 'sound') <= 1) {
-      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
-    }
-
+  deleteCell(){
     this.data.screen[this.data.cell] = {
-      imageId: '',
-      imageName: '',
+      imageName: "",
       imageFile: undefined,
-      soundId: '',
-      soundName: '',
+      soundName: "",
       soundFile: undefined,
       goodAnswer: false,
-    };
-
+    }
     this.checkCell();
-    this.saveAutoService.autoSave('stimuli');
   }
 
-  /**
-   * Compte combien de cases référencent ce fichier (par son nom) dans toute l'évaluation.
-   * Sert à éviter de supprimer de l'IDB un fichier encore utilisé par une case dupliquée.
-   * @param fileName nom du fichier recherché.
-   * @param type 'image' ou 'sound'.
-   */
-  private countFileReferences(fileName: string | undefined, type: 'image' | 'sound'): number {
-    if (!fileName) return 0;
-
-    let count = 0;
-    const tally = (cells: { [key: number]: stimuliScreenValues }) => {
-      for (const key of Object.keys(cells)) {
-        const cell = cells[Number(key)];
-        const name = type === 'image' ? cell?.imageName : cell?.soundName;
-        if (name === fileName) count++;
-      }
-    };
-
-    // Écran courant (où se font les duplications)
-    tally(this.data.screen);
-
-    // Autres écrans stimuli de l'évaluation
-    const screens = this.saveService.dataAuto?.listScreens ?? [];
-    for (const screen of screens) {
-      if (screen?.type !== stimuliScreenConstModel) continue;
-      const cells = screen.values?.[12];
-      if (!cells || cells === this.data.screen) continue; // évite le double comptage
-      tally(cells);
-    }
-
-    return count;
-  }
-
-  public saveProgress(): void {
-    this.saveAutoService.autoSave('stimuli');
-  }
-
-  private async findFileInIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
-    const candidateIds = this.getCandidateIds(fileName);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        if (!(evalFile?.file instanceof Blob)) continue;
-
-        if (evalFile.file instanceof File) {
-          return { file: evalFile.file, id };
-        }
-
-        const inferredName = this.extractFileNameFromId(id);
-        return {
-          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
-          id
-        };
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    // Fallback: certaines sauvegardes ont un préfixe de projet différent.
-    // Dans ce cas, on retrouve le média par son nom de fichier et son type.
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(fileName);
-      const match = allFiles.find((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      if (match?.file instanceof Blob) {
-        if (match.file instanceof File) {
-          return { file: match.file, id: match.id };
-        }
-        return {
-          file: new File([match.file], baseName, { type: match.file.type }),
-          id: match.id
-        };
-      }
-    } catch {
-      // ignore: fallback best-effort
-    }
-
-    return undefined;
-  }
-
-  private async deleteFileFromIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<void> {
-    const candidateIds = this.getCandidateIds(fileName);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        await this.idbService.deleteFile(id);
-      } catch {
-        // peut déjà être supprimé ou absent
-      }
-    }
-
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(fileName);
-      const matches = allFiles.filter((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      for (const match of matches) {
-        try {
-          await this.idbService.deleteFile(match.id);
-        } catch {
-          // peut déjà être supprimé ou absent
-        }
-      }
-    } catch {
-      // ignore: cleanup best-effort
-    }
-  }
-
-  private getCandidateIds(fileName: string): string[] {
-    const cleanName = fileName.trim();
-    if (!cleanName) return [];
-
-    const projectName = this.saveService.getEvalName();
-    const baseName = this.extractFileNameFromId(cleanName);
-    const ids = new Set<string>();
-
-    ids.add(cleanName);
-    ids.add(baseName);
-
-    if (projectName) {
-      ids.add(`${projectName}/${cleanName}`);
-      ids.add(`${projectName}/${baseName}`);
-    }
-
-    return [...ids];
-  }
-
-  private extractFileNameFromId(id: string): string {
-    const parts = id.split('/');
-    return parts[parts.length - 1] || id;
-  }
-
-  async getImageFile(event: Event){
+  getImageFile(event: Event){
     const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-    const projectName = this.saveService.getEvalName();
-    const id = `${projectName}/${file.name}`;
-
-    try {
-      await this.idbService.addFile(id, file, 'image');
-    } catch {
-      await this.idbService.updateFile(id, file, 'image'); // écrase si existe déjà
+    if (input.files && input.files.length > 0){
+      this.data.screen[this.data.cell].imageName = input.files[0].name;
+      this.data.screen[this.data.cell].imageFile = input.files[0];
+      this.previewImage =  URL.createObjectURL(input.files[0]);
     }
-
-    this.data.screen[this.data.cell].imageName = file.name;
-    this.data.screen[this.data.cell].imageId = id;
-    this.data.screen[this.data.cell].imageFile = file;
-    this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
   }
 
-  async getSoundFile(event: Event){
+  getSoundFile(event: Event){
     const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-    const projectName = this.saveService.getEvalName();
-    const id = `${projectName}/${file.name}`;
-
-    try {
-      await this.idbService.addFile(id, file, 'sound');
-    } catch {
-      await this.idbService.updateFile(id, file, 'sound');
+    if (input.files && input.files.length > 0){
+      this.data.screen[this.data.cell].soundName = input.files[0].name;
+      this.data.screen[this.data.cell].soundFile = input.files[0];
+      this.previewSound =  URL.createObjectURL(input.files[0]);
     }
-
-    this.data.screen[this.data.cell].soundName = file.name;
-    this.data.screen[this.data.cell].soundId = id;
-    this.data.screen[this.data.cell].soundFile = file;
-    this.previewSound = URL.createObjectURL(file);
   }
 
   cropImage(){
@@ -339,8 +91,8 @@ export class ConfigStimuliComponent implements OnChanges{
       data: {
         image: this.data.screen[this.data.cell].imageFile
       },
-      panelClass: 'scrollable-dialog', // classe custom pour laisser le scroll
-      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
+      panelClass: 'crop-image',
+      disableClose: true
     });
 
     dialogRef.afterClosed().subscribe((result: File | null) => {

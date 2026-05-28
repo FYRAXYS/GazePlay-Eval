@@ -44,8 +44,7 @@ export class CreateEvalComponent implements OnInit{
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
-      this.listScreens,
-      this.saveService.dataAuto.step);
+      this.listScreens);
   }
 
   loadData(){
@@ -108,11 +107,11 @@ export class CreateEvalComponent implements OnInit{
 
   backToSetupEval() {
     this.saveData();
-    void this.router.navigate(['/setup-eval']);
+    this.router.navigate(['/setup-eval']);
   }
 
   goToDownloadEval() {
     this.saveData()
-    void this.router.navigate(['/download-eval']);
+    this.router.navigate(['/download-eval']);
   }
 }

@@ -2,13 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
+import {CommonModule} from '@angular/common';
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
-import {FlashComponent} from './components/flash-message/flash.component';
-import {AutoSaveService} from './services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, ProgressBarComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -18,7 +17,7 @@ export class App implements OnInit{
   steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
   currentStepIndex = -1;
 
-  constructor(private router: Router, private autoSaveService:AutoSaveService) {
+  constructor(private router: Router) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(event => {
@@ -41,35 +40,11 @@ export class App implements OnInit{
   }
 
   ngOnInit(): void {
-    this.autoSaveService.init(); // pour la sauvegarde automatique
-
-    // Pour éviter le bug de scroll en cas de chargement d'évaluation
-    const cleanOverflow = () => {
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
-      document.body.classList.remove('modal-open', 'offcanvas-open');
-      document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(el => el.remove());
-    };
-
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      cleanOverflow();
-      // Re-passe après l'animation de fermeture Bootstrap (~300ms) qui peut reposer overflow:hidden
-      setTimeout(cleanOverflow, 400);
-    });
-
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isReload = nav?.type === 'reload';
 
-    // Si on recharge le site, on redirige vers la page d'accueil
-    if (isReload) {
-      this.router.navigate(['/home']).then(() => {
-        // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
-        // S'il n'y en a pas, on reste sur la page d'accueil
-        this.autoSaveService.tryResume();
-      });
-      return ;
+    if (isReload && this.router.url !== '/home') {
+      this.router.navigate(['/home']);
     }
   }
 }

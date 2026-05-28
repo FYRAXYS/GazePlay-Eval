@@ -23,8 +23,7 @@ describe('InfoParticipantComponent', () => {
         globalParamsTransitionScreen: [],
         globalParamsInstructionScreen: [],
         globalParamsStimuliScreen: [],
-        listScreens: [],
-        step: 0
+        listScreens: []
       }
     });
 
@@ -61,8 +60,7 @@ describe('InfoParticipantComponent', () => {
       [],
       [],
       [],
-      [],
-      0
+      []
     );
   });
 

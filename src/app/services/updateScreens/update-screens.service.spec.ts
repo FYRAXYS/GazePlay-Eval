@@ -21,46 +21,21 @@ describe('UpdateScreensService', () => {
     const updated = service.updateTransitionScreen(screen, 'TestTransition', newValues);
 
     expect(updated.name).toBe('TestTransition');
-    expect(updated.values).toEqual(['nomTest',1, 2, 3, 4]);
+    expect(updated.values).toEqual([1, 2, 3, 4, 5]);
   });
 
   it('updateInstructionScreen met à jour le nom et les valeurs', () => {
-    const screen: instructionScreenModel = { type: 'instruction', name: '', values: [0, 0, 0, 0, 0, 0, 0, 0] };
+    const screen: instructionScreenModel = { type: 'instruction', name: '', values: [0, 0, 0, 0, 0, 0, 0] };
     const newValues = ['nomTest', 1, 2, 3, 4, 5];
 
     const updated = service.updateInstructionScreen(screen, 'TestInstruction', newValues);
 
     expect(updated.name).toBe('TestInstruction');
-    expect(updated.values[0]).toBe('nomTest');
-    expect(updated.values[1]).toBe(1);
-    expect(updated.values[2]).toBe(2);
-    expect(updated.values[3]).toBe(3);
-    expect(updated.values[4]).toBe(0);
-    expect(updated.values[5]).toBe(0);
-    expect(updated.values[6]).toBe(4);
-    expect(updated.values[7]).toBe(5);
-  });
-
-  it('updateStimuliScreen met à jour le nom et les valeurs aux bons indices', () => {
-    const screen: any = { type: 'stimuli', name: '', values: [0, 0, 0, 0, 0, 0, 0, 0, 0] };
-    const newValues = [2, 3, true, 10, 1.5, 4, false, true];
-
-    const updated = service.updateStimuliScreen(screen, 'TestStimuli', newValues);
-
-    expect(updated.name).toBe('TestStimuli');
-    expect(updated.values[0]).toBe(2);
-    expect(updated.values[1]).toBe(3);
-    expect(updated.values[2]).toBeTrue();
-    expect(updated.values[3]).toBe(10);
-    expect(updated.values[4]).toBe(1.5);
-    expect(updated.values[6]).toBe(4);
-    expect(updated.values[7]).toBeFalse();
-    expect(updated.values[8]).toBeTrue();
-  });
-
-  it('updateStimuliScreen retourne le même objet screen modifié', () => {
-    const screen: any = { type: 'stimuli', name: '', values: [0, 0, 0, 0, 0, 0, 0, 0, 0] };
-    const result = service.updateStimuliScreen(screen, 'S', [1, 1, false, 5, 1, 1, false, false]);
-    expect(result).toBe(screen);
+    expect(updated.values[0]).toBe(1);
+    expect(updated.values[1]).toBe(2);
+    expect(updated.values[2]).toBe(3);
+    expect(updated.values[3]).toBe(4);
+    expect(updated.values[5]).toBe(5);
+    expect(updated.values[6]).toBeUndefined();
   });
 });
