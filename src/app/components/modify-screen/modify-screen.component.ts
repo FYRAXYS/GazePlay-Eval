@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  HostListener,
   Input, OnInit,
   Output,
 } from '@angular/core';
@@ -23,6 +24,7 @@ import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component
 import {Offcanvas} from 'bootstrap';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {FlashService} from '../../services/flash-message/flash.service';
 
 @Component({
   selector: 'app-modify-screen',
@@ -66,18 +68,33 @@ export class ModifyScreenComponent implements OnInit{
   pendingDuplicateTarget: number | null = null;
   swapMode: boolean = false;
   swapSourceIndex: number | null = null;
+  cellSize: number = 80;
+  private readonly minCellSize = 40;
+  private readonly maxCellSize = 160;
+  gridMaxHeight: number = 0;
+  multiSelectMode: boolean = false;
+  selectedCells: Set<number> = new Set<number>();
+  pendingDeleteCells: number[] | null = null;
 
   constructor(
     private updateScreenService: UpdateScreensService,
     private saveService: SaveService,
     private autoSaveService: AutoSaveService,
-    private idbService: IndexedDBService
+    private idbService: IndexedDBService,
+    private flashService: FlashService
   ) {
   }
 
   ngOnInit(): void {
     this.actualTypeScreen = this.screenToModify.type;
     void this.initializeMediaState();
+    this.updateGridViewport();
+  }
+
+  @HostListener('window:resize')
+  updateGridViewport(): void {
+    // Hauteur max de la zone grille basée sur l'écran : ~60% de la hauteur visible.
+    this.gridMaxHeight = Math.max(Math.round(window.innerHeight * 0.6), 240);
   }
 
   private async initializeMediaState(): Promise<void> {
@@ -554,6 +571,15 @@ export class ModifyScreenComponent implements OnInit{
 
   openStimuliData(cellNumber: number) {
     const listScreenAll = this.screenToModify.values[12];
+    if (this.multiSelectMode) {
+      if (listScreenAll[cellNumber]?.hidden) return;
+      if (this.selectedCells.has(cellNumber)) {
+        this.selectedCells.delete(cellNumber);
+      } else {
+        this.selectedCells.add(cellNumber);
+      }
+      return;
+    }
     if (this.swapMode) {
       if (this.swapSourceIndex === null) {
         if (listScreenAll[cellNumber]?.hidden) return;
@@ -574,6 +600,11 @@ export class ModifyScreenComponent implements OnInit{
       if (this.duplicateSourceIndex === null) {
         if (listScreenAll[cellNumber]?.hidden) return;
         this.duplicateSourceIndex = cellNumber;
+        // S'il n'y a qu'une seule case, on ajoute une colonne pour avoir une destination
+        if (Number(this.screenToModify.values[0]) * Number(this.screenToModify.values[1]) === 1) {
+          this.screenToModify.values[1] = Number(this.screenToModify.values[1]) + 1;
+          this.checkStimuliCells();
+        }
         return;
       }
       const target = listScreenAll[cellNumber];
@@ -588,12 +619,14 @@ export class ModifyScreenComponent implements OnInit{
       this.duplicateMode = false;
       return;
     }
-    if (listScreenAll[cellNumber]?.hidden) {
+    if (this.deleteMode) {
+      if (listScreenAll[cellNumber]?.hidden) return;
+      this.requestDelete([cellNumber]);
       return;
     }
-    if (this.deleteMode) {
-      this.deleteCellContent(cellNumber);
-      return;
+    // Clic sur un emplacement vide (masqué) en mode normal : on le matérialise en case.
+    if (listScreenAll[cellNumber]?.hidden) {
+      listScreenAll[cellNumber] = this.emptyCell();
     }
     const listScreen = this.screenToModify.values[12];
     this.activeCellIndex = cellNumber;
@@ -617,7 +650,34 @@ export class ModifyScreenComponent implements OnInit{
       this.deleteMode = false;
       this.swapMode = false;
       this.swapSourceIndex = null;
+      this.multiSelectMode = false;
+      this.selectedCells.clear();
     }
+  }
+
+  toggleMultiSelectMode() {
+    this.multiSelectMode = !this.multiSelectMode;
+    this.selectedCells.clear();
+    this.pendingDeleteCells = null;
+    if (this.multiSelectMode) {
+      this.duplicateMode = false;
+      this.duplicateSourceIndex = null;
+      this.pendingDuplicateTarget = null;
+      this.swapMode = false;
+      this.swapSourceIndex = null;
+      this.deleteMode = false;
+    }
+  }
+
+  /** Clic sur la corbeille : en multi-sélection on supprime la sélection, sinon on (dé)active le mode suppression simple. */
+  onDeleteClick() {
+    if (this.multiSelectMode) {
+      if (this.selectedCells.size > 0) {
+        this.requestDelete([...this.selectedCells]);
+      }
+      return;
+    }
+    this.toggleDeleteMode();
   }
 
   confirmOverwrite() {
@@ -653,6 +713,39 @@ export class ModifyScreenComponent implements OnInit{
       goodAnswer: false,
       hidden: true,
     };
+  }
+
+  /**
+   * Compte combien de cases référencent ce fichier (par son nom) dans toute l'évaluation.
+   * Sert à éviter de supprimer de l'IDB un fichier encore utilisé par une case dupliquée.
+   * @param fileName nom du fichier recherché.
+   * @param type 'image' ou 'sound'.
+   */
+  private countFileReferences(fileName: string | undefined, type: 'image' | 'sound'): number {
+    if (!fileName) return 0;
+
+    let count = 0;
+    const tally = (cells: { [key: number]: any }) => {
+      for (const key of Object.keys(cells)) {
+        const cell = cells[Number(key)];
+        const name = type === 'image' ? cell?.imageName : cell?.soundName;
+        if (name === fileName) count++;
+      }
+    };
+
+    // Écran courant (où se font les duplications)
+    tally(this.screenToModify.values[12]);
+
+    // Autres écrans stimuli de l'évaluation
+    const screens = this.saveService.dataAuto?.listScreens ?? [];
+    for (const screen of screens) {
+      if (screen?.type !== stimuliScreenConstModel) continue;
+      const cells = screen.values?.[12];
+      if (!cells || cells === this.screenToModify.values[12]) continue; // évite le double comptage
+      tally(cells);
+    }
+
+    return count;
   }
 
   addAdjacent(event: Event, cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right') {
@@ -733,18 +826,77 @@ export class ModifyScreenComponent implements OnInit{
       this.pendingDuplicateTarget = null;
       this.swapMode = false;
       this.swapSourceIndex = null;
+      this.multiSelectMode = false;
+      this.selectedCells.clear();
     }
   }
 
-  deleteCellContent(cellNumber: number) {
+  /**
+   * Demande la suppression des cases données. Si au moins une contient des données,
+   * on ouvre une confirmation ; sinon on supprime directement.
+   */
+  private requestDelete(indices: number[]) {
     const listScreen = this.screenToModify.values[12];
-    if (!listScreen[cellNumber] || listScreen[cellNumber].hidden) {
+    const toDelete = indices.filter(i => listScreen[i] && !listScreen[i].hidden);
+    if (toDelete.length === 0) {
       this.deleteMode = false;
       return;
     }
+    // On garde toujours au moins une case visible dans la grille.
+    if (toDelete.length >= this.countVisibleCells()) {
+      this.flashService.show('warning', 'Vous devez conserver au moins une case.');
+      this.deleteMode = false;
+      this.selectedCells.clear();
+      return;
+    }
+    const hasData = toDelete.some(i => listScreen[i].imageName || listScreen[i].soundName);
+    if (hasData) {
+      this.pendingDeleteCells = toDelete;
+    } else {
+      this.performDelete(toDelete);
+    }
+  }
 
-    const rows = Number(this.screenToModify.values[0]);
-    const cols = Number(this.screenToModify.values[1]);
+  /** Nombre de cases visibles (non masquées) dans l'écran courant. */
+  private countVisibleCells(): number {
+    const listScreen = this.screenToModify.values[12];
+    let count = 0;
+    for (const key of Object.keys(listScreen)) {
+      if (!listScreen[Number(key)]?.hidden) count++;
+    }
+    return count;
+  }
+
+  confirmDelete() {
+    if (this.pendingDeleteCells) {
+      this.performDelete(this.pendingDeleteCells);
+    }
+  }
+
+  cancelDelete() {
+    this.pendingDeleteCells = null;
+  }
+
+  private performDelete(indices: number[]) {
+    for (const i of indices) {
+      this.clearCellWithIDB(i);
+    }
+    this.autoShrinkGrid();
+    this.selectedCells.clear();
+    this.pendingDeleteCells = null;
+    this.deleteMode = false;
+  }
+
+  /** Masque/vide une case et retire ses fichiers de l'IDB s'ils ne sont plus référencés. */
+  private clearCellWithIDB(cellNumber: number) {
+    const listScreen = this.screenToModify.values[12];
+    const cell = listScreen[cellNumber];
+    if (!cell || cell.hidden) return;
+
+    const removedImageName = cell.imageName;
+    const removedSoundName = cell.soundName;
+    const shouldDeleteImage = !!removedImageName && this.countFileReferences(removedImageName, 'image') <= 1;
+    const shouldDeleteSound = !!removedSoundName && this.countFileReferences(removedSoundName, 'sound') <= 1;
 
     listScreen[cellNumber] = {
       imageName: "",
@@ -754,6 +906,24 @@ export class ModifyScreenComponent implements OnInit{
       goodAnswer: false,
       hidden: true,
     };
+
+    if (shouldDeleteImage) void this.deleteFileFromIDB(removedImageName, 'image');
+    if (shouldDeleteSound) void this.deleteFileFromIDB(removedSoundName, 'sound');
+
+    if (this.activeCellIndex === cellNumber) {
+      this.activeCellIndex = null;
+    }
+  }
+
+  /** Retire les dernières lignes/colonnes entièrement masquées, en boucle. */
+  private autoShrinkGrid() {
+    while (this.shrinkOnce()) { /* continue tant qu'on peut rétrécir */ }
+  }
+
+  private shrinkOnce(): boolean {
+    const rows = Number(this.screenToModify.values[0]);
+    const cols = Number(this.screenToModify.values[1]);
+    const listScreen = this.screenToModify.values[12];
 
     let lastColAllHidden = cols > 1;
     for (let r = 0; r < rows && lastColAllHidden; r++) {
@@ -776,7 +946,10 @@ export class ModifyScreenComponent implements OnInit{
       for (let i = rows * newCols; i < rows * cols; i++) {
         delete listScreen[i];
       }
-    } else if (rows > 1) {
+      return true;
+    }
+
+    if (rows > 1) {
       let lastRowAllHidden = true;
       for (let c = 0; c < cols && lastRowAllHidden; c++) {
         if (!listScreen[(rows - 1) * cols + c]?.hidden) {
@@ -788,13 +961,11 @@ export class ModifyScreenComponent implements OnInit{
         for (let i = (rows - 1) * cols; i < rows * cols; i++) {
           delete listScreen[i];
         }
+        return true;
       }
     }
 
-    if (this.activeCellIndex === cellNumber) {
-      this.activeCellIndex = null;
-    }
-    this.deleteMode = false;
+    return false;
   }
 
   duplicateCell(sourceIndex: number, targetIndex: number) {
@@ -854,6 +1025,8 @@ export class ModifyScreenComponent implements OnInit{
       this.duplicateSourceIndex = null;
       this.pendingDuplicateTarget = null;
       this.deleteMode = false;
+      this.multiSelectMode = false;
+      this.selectedCells.clear();
     }
   }
 
@@ -862,6 +1035,14 @@ export class ModifyScreenComponent implements OnInit{
     const tmp = list[a];
     list[a] = list[b];
     list[b] = tmp;
+  }
+
+  zoomIn() {
+    this.cellSize = Math.min(this.cellSize + 20, this.maxCellSize);
+  }
+
+  zoomOut() {
+    this.cellSize = Math.max(this.cellSize - 20, this.minCellSize);
   }
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
