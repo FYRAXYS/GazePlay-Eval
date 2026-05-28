@@ -24,6 +24,7 @@ import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component
 import {Offcanvas} from 'bootstrap';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {FlashService} from '../../services/flash-message/flash.service';
 import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
