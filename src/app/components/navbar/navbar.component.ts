@@ -3,7 +3,6 @@ import {NgOptimizedImage} from '@angular/common';
 import {ThemeService} from '../../services/theme/theme.service';
 import {MenuComponent} from '../menu/menu.component';
 import {Router} from '@angular/router';
-import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
