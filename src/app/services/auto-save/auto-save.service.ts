@@ -79,7 +79,18 @@ export class AutoSaveService implements OnDestroy {
   tryResume(): void {
     // récupération du slot dynamique
     const save = this.loadService.getSlot(0);
-    if (!save || save.step === -1) return;
+
+    // si pas de sauvegarde
+    if (!save) {
+      return;
+    }
+
+    // si l'avancée est invalide
+    if (save.step === -1) {
+      this.flashService.show("error", "Une erreur s'est produite lors de la tentative de rechargement" +
+        "de l'évaluation. Tentez de la sauvegarder et de l'ouvrir à nouveau.");
+      return;
+    }
 
     const route = STEP_TO_ROUTE[save.step]; // Si la route est invalide
     if (!route) return;
