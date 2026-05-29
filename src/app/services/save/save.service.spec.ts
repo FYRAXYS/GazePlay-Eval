@@ -34,7 +34,8 @@ describe('SaveService', () => {
       globalParamsTransitionScreen: [] as any[],
       globalParamsInstructionScreen: [] as any[],
       globalParamsStimuliScreen: [] as any[],
-      listScreens: [] as any[]
+      listScreens: [] as any[],
+      step: 0
     };
 
     spyOn(service, 'saveToSlot').and.callThrough();
@@ -46,7 +47,8 @@ describe('SaveService', () => {
       mockData.globalParamsTransitionScreen,
       mockData.globalParamsInstructionScreen,
       mockData.globalParamsStimuliScreen,
-      mockData.listScreens
+      mockData.listScreens,
+      mockData.step
     );
 
     expect(service.dataAuto).toEqual(mockData);
@@ -54,9 +56,21 @@ describe('SaveService', () => {
     expect(localStorage.getItem(SAVE_SLOT_LIST[0])).not.toBeNull();
   });
 
-  it('clearSlot doit supprimer l’entrée correspondante dans localStorage', () => {
+  it("clearSlot doit supprimer l'entree correspondante dans localStorage", () => {
     localStorage.setItem(SAVE_SLOT_LIST[0], 'test');
     service.clearSlot(0);
     expect(localStorage.getItem(SAVE_SLOT_LIST[0])).toBeNull();
+  });
+
+  it('getEvalName — nomEval défini → retourne nomEval', () => {
+    service.dataAuto.nomEval = 'MonEval';
+    expect(service.getEvalName()).toBe('MonEval');
+  });
+
+  it('getEvalName - nomEval vide - retourne le nom par defaut', () => {
+    service.dataAuto.nomEval = String();
+    const result = service.getEvalName();
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).not.toEqual(service.dataAuto.nomEval);
   });
 });

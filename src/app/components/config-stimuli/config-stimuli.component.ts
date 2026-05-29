@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnChanges, ViewChild} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {stimuliScreenValues} from '../../shared/screenModel';
+import {stimuliScreenConstModel, stimuliScreenValues} from '../../shared/screenModel';
 import {CropImageComponent} from '../crop-image/crop-image.component';
 import {MatDialog} from '@angular/material/dialog';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
@@ -93,8 +93,8 @@ export class ConfigStimuliComponent implements OnChanges{
   async deleteImage(): Promise<void> {
     const cell = this.data.screen[this.data.cell];
 
-    // Supprimer les fichiers de l'IDB si ils existent
-    if (cell.imageId || cell.imageName) {
+    // On ne supprime de l'IDB que si aucune autre case ne référence ce fichier
+    if ((cell.imageId || cell.imageName) && this.countFileReferences(cell.imageName, 'image') <= 1) {
       await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
     }
 
@@ -112,7 +112,7 @@ export class ConfigStimuliComponent implements OnChanges{
 
     const cell = this.data.screen[this.data.cell];
 
-    if (cell.soundId || cell.soundName) {
+    if ((cell.soundId || cell.soundName) && this.countFileReferences(cell.soundName, 'sound') <= 1) {
       await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
     }
 
@@ -130,12 +130,12 @@ export class ConfigStimuliComponent implements OnChanges{
   async deleteCell(): Promise<void> {
     const cell = this.data.screen[this.data.cell];
 
-    // Supprimer les fichiers de l'IDB si ils existent
-    if (cell.imageId || cell.imageName) {
+    // On ne supprime de l'IDB que si aucune autre case ne référence ces fichiers
+    if ((cell.imageId || cell.imageName) && this.countFileReferences(cell.imageName, 'image') <= 1) {
       await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
     }
 
-    if (cell.soundId || cell.soundName) {
+    if ((cell.soundId || cell.soundName) && this.countFileReferences(cell.soundName, 'sound') <= 1) {
       await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
     }
 
@@ -151,6 +151,39 @@ export class ConfigStimuliComponent implements OnChanges{
 
     this.checkCell();
     this.saveAutoService.autoSave('stimuli');
+  }
+
+  /**
+   * Compte combien de cases référencent ce fichier (par son nom) dans toute l'évaluation.
+   * Sert à éviter de supprimer de l'IDB un fichier encore utilisé par une case dupliquée.
+   * @param fileName nom du fichier recherché.
+   * @param type 'image' ou 'sound'.
+   */
+  private countFileReferences(fileName: string | undefined, type: 'image' | 'sound'): number {
+    if (!fileName) return 0;
+
+    let count = 0;
+    const tally = (cells: { [key: number]: stimuliScreenValues }) => {
+      for (const key of Object.keys(cells)) {
+        const cell = cells[Number(key)];
+        const name = type === 'image' ? cell?.imageName : cell?.soundName;
+        if (name === fileName) count++;
+      }
+    };
+
+    // Écran courant (où se font les duplications)
+    tally(this.data.screen);
+
+    // Autres écrans stimuli de l'évaluation
+    const screens = this.saveService.dataAuto?.listScreens ?? [];
+    for (const screen of screens) {
+      if (screen?.type !== stimuliScreenConstModel) continue;
+      const cells = screen.values?.[12];
+      if (!cells || cells === this.data.screen) continue; // évite le double comptage
+      tally(cells);
+    }
+
+    return count;
   }
 
   public saveProgress(): void {
