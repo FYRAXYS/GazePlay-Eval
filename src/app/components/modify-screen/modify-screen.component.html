@@ -43,7 +43,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -83,7 +83,7 @@
                     <span class="param-label">Combien de temps ?</span>
                     <div class="param-control">
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[4]">
+                        <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[4]">
                         <span class="input-group-text">secondes</span>
                       </div>
                     </div>
@@ -120,7 +120,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -129,7 +129,12 @@
 
               <div class="param-section-title">Média</div>
               <div class="param-row">
-                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?</span>
+                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="screenToModify.values[2]">
@@ -156,31 +161,39 @@
 
                 @if (typeFile === 'Image') {
                   <div class="param-row">
-                    <span class="param-label">Image à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une image' }}
+                        <input #fileInputImage type="file" accept="image/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer l'image
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer l'image
+                        </button>
                       }
                     </div>
                   </div>
                 } @else if (typeFile === 'Video') {
                   <div class="param-row">
-                    <span class="param-label">Vidéo à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une vidéo' }}
+                        <input #fileInputVideo type="file" accept="video/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer la vidéo
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer la vidéo
+                        </button>
                       }
                     </div>
                   </div>
@@ -196,16 +209,23 @@
                   </div>
                 } @else if (typeFile === 'Son') {
                   <div class="param-row">
-                    <span class="param-label">Son à jouer</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir un son' }}
+                        <input #fileInputSound type="file" accept="audio/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <div class="sound-preview-row">
+                          <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundInstruction()">
+                            Supprimer le son
+                          </button>
+                        </div>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer le son
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
                       }
                     </div>
                   </div>
@@ -244,7 +264,7 @@
                   <span class="param-label">Combien de temps de fixation ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[7]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[7]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -294,7 +314,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[3]">
+                      <input type="number" class="form-control" min="0.1" value="0.1" step="0.1" [(ngModel)]="screenToModify.values[3]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -303,20 +323,33 @@
 
               <div class="param-section-title">Fixation & sélection</div>
               <div class="param-row">
-                <span class="param-label">Temps de fixation</span>
+                <span class="param-label">Temps de fixation pour la validation</span>
                 <div class="param-control">
-                  <input type="number" class="form-control" min="1" max="9999" value="1" [(ngModel)]="screenToModify.values[4]">
+                  <div class="input-group w-auto">
+                    <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="screenToModify.values[4]">
+                    <span class="input-group-text">secondes</span>
+                  </div>
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Combien de stimuli à sélectionner ?</span>
+                <span class="param-label">Combien de stimuli à sélectionner ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipMaxSelection" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <input type="number" class="form-control" min="1" value="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
                 </div>
               </div>
               <div class="param-row">
-                <span class="param-label">Pour quel choix de sélection ?</span>
-                <div class="param-control">
+                <span class="param-label">Pour quel choix de sélection ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipSelectionChoice" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
+                  <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
                     <label class="form-check-label" for="choiceSelectionY">Tout</label>
@@ -333,11 +366,11 @@
                 <span class="param-label">Position des stimuli aléatoire ?</span>
                 <div class="param-control">
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
                     <label class="form-check-label" for="randomStimuliY">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
                     <label class="form-check-label" for="randomStimuliN">Non</label>
                   </div>
                 </div>
@@ -346,11 +379,11 @@
                 <span class="param-label">Cacher les stimuli après sélection ?</span>
                 <div class="param-control">
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
                     <label class="form-check-label" for="disableStimuliY">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
                     <label class="form-check-label" for="disableStimuliN">Non</label>
                   </div>
                 </div>
@@ -358,7 +391,12 @@
 
               <div class="param-section-title">Son</div>
               <div class="param-row">
-                <span class="param-label">Jouer un son ?</span>
+                <span class="param-label">Jouer un son ?
+                  <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                  <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                       [matTooltip]="tooltipFileSave" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+                </span>
                 <div class="param-control">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">
@@ -372,36 +410,127 @@
               </div>
               @if (screenToModify.values[9]) {
                 <div class="param-row">
-                  <span class="param-label">Son à jouer</span>
-                  <div class="param-control">
-                    <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
-                    <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
-                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
-                      <i class="bi bi-eye"></i>
-                    </button>
+                  <div class="sound-block">
+                    <label class="file-upload-btn">
+                      {{ screenToModify.values[10] || 'Choisir un son' }}
+                      <input #fileInputSound type="file" accept="audio/*" hidden (change)="getStimuliSoundFile($event)">
+                    </label>
+
+                    @if (haveStimuliSoundFile) {
+                      <div class="sound-preview-row">
+                        <audio controls [attr.src]="stimuliFile"></audio>
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundStimuli()">
+                          Supprimer le son
+                        </button>
+                      </div>
+                    } @else {
+                      <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                        Supprimer le son
+                      </button>
+                    }
                   </div>
                 </div>
               }
 
-              <div class="wrapper mt-3">
+              <div class="wrapper mt-3" [class.duplicate-mode]="duplicateMode" [class.delete-mode]="deleteMode">
+                <div class="stimuli-toolbar" [class.toolbar-locked]="configStimuliOpen">
+                  <button type="button" class="stimuli-tool-btn" [class.active]="duplicateMode" [disabled]="multiSelectMode" data-tooltip="Dupliquer : copie le contenu d'une case vers une autre" (click)="toggleDuplicateMode()">
+                    <i class="bi bi-files"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [class.active]="swapMode" [disabled]="multiSelectMode" data-tooltip="Échanger : intervertit le contenu de deux cases" (click)="toggleSwapMode()">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [class.active]="multiSelectMode" data-tooltip="Sélection multiple : sélectionnez plusieurs cases puis supprimez-les" (click)="toggleMultiSelectMode()">
+                    <i class="bi bi-ui-checks-grid"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn stimuli-tool-btn-danger" [class.active]="deleteMode" [disabled]="multiSelectMode && selectedCells.size === 0" data-tooltip="Supprimer : masque la/les case(s)" (click)="onDeleteClick()">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <div class="stimuli-tool-separator"></div>
+                  <button type="button" class="stimuli-tool-btn" data-tooltip="Zoom + : agrandit l'aperçu de la grille" (click)="zoomIn()" [disabled]="cellSize >= 160">
+                    <i class="bi bi-zoom-in"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" data-tooltip="Zoom − : réduit l'aperçu de la grille" (click)="zoomOut()" [disabled]="cellSize <= 40">
+                    <i class="bi bi-zoom-out"></i>
+                  </button>
+                </div>
+                @if (duplicateMode) {
+                  @if (duplicateSourceIndex === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la case à dupliquer</div>
+                  } @else if (pendingDuplicateTarget === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez maintenant sur la case de destination</div>
+                  }
+                }
+                @if (pendingDuplicateTarget !== null) {
+                  <div class="overwrite-confirm">
+                    <div class="overwrite-confirm-text">⚠ Cette case contient déjà du contenu. Êtes-vous sûr de vouloir l'écraser ?</div>
+                    <div class="overwrite-confirm-actions">
+                      <button type="button" class="btn btn-sm btn-warning fw-semibold" (click)="confirmOverwrite()">Oui, écraser</button>
+                      <button type="button" class="btn btn-sm btn-outline-light" (click)="cancelOverwrite()">Annuler</button>
+                    </div>
+                  </div>
+                }
+                @if (deleteMode) {
+                  <div class="stimuli-toolbar-hint danger">Cliquez sur la case à vider</div>
+                }
+                @if (swapMode) {
+                  @if (swapSourceIndex === null) {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la 1re case à échanger</div>
+                  } @else {
+                    <div class="stimuli-toolbar-hint">Cliquez sur la 2e case</div>
+                  }
+                }
+                @if (multiSelectMode) {
+                  <div class="stimuli-toolbar-hint">{{ selectedCells.size }} case(s) sélectionnée(s) — cliquez sur la corbeille pour supprimer</div>
+                }
+                @if (pendingDeleteCells !== null) {
+                  <div class="overwrite-confirm">
+                    <div class="overwrite-confirm-text">⚠ Êtes-vous sûr de vouloir supprimer {{ pendingDeleteCells.length }} case(s) contenant des données ?</div>
+                    <div class="overwrite-confirm-actions">
+                      <button type="button" class="btn btn-sm btn-danger fw-semibold" (click)="confirmDelete()">Oui, supprimer</button>
+                      <button type="button" class="btn btn-sm btn-outline-light" (click)="cancelDelete()">Annuler</button>
+                    </div>
+                  </div>
+                }
                 <div class="grid-container"
-                     [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'"
-                     [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
+                     [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', ' + cellSize + 'px)'"
+                     [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', ' + cellSize + 'px)'"
+                     [style.maxHeight.px]="gridMaxHeight">
                   @for (n of totalCells; track n; let i = $index) {
-                    <div [id]="i" class="cell" (click)="openStimuliData(i)">
-                      @if (screenToModify.values[12][i].goodAnswer === true) {
-                        <span class="cell-text icon valid">✓</span>
-                      } @else {
-                        <span class="cell-text icon invalid">✕</span>
-                      }
-                      @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
-                        <span class="cell-text">{{ i + 1 }}</span>
-                      }
-                      @if (screenToModify.values[12][i].imageName !== "") {
-                        <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
-                      }
-                      @if (screenToModify.values[12][i].soundName !== "") {
-                        <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
+                    <div [id]="i" class="cell"
+                         [style.width.px]="cellSize"
+                         [class.cell-active]="activeCellIndex === i"
+                         [class.cell-hidden]="screenToModify.values[12][i]?.hidden"
+                         [class.cell-dup-source]="duplicateSourceIndex === i"
+                         [class.cell-swap-source]="swapSourceIndex === i"
+                         [class.cell-multi-selected]="selectedCells.has(i)"
+                         [class.cell-empty]="!duplicateMode && !deleteMode && !swapMode && !multiSelectMode && !screenToModify.values[12][i]?.hidden && !screenToModify.values[12][i]?.imageName && !screenToModify.values[12][i]?.soundName"
+                         [class.cell-dup-target]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && !screenToModify.values[12][i]?.hidden && !screenToModify.values[12][i]?.imageName && !screenToModify.values[12][i]?.soundName"
+                         [class.cell-dup-target-hidden]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && screenToModify.values[12][i]?.hidden"
+                         [class.cell-dup-warning]="duplicateMode && duplicateSourceIndex !== null && duplicateSourceIndex !== i && !screenToModify.values[12][i]?.hidden && (screenToModify.values[12][i]?.imageName || screenToModify.values[12][i]?.soundName)"
+                         [class.cell-dup-pending]="pendingDuplicateTarget === i"
+                         (click)="openStimuliData(i)">
+                      @if (!screenToModify.values[12][i]?.hidden) {
+                        @if (!duplicateMode && !deleteMode && !swapMode && !multiSelectMode) {
+                          <button type="button" class="cell-add cell-add-top" data-tooltip="Ajouter en haut" (click)="addAdjacent($event, i, 'top')"><i class="bi bi-plus"></i></button>
+                          <button type="button" class="cell-add cell-add-bottom" data-tooltip="Ajouter en bas" (click)="addAdjacent($event, i, 'bottom')"><i class="bi bi-plus"></i></button>
+                          <button type="button" class="cell-add cell-add-left" data-tooltip="Ajouter à gauche" (click)="addAdjacent($event, i, 'left')"><i class="bi bi-plus"></i></button>
+                          <button type="button" class="cell-add cell-add-right" data-tooltip="Ajouter à droite" (click)="addAdjacent($event, i, 'right')"><i class="bi bi-plus"></i></button>
+                        }
+                        @if (screenToModify.values[12][i].goodAnswer === true) {
+                          <span class="cell-text icon valid">✓</span>
+                        } @else {
+                          <span class="cell-text icon invalid">✕</span>
+                        }
+                        @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
+                          <span class="cell-text">{{ i + 1 }}</span>
+                        }
+                        @if (screenToModify.values[12][i].imageName !== "") {
+                          <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
+                        }
+                        @if (screenToModify.values[12][i].soundName !== "") {
+                          <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
+                        }
                       }
                     </div>
                   }

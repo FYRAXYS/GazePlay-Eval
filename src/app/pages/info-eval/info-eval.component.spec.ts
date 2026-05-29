@@ -23,7 +23,8 @@ describe('InfoEvalComponent', () => {
         globalParamsTransitionScreen: [],
         globalParamsInstructionScreen: [],
         globalParamsStimuliScreen: [],
-        listScreens: []
+        listScreens: [],
+        step: 0
       }
     });
 
@@ -63,7 +64,8 @@ describe('InfoEvalComponent', () => {
       [],
       [],
       [],
-      []
+      [],
+      0
     );
   });
 

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import {ThemeService} from './theme.service';
+import {signal} from '@angular/core';
 
 
 describe('ThemeService', () => {
@@ -52,5 +53,13 @@ describe('ThemeService', () => {
     expect(service.getTheme()).toBe('dark');
     service.toggleTheme();
     expect(service.getTheme()).toBe('light');
+  });
+
+  it('Constructeur → applySavedTheme() appelé', () => {
+    const spy = spyOn(ThemeService.prototype, 'applySavedTheme');
+
+    const newService = new ThemeService();
+
+    expect(spy).toHaveBeenCalled();
   });
 });
