@@ -108,11 +108,11 @@ export class CreateEvalComponent implements OnInit{
 
   backToSetupEval() {
     this.saveData();
-    this.router.navigate(['/setup-eval']);
+    void this.router.navigate(['/setup-eval']);
   }
 
   goToDownloadEval() {
     this.saveData()
-    this.router.navigate(['/download-eval']);
+    void this.router.navigate(['/download-eval']);
   }
 }

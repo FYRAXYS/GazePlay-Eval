@@ -433,7 +433,7 @@
               }
 
               <div class="wrapper mt-3" [class.duplicate-mode]="duplicateMode" [class.delete-mode]="deleteMode">
-                <div class="stimuli-toolbar">
+                <div class="stimuli-toolbar" [class.toolbar-locked]="configStimuliOpen">
                   <button type="button" class="stimuli-tool-btn" [class.active]="duplicateMode" [disabled]="multiSelectMode" data-tooltip="Dupliquer : copie le contenu d'une case vers une autre" (click)="toggleDuplicateMode()">
                     <i class="bi bi-files"></i>
                   </button>
