@@ -143,6 +143,7 @@ Code pour activer le scroll dans la popup d'import
   --popup-muted-text:          #64748b;
   --popup-input-border:        #cbd5e1;
   --popup-input-icon:          #94a3b8;
+
   --popup-warn-bg:             var(--bs-warning-bg-subtle);
   --popup-warn-border:         var(--bs-warning-border-subtle);
   --popup-warn-text:           var(--bs-warning-text-emphasis);
@@ -179,6 +180,22 @@ Code pour activer le scroll dans la popup d'import
   --slot-shadow:               0 4px 12px rgba(59, 130, 246, 0.2);
   --slot-shadow-hover:         0 8px 24px rgba(59, 130, 246, 0.35);
   --slot-selected-bg:          rgba(59, 130, 246, 0.15);
+}
+
+.alert-tip {
+  background-color: rgba(139, 92, 246, 0.08);
+  border-color: #8b5cf6;
+}
+
+[data-bs-theme="dark"] .alert-tip {
+  background-color: rgba(139, 92, 246, 0.15);
+  border-color: #a78bfa;
+  color: #b1abff;
+}
+[data-bs-theme="light"] .alert-tip {
+  background-color: rgba(190, 166, 243, 0.15);
+  border-color: #cfc3fa;
+  color: #321f6e;
 }
 
 /**
