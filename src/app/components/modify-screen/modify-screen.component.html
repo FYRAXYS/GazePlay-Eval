@@ -446,6 +446,9 @@
                   <button type="button" class="stimuli-tool-btn stimuli-tool-btn-danger" [class.active]="deleteMode" [disabled]="multiSelectMode && selectedCells.size === 0" data-tooltip="Supprimer : masque la/les case(s)" (click)="onDeleteClick()">
                     <i class="bi bi-trash"></i>
                   </button>
+                  <button type="button" class="stimuli-tool-btn" [disabled]="!canUndo" data-tooltip="Annuler la dernière action" (click)="undo()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </button>
                   <div class="stimuli-tool-separator"></div>
                   <button type="button" class="stimuli-tool-btn" data-tooltip="Zoom + : agrandit l'aperçu de la grille" (click)="zoomIn()" [disabled]="cellSize >= 160">
                     <i class="bi bi-zoom-in"></i>
@@ -512,10 +515,18 @@
                          (click)="openStimuliData(i)">
                       @if (!screenToModify.values[12][i]?.hidden) {
                         @if (!duplicateMode && !deleteMode && !swapMode && !multiSelectMode) {
-                          <button type="button" class="cell-add cell-add-top" data-tooltip="Ajouter en haut" (click)="addAdjacent($event, i, 'top')"><i class="bi bi-plus"></i></button>
-                          <button type="button" class="cell-add cell-add-bottom" data-tooltip="Ajouter en bas" (click)="addAdjacent($event, i, 'bottom')"><i class="bi bi-plus"></i></button>
-                          <button type="button" class="cell-add cell-add-left" data-tooltip="Ajouter à gauche" (click)="addAdjacent($event, i, 'left')"><i class="bi bi-plus"></i></button>
-                          <button type="button" class="cell-add cell-add-right" data-tooltip="Ajouter à droite" (click)="addAdjacent($event, i, 'right')"><i class="bi bi-plus"></i></button>
+                          @if (canAddAdjacent(i, 'top')) {
+                            <button type="button" class="cell-add cell-add-top" data-tooltip="Ajouter en haut" (click)="addAdjacent($event, i, 'top')"><i class="bi bi-plus"></i></button>
+                          }
+                          @if (canAddAdjacent(i, 'bottom')) {
+                            <button type="button" class="cell-add cell-add-bottom" data-tooltip="Ajouter en bas" (click)="addAdjacent($event, i, 'bottom')"><i class="bi bi-plus"></i></button>
+                          }
+                          @if (canAddAdjacent(i, 'left')) {
+                            <button type="button" class="cell-add cell-add-left" data-tooltip="Ajouter à gauche" (click)="addAdjacent($event, i, 'left')"><i class="bi bi-plus"></i></button>
+                          }
+                          @if (canAddAdjacent(i, 'right')) {
+                            <button type="button" class="cell-add cell-add-right" data-tooltip="Ajouter à droite" (click)="addAdjacent($event, i, 'right')"><i class="bi bi-plus"></i></button>
+                          }
                         }
                         @if (screenToModify.values[12][i].goodAnswer === true) {
                           <span class="cell-text icon valid">✓</span>

@@ -96,6 +96,8 @@ export class ModifyScreenComponent implements OnInit {
   multiSelectMode: boolean = false;
   selectedCells: Set<number> = new Set<number>();
   pendingDeleteCells: number[] | null = null;
+  private undoHistory: Array<{ rows: number, cols: number, cells: { [key: number]: any } }> = [];
+  private readonly maxUndoHistory = 20;
 
   constructor(
     private updateScreenService: UpdateScreensService,
@@ -611,6 +613,7 @@ export class ModifyScreenComponent implements OnInit {
         this.swapSourceIndex = null;
         return;
       }
+      this.saveSnapshot();
       this.swapCells(this.swapSourceIndex, cellNumber);
       this.swapSourceIndex = null;
       this.swapMode = false;
@@ -635,6 +638,7 @@ export class ModifyScreenComponent implements OnInit {
         this.pendingDuplicateTarget = cellNumber;
         return;
       }
+      this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, cellNumber);
       this.duplicateSourceIndex = null;
       this.duplicateMode = false;
@@ -703,6 +707,7 @@ export class ModifyScreenComponent implements OnInit {
 
   confirmOverwrite() {
     if (this.duplicateSourceIndex !== null && this.pendingDuplicateTarget !== null) {
+      this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, this.pendingDuplicateTarget);
     }
     this.pendingDuplicateTarget = null;
@@ -769,6 +774,22 @@ export class ModifyScreenComponent implements OnInit {
     return count;
   }
 
+  canAddAdjacent(cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right'): boolean {
+    const rows = Number(this.screenToModify.values[0]);
+    const cols = Number(this.screenToModify.values[1]);
+    const r = Math.floor(cellIndex / cols);
+    const c = cellIndex % cols;
+    let targetR = r;
+    let targetC = c;
+    if (direction === 'top') targetR = r - 1;
+    if (direction === 'bottom') targetR = r + 1;
+    if (direction === 'left') targetC = c - 1;
+    if (direction === 'right') targetC = c + 1;
+    if (targetR < 0 || targetR >= rows || targetC < 0 || targetC >= cols) return true;
+    const targetIdx = targetR * cols + targetC;
+    return !!this.screenToModify.values[12][targetIdx]?.hidden;
+  }
+
   addAdjacent(event: Event, cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right') {
     event.stopPropagation();
     const rows = Number(this.screenToModify.values[0]);
@@ -787,10 +808,13 @@ export class ModifyScreenComponent implements OnInit {
     if (targetR >= 0 && targetR < rows && targetC >= 0 && targetC < cols) {
       const targetIdx = targetR * cols + targetC;
       if (listScreen[targetIdx]?.hidden) {
+        this.saveSnapshot();
         listScreen[targetIdx] = this.emptyCell();
       }
       return;
     }
+
+    this.saveSnapshot();
 
     if (direction === 'bottom') {
       this.screenToModify.values[0] = rows + 1;
@@ -899,6 +923,7 @@ export class ModifyScreenComponent implements OnInit {
   }
 
   private performDelete(indices: number[]) {
+    this.saveSnapshot();
     for (const i of indices) {
       this.clearCellWithIDB(i);
     }
@@ -1005,6 +1030,43 @@ export class ModifyScreenComponent implements OnInit {
     });
   }
 
+  private saveSnapshot() {
+    const cells = this.screenToModify.values[12];
+    const cellsClone: { [key: number]: any } = {};
+    for (const key of Object.keys(cells)) {
+      cellsClone[Number(key)] = { ...cells[Number(key)] };
+    }
+    this.undoHistory.push({
+      rows: Number(this.screenToModify.values[0]),
+      cols: Number(this.screenToModify.values[1]),
+      cells: cellsClone,
+    });
+    if (this.undoHistory.length > this.maxUndoHistory) {
+      this.undoHistory.shift();
+    }
+  }
+
+  get canUndo(): boolean {
+    return this.undoHistory.length > 0;
+  }
+
+  undo() {
+    const snapshot = this.undoHistory.pop();
+    if (!snapshot) return;
+    this.screenToModify.values[0] = snapshot.rows;
+    this.screenToModify.values[1] = snapshot.cols;
+    this.screenToModify.values[12] = snapshot.cells;
+    this.activeCellIndex = null;
+    this.duplicateMode = false;
+    this.duplicateSourceIndex = null;
+    this.pendingDuplicateTarget = null;
+    this.swapMode = false;
+    this.swapSourceIndex = null;
+    this.deleteMode = false;
+    this.selectedCells.clear();
+    this.pendingDeleteCells = null;
+  }
+
   openOffcanvasStimuli() {
     const element = document.getElementById('configStimuli');
 
@@ -1013,6 +1075,7 @@ export class ModifyScreenComponent implements OnInit {
       this.configStimuliOpen = true;
       element.addEventListener('hidden.bs.offcanvas', () => {
         this.configStimuliOpen = false;
+        this.activeCellIndex = null;
       }, { once: true });
       instance.show();
     }
