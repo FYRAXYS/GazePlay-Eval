@@ -97,6 +97,9 @@ export class CreateEvalComponent implements OnInit{
       this.selectedScreen = null;
     }
     this.listScreens = this.listScreens.filter(s => s !== screen);
+
+    this.saveData();
+    this.autoSaveService.autoSave('create-eval');
   }
 
   getNameCurrentScreen() {
