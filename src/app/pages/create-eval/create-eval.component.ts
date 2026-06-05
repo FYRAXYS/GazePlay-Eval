@@ -64,6 +64,12 @@ export class CreateEvalComponent implements OnInit{
     this.indexSelectedScreen = this.listScreens.length - 1;
 
     this.autoSaveService.autoSave('create-eval');
+
+    // Scroll en bas de la liste
+    setTimeout(() => {
+      const container = this.inputs.last?.nativeElement.closest('.screen-list-scroll');
+      container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }, 200);
   }
 
   selectScreen(screen: screenTypeModel, index: number) {
