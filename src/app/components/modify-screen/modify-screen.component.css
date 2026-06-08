@@ -362,7 +362,7 @@ audio {
 }
 
 .wrapper.delete-mode .cell {
-  cursor: not-allowed;
+  cursor: url('/assets/icons/delete/delete.png') 16 16, not-allowed;
 }
 
 .cell-hidden {

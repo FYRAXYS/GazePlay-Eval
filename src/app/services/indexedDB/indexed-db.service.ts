@@ -53,7 +53,8 @@ export class IndexedDBService {
         id,
         file,
         type,
-        lastEdit: new Date()
+        lastEdit: new Date(),
+        refCount: 1
       };
 
       const check = store.get(id);
@@ -89,7 +90,7 @@ export class IndexedDBService {
         }
         resolve(req.result as EvalFile);
       };
-      req.onerror = (e) => reject(req.error);
+      req.onerror = () => reject(req.error);
     });
   }
 
@@ -124,17 +125,56 @@ export class IndexedDBService {
   async updateFile(id: string, file: File | Blob, type: 'image' | 'sound' | 'video'): Promise<void> {
     await this.dbReady;
 
+    let refCount = 1;
+    try {
+      const existing = await this.getFile(id);
+      refCount = existing.refCount ?? 1;
+    } catch { /* fichier absent, refCount par défaut à 1 */ }
+
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(this.storeName, 'readwrite');
       const store = transaction.objectStore(this.storeName);
 
-      const entry: EvalFile = {
-        id,
-        file,
-        type,
-        lastEdit: new Date()
-      };
+      const entry: EvalFile = { id, file, type, lastEdit: new Date(), refCount };
 
+      const request = store.put(entry);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
+   * Incrémente le compteur de références d'un fichier dans l'IDB.
+   * @param id L'identifiant du fichier. Doit être de la forme "nomProjet/nomFichier".
+   */
+  async incrementRef(id: string): Promise<void> {
+    await this.dbReady;
+
+    const entry = await this.getFile(id);
+    entry.refCount = (entry.refCount ?? 1) + 1;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.storeName, 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      const request = store.put(entry);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async releaseFile(id: string): Promise<void> {
+    await this.dbReady;
+    const entry = await this.getFile(id);
+
+    if ((entry.refCount ?? 1) <= 1) {
+      await this.deleteFile(id);
+      return;
+    }
+
+    entry.refCount!--;
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.storeName, 'readwrite');
+      const store = transaction.objectStore(this.storeName);
       const request = store.put(entry);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -181,9 +221,17 @@ export class IndexedDBService {
   async changeID(oldID: string, newID: string): Promise<void> {
     await this.dbReady;
 
-    let evalFile = await this.getFile(oldID);
+    const evalFile = await this.getFile(oldID);
     await this.deleteFile(oldID);
-    await this.addFile(newID, evalFile.file, evalFile.type);
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.storeName, 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      const entry: EvalFile = { ...evalFile, id: newID, lastEdit: new Date() };
+      const request = store.add(entry);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
   }
 
   /**
@@ -219,4 +267,6 @@ export class IndexedDBService {
       await this.deleteFile(file.id);
     }
   }
+
+
 }
