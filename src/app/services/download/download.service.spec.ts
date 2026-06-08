@@ -128,11 +128,11 @@ describe('DownloadService', () => {
     expect(result["Informations participant"]).toEqual(['Nom']);
   });
 
-  // ─── generateTransitionScreenZip ─────────────────────────────────────────
+  // ─── generateTransitionScreen ────────────────────────────────────────────
 
-  it('generateTransitionScreenZip → pousse une entrée JSON avec Type=transition et les bonnes clés', () => {
+  it('generateTransitionScreen → pousse une entrée JSON avec Type=transition et les bonnes clés', () => {
     const jsonData: any[] = [];
-    service.generateTransitionScreenZip(makeTransitionScreen(), jsonData);
+    service.generateTransitionScreen(makeTransitionScreen(), jsonData);
 
     expect(jsonData.length).toBe(1);
     expect(jsonData[0].Type).toBe('transition');
@@ -140,181 +140,154 @@ describe('DownloadService', () => {
     expect(jsonData[0]["Combien de temps"]).toBe(5);
   });
 
-  it('generateTransitionScreenZip → ne modifie pas le tableau original', () => {
+  it('generateTransitionScreen → ne modifie pas le tableau original', () => {
     const screen = makeTransitionScreen();
     const originalValues = [...screen.values];
-    service.generateTransitionScreenZip(screen, []);
+    service.generateTransitionScreen(screen, []);
     expect(screen.values).toEqual(originalValues);
   });
 
-  // ─── generateInstructionScreenZipText ────────────────────────────────────
+  // ─── generateInstructionScreenText ───────────────────────────────────────
 
-  it('generateInstructionScreenZipText → pousse JSON avec Type=instruction sans fichier zip', () => {
+  it('generateInstructionScreenText → pousse JSON avec Type=instruction sans fichier zip', () => {
     const jsonData: any[] = [];
-    service.generateInstructionScreenZipText(makeInstructionScreen('Texte'), jsonData);
+    service.generateInstructionScreenText(makeInstructionScreen('Texte'), jsonData);
 
     expect(jsonData.length).toBe(1);
     expect(jsonData[0].Type).toBe('instruction');
     expect(zipFileSpy).not.toHaveBeenCalled();
   });
 
-  // ─── generateInstructionScreenZipImg ─────────────────────────────────────
+  // ─── generateInstructionScreenMedia ──────────────────────────────────────
 
-  it('generateInstructionScreenZipImg — blob en mémoire → zip.file pour images/ et JSON poussé', async () => {
+  it('generateInstructionScreenMedia — image en mémoire → zip.file pour images/ et JSON poussé', async () => {
     const blob = new Blob(['img'], { type: 'image/png' });
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Image', 'photo.png', blob, false, 1, ''];
+    const screen = makeInstructionScreen('Image', 'photo.png', blob);
 
-    await service.generateInstructionScreenZipImg('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
     expect(jsonData[0].Type).toBe('instruction');
     expect(idbSpy.getFile).not.toHaveBeenCalled();
   });
 
-  it('generateInstructionScreenZipImg — pas de blob mais IDB → getFile + zip.file', async () => {
+  it('generateInstructionScreenMedia — image sans blob mais IDB → getFile + zip.file', async () => {
     const idbBlob = new Blob(['img'], { type: 'image/png' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/photo.png', idbBlob, 'image')));
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Image', 'photo.png', undefined, false, 1, 'TestEval/photo.png'];
+    const screen = makeInstructionScreen('Image', 'photo.png', undefined, 'TestEval/photo.png');
 
-    await service.generateInstructionScreenZipImg('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(idbSpy.getFile).toHaveBeenCalledWith('TestEval/photo.png');
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
   });
 
-  it('generateInstructionScreenZipImg — aucun fichier → zip.file non appelé pour images/, JSON toujours poussé', async () => {
+  it('generateInstructionScreenMedia — aucun fichier → zip.file non appelé pour images/, JSON toujours poussé', async () => {
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Image', '', undefined, false, 1, ''];
+    const screen = makeInstructionScreen('Image', '');
 
-    await service.generateInstructionScreenZipImg('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).not.toHaveBeenCalledWith(jasmine.stringMatching(/images/), jasmine.anything());
     expect(jsonData.length).toBe(1);
   });
 
-  // ─── generateInstructionScreenZipVideo ───────────────────────────────────
+  it('generateInstructionScreenMedia — zip=false ajoute le nom de l’écran au JSON', async () => {
+    const jsonData: any[] = [];
+    const zip = new JSZip();
+    const screen = makeInstructionScreen('Texte', 'Bonjour');
 
-  it('generateInstructionScreenZipVideo — blob en mémoire → zip.file pour videos/ et JSON poussé', async () => {
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip, false);
+
+    expect(jsonData[0].Name).toBe('I');
+  });
+
+  it('generateInstructionScreenMedia — video en mémoire → zip.file pour videos/ et JSON poussé', async () => {
     const blob = new Blob(['vid'], { type: 'video/mp4' });
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Video', 'video.mp4', blob, false, 1, ''];
+    const screen = makeInstructionScreen('Video', 'video.mp4', blob);
 
-    await service.generateInstructionScreenZipVideo('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/videos/video.mp4', jasmine.anything());
     expect(jsonData[0].Type).toBe('instruction');
     expect(idbSpy.getFile).not.toHaveBeenCalled();
   });
 
-  it('generateInstructionScreenZipVideo — pas de blob mais IDB → getFile + zip.file pour videos/', async () => {
+  it('generateInstructionScreenMedia — video sans blob mais IDB → getFile + zip.file', async () => {
     const idbBlob = new Blob(['vid'], { type: 'video/mp4' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/video.mp4', idbBlob, 'video')));
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Video', 'video.mp4', undefined, false, 1, 'TestEval/video.mp4'];
+    const screen = makeInstructionScreen('Video', 'video.mp4', undefined, 'TestEval/video.mp4');
 
-    await service.generateInstructionScreenZipVideo('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(idbSpy.getFile).toHaveBeenCalled();
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/videos/video.mp4', jasmine.anything());
   });
 
-  it('generateInstructionScreenZipVideo — aucun fichier → pas de zip.file pour videos/', async () => {
+  it('generateInstructionScreenMedia — aucun fichier → pas de zip.file pour videos/', async () => {
     const jsonData: any[] = [];
     const zip = new JSZip();
-    const values = [false, 1, true, 'Video', '', undefined, false, 1, ''];
+    const screen = makeInstructionScreen('Video', '');
 
-    await service.generateInstructionScreenZipVideo('TestEval', values, jsonData, zip);
+    await service.generateInstructionScreenMedia(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).not.toHaveBeenCalledWith(jasmine.stringMatching(/videos/), jasmine.anything());
     expect(jsonData.length).toBe(1);
   });
 
-  // ─── generateInstructionScreenZipSound ───────────────────────────────────
+  // ─── generateStimuliScreen ───────────────────────────────────────────────
 
-  it('generateInstructionScreenZipSound — blob en mémoire → zip.file pour audio/ et JSON poussé', async () => {
-    const blob = new Blob(['snd'], { type: 'audio/mp3' });
-    const jsonData: any[] = [];
-    const zip = new JSZip();
-    const values = [false, 1, true, 'Son', 'son.mp3', blob, false, 1, ''];
-
-    await service.generateInstructionScreenZipSound('TestEval', values, jsonData, zip);
-
-    expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
-    expect(jsonData[0].Type).toBe('instruction');
-    expect(idbSpy.getFile).not.toHaveBeenCalled();
-  });
-
-  it('generateInstructionScreenZipSound — pas de blob mais IDB → getFile + zip.file pour audio/', async () => {
-    const idbBlob = new Blob(['snd'], { type: 'audio/mp3' });
-    idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/son.mp3', idbBlob, 'sound')));
-    const jsonData: any[] = [];
-    const zip = new JSZip();
-    const values = [false, 1, true, 'Son', 'son.mp3', undefined, false, 1, 'TestEval/son.mp3'];
-
-    await service.generateInstructionScreenZipSound('TestEval', values, jsonData, zip);
-
-    expect(idbSpy.getFile).toHaveBeenCalled();
-    expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
-  });
-
-  it('generateInstructionScreenZipSound — aucun fichier → pas de zip.file pour audio/, JSON poussé', async () => {
-    const jsonData: any[] = [];
-    const zip = new JSZip();
-    const values = [false, 1, true, 'Son', '', undefined, false, 1, ''];
-
-    await service.generateInstructionScreenZipSound('TestEval', values, jsonData, zip);
-
-    expect(zipFileSpy).not.toHaveBeenCalledWith(jasmine.stringMatching(/audio/), jasmine.anything());
-    expect(jsonData.length).toBe(1);
-  });
-
-  // ─── generateStimuliScreenZip ─────────────────────────────────────────────
-
-  it('generateStimuliScreenZip — image en mémoire → zip.file pour images/ et JSON poussé', async () => {
+  it('generateStimuliScreen — image en mémoire → zip.file pour images/ et JSON poussé', async () => {
     const imgBlob = new Blob(['img'], { type: 'image/png' });
     const screen = makeStimuliScreen({
       stimuliList: { 0: { imageName: 'photo.png', imageFile: imgBlob, soundName: '', soundFile: undefined,
                           goodAnswer: true, imageId: '', soundId: '' } }
     });
     const jsonData: any[] = [];
+    const zip = new JSZip();
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
     expect(jsonData[0].Type).toBe('stimuli');
+    expect(idbSpy.getFile).not.toHaveBeenCalled();
   });
 
-  it('generateStimuliScreenZip — son de cellule en mémoire → zip.file pour audio/', async () => {
+  it('generateStimuliScreen — son de cellule en mémoire → zip.file pour audio/', async () => {
     const sndBlob = new Blob(['snd'], { type: 'audio/mp3' });
     const screen = makeStimuliScreen({
       stimuliList: { 0: { imageName: '', imageFile: undefined, soundName: 'son.mp3', soundFile: sndBlob,
                           goodAnswer: false, imageId: '', soundId: '' } }
     });
     const jsonData: any[] = [];
+    const zip = new JSZip();
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
   });
 
-  it('generateStimuliScreenZip — son global en mémoire → zip.file pour audio/', async () => {
+  it('generateStimuliScreen — son global en mémoire → zip.file pour audio/', async () => {
     const sndBlob = new Blob(['snd'], { type: 'audio/mp3' });
     const screen = makeStimuliScreen({ soundName: 'global.mp3', soundBlob: sndBlob });
     const jsonData: any[] = [];
+    const zip = new JSZip();
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', zip);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/global.mp3', jasmine.anything());
   });
 
-  it('generateStimuliScreenZip — image depuis IDB → getFile + zip.file pour images/', async () => {
+  it('generateStimuliScreen — image depuis IDB → getFile + zip.file pour images/', async () => {
     const idbBlob = new Blob(['img'], { type: 'image/png' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/photo.png', idbBlob, 'image')));
     const screen = makeStimuliScreen({
@@ -323,92 +296,104 @@ describe('DownloadService', () => {
     });
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', new JSZip());
 
     expect(idbSpy.getFile).toHaveBeenCalled();
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
   });
 
-  it('generateStimuliScreenZip — son global depuis IDB → getFile + zip.file pour audio/', async () => {
+  it('generateStimuliScreen — son global depuis IDB → getFile + zip.file pour audio/', async () => {
     const idbBlob = new Blob(['snd'], { type: 'audio/mp3' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/global.mp3', idbBlob, 'sound')));
     const screen = makeStimuliScreen({ soundName: 'global.mp3', soundId: 'TestEval/global.mp3' });
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/global.mp3', jasmine.anything());
   });
 
-  it('generateStimuliScreenZip — cellule vide → aucun zip.file pour images/ ou audio/ de cellule', async () => {
+  it('generateStimuliScreen — cellule vide → aucun zip.file pour images/ ou audio/ de cellule', async () => {
     const screen = makeStimuliScreen();  // imageName et soundName vides
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZip('TestEval', screen, jsonData, new JSZip());
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', new JSZip());
 
     const calls = zipFileSpy.calls.allArgs().map(a => a[0] as string);
     expect(calls.some(p => p.includes('images/'))).toBeFalse();
     expect(jsonData.length).toBe(1);
   });
 
-  // ─── generateInstructionScreenZipSlot ─────────────────────────────────────
+  it('generateStimuliScreen — zip=false ajoute le nom de l’écran au JSON', async () => {
+    const screen = makeStimuliScreen({
+      stimuliList: { 0: { imageName: '', imageFile: undefined, soundName: '', soundFile: undefined,
+                          goodAnswer: false, imageId: '', soundId: '' } }
+    });
+    const jsonData: any[] = [];
 
-  it('generateInstructionScreenZipSlot — type Image depuis IDB → zip.file pour images/', async () => {
+    await service.generateStimuliScreen(screen, jsonData, 'TestEval', new JSZip(), false);
+
+    expect(jsonData[0].Name).toBe('S');
+  });
+
+  // ─── generateInstructionScreenSlot ────────────────────────────────────────
+
+  it('generateInstructionScreenSlot — type Image depuis IDB → zip.file pour images/', async () => {
     const blob = new Blob(['img'], { type: 'image/png' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/photo.png', blob, 'image')));
     const screen = makeInstructionScreen('Image', 'photo.png', undefined, 'TestEval/photo.png');
     const jsonData: any[] = [];
 
-    await service.generateInstructionScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateInstructionScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
     expect(jsonData[0].Type).toBe('instruction');
   });
 
-  it('generateInstructionScreenZipSlot — type Video depuis IDB → zip.file pour videos/', async () => {
+  it('generateInstructionScreenSlot — type Video depuis IDB → zip.file pour videos/', async () => {
     const blob = new Blob(['vid'], { type: 'video/mp4' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/video.mp4', blob, 'video')));
     const screen = makeInstructionScreen('Video', 'video.mp4', undefined, 'TestEval/video.mp4');
     const jsonData: any[] = [];
 
-    await service.generateInstructionScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateInstructionScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/videos/video.mp4', jasmine.anything());
   });
 
-  it('generateInstructionScreenZipSlot — type Son depuis IDB → zip.file pour audio/', async () => {
+  it('generateInstructionScreenSlot — type Son depuis IDB → zip.file pour audio/', async () => {
     const blob = new Blob(['snd'], { type: 'audio/mp3' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/son.mp3', blob, 'sound')));
     const screen = makeInstructionScreen('Son', 'son.mp3', undefined, 'TestEval/son.mp3');
     const jsonData: any[] = [];
 
-    await service.generateInstructionScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateInstructionScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
   });
 
-  it('generateInstructionScreenZipSlot — type Texte → getFile non appelé, JSON poussé', async () => {
+  it('generateInstructionScreenSlot — type Texte → getFile non appelé, JSON poussé', async () => {
     const screen = makeInstructionScreen('Texte', 'Bonjour');
     const jsonData: any[] = [];
 
-    await service.generateInstructionScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateInstructionScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(idbSpy.getFile).not.toHaveBeenCalled();
     expect(jsonData[0].Type).toBe('instruction');
   });
 
-  it('generateInstructionScreenZipSlot — nom de fichier vide → getFile non appelé', async () => {
+  it('generateInstructionScreenSlot — nom de fichier vide → getFile non appelé', async () => {
     const screen = makeInstructionScreen('Image', '');
     const jsonData: any[] = [];
 
-    await service.generateInstructionScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateInstructionScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(idbSpy.getFile).not.toHaveBeenCalled();
   });
 
-  // ─── generateStimuliScreenZipSlot ─────────────────────────────────────────
+  // ─── generateStimuliScreenSlot ───────────────────────────────────────────
 
-  it('generateStimuliScreenZipSlot — image depuis IDB → zip.file pour images/ et JSON poussé', async () => {
+  it('generateStimuliScreenSlot — image depuis IDB → zip.file pour images/ et JSON poussé', async () => {
     const blob = new Blob(['img'], { type: 'image/png' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/photo.png', blob, 'image')));
     const screen = makeStimuliScreen({
@@ -417,13 +402,14 @@ describe('DownloadService', () => {
     });
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateStimuliScreenSlot(screen, jsonData, 'TestEval', new JSZip(), false);
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/images/photo.png', jasmine.anything());
     expect(jsonData[0].Type).toBe('stimuli');
+    expect(jsonData[0].Name).toBe('S');
   });
 
-  it('generateStimuliScreenZipSlot — son de cellule en mémoire → zip.file pour audio/', async () => {
+  it('generateStimuliScreenSlot — son de cellule en mémoire → zip.file pour audio/', async () => {
     const sndBlob = new Blob(['snd'], { type: 'audio/mp3' });
     const screen = makeStimuliScreen({
       stimuliList: { 0: { imageName: '', imageFile: undefined, soundName: 'son.mp3', soundFile: sndBlob,
@@ -431,27 +417,27 @@ describe('DownloadService', () => {
     });
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateStimuliScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
   });
 
-  it('generateStimuliScreenZipSlot — son global depuis IDB → zip.file pour audio/', async () => {
+  it('generateStimuliScreenSlot — son global depuis IDB → zip.file pour audio/', async () => {
     const sndBlob = new Blob(['snd'], { type: 'audio/mp3' });
     idbSpy.getFile.and.returnValue(Promise.resolve(makeIdbEntry('TestEval/global.mp3', sndBlob, 'sound')));
     const screen = makeStimuliScreen({ soundName: 'global.mp3', soundId: 'TestEval/global.mp3' });
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateStimuliScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/global.mp3', jasmine.anything());
   });
 
-  it('generateStimuliScreenZipSlot — cellule vide → JSON poussé sans fichier media', async () => {
+  it('generateStimuliScreenSlot — cellule vide → JSON poussé sans fichier media', async () => {
     const screen = makeStimuliScreen();
     const jsonData: any[] = [];
 
-    await service.generateStimuliScreenZipSlot(screen, jsonData, 'TestEval', new JSZip());
+    await service.generateStimuliScreenSlot(screen, jsonData, 'TestEval', new JSZip());
 
     expect(jsonData[0].Type).toBe('stimuli');
     const calls = zipFileSpy.calls.allArgs().map(a => a[0] as string);
@@ -470,18 +456,18 @@ describe('DownloadService', () => {
     expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'TestEval-gazeplayEval.zip');
   });
 
-  it('generateEvalZip — écran transition → generateTransitionScreenZip appelé', async () => {
-    spyOn(service, 'generateTransitionScreenZip').and.callThrough();
+  it('generateEvalZip — écran transition → generateTransitionScreen appelé', async () => {
+    spyOn(service, 'generateTransitionScreen').and.callThrough();
     await service.generateEvalZip(makeSaveService([makeTransitionScreen()]) as any);
     await Promise.resolve();
-    expect(service.generateTransitionScreenZip).toHaveBeenCalled();
+    expect(service.generateTransitionScreen).toHaveBeenCalled();
   });
 
-  it('generateEvalZip — instruction Texte → generateInstructionScreenZipText appelé', async () => {
-    spyOn(service, 'generateInstructionScreenZipText').and.callThrough();
+  it('generateEvalZip — instruction Texte → generateInstructionScreenText appelé', async () => {
+    spyOn(service, 'generateInstructionScreenText').and.callThrough();
     await service.generateEvalZip(makeSaveService([makeInstructionScreen('Texte', 'Hello')]) as any);
     await Promise.resolve();
-    expect(service.generateInstructionScreenZipText).toHaveBeenCalled();
+    expect(service.generateInstructionScreenText).toHaveBeenCalled();
   });
 
   it('generateEvalZip — instruction Image avec blob → zip.file pour images/', async () => {
@@ -508,11 +494,11 @@ describe('DownloadService', () => {
     expect(zipFileSpy).toHaveBeenCalledWith('TestEval/audio/son.mp3', jasmine.anything());
   });
 
-  it('generateEvalZip — écran stimuli → generateStimuliScreenZip appelé', async () => {
-    spyOn(service, 'generateStimuliScreenZip').and.callThrough();
+  it('generateEvalZip — écran stimuli → generateStimuliScreen appelé', async () => {
+    spyOn(service, 'generateStimuliScreen').and.callThrough();
     await service.generateEvalZip(makeSaveService([makeStimuliScreen()]) as any);
     await Promise.resolve();
-    expect(service.generateStimuliScreenZip).toHaveBeenCalled();
+    expect(service.generateStimuliScreen).toHaveBeenCalled();
   });
 
   it('generateEvalZip — plusieurs types d\'écrans → tous traités et zip généré', async () => {

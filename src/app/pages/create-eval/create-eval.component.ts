@@ -10,6 +10,7 @@ import {
 } from '../../shared/screenModel';
 import {ModifyScreenComponent} from '../../components/modify-screen/modify-screen.component';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-create-eval',
@@ -29,7 +30,10 @@ export class CreateEvalComponent implements OnInit{
   idScreen: number = 1;
   editNameScreenDisable: boolean = true;
 
-  constructor(private router: Router, private saveService: SaveService, private updateScreenService: UpdateScreensService) {
+  constructor(private router: Router,
+              private saveService: SaveService,
+              private updateScreenService: UpdateScreensService,
+              private autoSaveService: AutoSaveService) {
   }
 
   ngOnInit(): void {
@@ -58,6 +62,14 @@ export class CreateEvalComponent implements OnInit{
     this.selectedScreen = newScreen;
     this.listScreens.push(newScreen);
     this.indexSelectedScreen = this.listScreens.length - 1;
+
+    this.autoSaveService.autoSave('create-eval');
+
+    // Scroll en bas de la liste
+    setTimeout(() => {
+      const container = this.inputs.last?.nativeElement.closest('.screen-list-scroll');
+      container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }, 200);
   }
 
   selectScreen(screen: screenTypeModel, index: number) {
@@ -85,6 +97,9 @@ export class CreateEvalComponent implements OnInit{
       this.selectedScreen = null;
     }
     this.listScreens = this.listScreens.filter(s => s !== screen);
+
+    this.saveData();
+    this.autoSaveService.autoSave('create-eval');
   }
 
   getNameCurrentScreen() {
