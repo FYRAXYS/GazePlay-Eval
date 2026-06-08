@@ -94,7 +94,7 @@ describe('LoadZipService', () => {
     };
     const evalData = [{
       Type: transitionScreenConstModel,
-      name: 'Ecran T',
+      Name: 'Ecran T',
       "Mettre un temps avant passage à l'écran suivant": true,
       "Combien de temps": 2,
       "Mettre une croix de fixation": false,

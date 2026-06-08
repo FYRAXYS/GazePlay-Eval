@@ -4,6 +4,7 @@ import { UpdateScreensService } from '../../services/updateScreens/update-screen
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
+import { FlashService } from '../../services/flash-message/flash.service';
 import { ConfigStimuliComponent } from '../config-stimuli/config-stimuli.component';
 import { Component } from '@angular/core';
 import * as bootstrap from 'bootstrap';
@@ -18,6 +19,7 @@ describe('ModifyScreenComponent', () => {
   let saveSpy: jasmine.SpyObj<SaveService>;
   let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
   let idbSpy: jasmine.SpyObj<IndexedDBService>;
+  let flashSpy: jasmine.SpyObj<FlashService>;
 
   function makeTransition(): any {
     return { name: 'TS', type: 'transition', values: [false, 0, false, false, 0] };
@@ -55,8 +57,9 @@ describe('ModifyScreenComponent', () => {
     });
     autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
     idbSpy = jasmine.createSpyObj('IndexedDBService', [
-      'getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles'
+      'getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile'
     ]);
+    flashSpy = jasmine.createSpyObj('FlashService', ['show']);
 
     saveSpy.getEvalName.and.returnValue('TestProject');
     idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
@@ -64,6 +67,8 @@ describe('ModifyScreenComponent', () => {
     idbSpy.updateFile.and.returnValue(Promise.resolve());
     idbSpy.deleteFile.and.returnValue(Promise.resolve());
     idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+    idbSpy.incrementRef.and.returnValue(Promise.resolve());
+    idbSpy.releaseFile.and.returnValue(Promise.resolve());
 
     updateScreenSpy.updateTransitionScreen.and.callFake((s: any, name: string) => { s.name = name; return s; });
     updateScreenSpy.updateInstructionScreen.and.callFake((s: any, name: string) => { s.name = name; return s; });
@@ -75,7 +80,8 @@ describe('ModifyScreenComponent', () => {
         { provide: UpdateScreensService, useValue: updateScreenSpy },
         { provide: SaveService, useValue: saveSpy },
         { provide: AutoSaveService, useValue: autoSaveSpy },
-        { provide: IndexedDBService, useValue: idbSpy }
+        { provide: IndexedDBService, useValue: idbSpy },
+        { provide: FlashService, useValue: flashSpy }
       ]
     })
     .overrideComponent(ModifyScreenComponent, {
@@ -348,7 +354,7 @@ describe('ModifyScreenComponent', () => {
     expect(idbSpy.addFile).toHaveBeenCalledWith('TestProject/son.mp3', file, 'sound');
   });
 
-  it('getInstructionFile — addFile échoue → updateFile appelé en fallback', async () => {
+  it('getInstructionFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
     createComponent(makeInstruction('Image'));
     await fixture.whenStable();
     idbSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
@@ -358,7 +364,8 @@ describe('ModifyScreenComponent', () => {
 
     await component.getInstructionFile(event);
 
-    expect(idbSpy.updateFile).toHaveBeenCalledWith('TestProject/photo.png', file, 'image');
+    expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/photo.png');
+    expect(idbSpy.updateFile).not.toHaveBeenCalled();
   });
 
   it('getInstructionFile — aucun fichier sélectionné → haveInstructionFile false, rien ajouté', async () => {
@@ -404,7 +411,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.nameFile).toBe('son.mp3');
   });
 
-  it('getStimuliSoundFile — addFile échoue → updateFile appelé en fallback', async () => {
+  it('getStimuliSoundFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
     idbSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
@@ -414,7 +421,8 @@ describe('ModifyScreenComponent', () => {
 
     await component.getStimuliSoundFile(event);
 
-    expect(idbSpy.updateFile).toHaveBeenCalledWith('TestProject/son.mp3', file, 'sound');
+    expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/son.mp3');
+    expect(idbSpy.updateFile).not.toHaveBeenCalled();
   });
 
   it('getStimuliSoundFile — aucun fichier → haveStimuliSoundFile false, rien ajouté', async () => {
@@ -455,16 +463,17 @@ describe('ModifyScreenComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('instruction');
   });
 
-  it('deleteImageInstruction → deleteFile appelé si imageId présent', async () => {
+  it('deleteImageInstruction → releaseFile appelé si imageId présent', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
     idbSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'image', lastEdit: new Date()
+      id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
     await component.deleteImageInstruction();
 
-    expect(idbSpy.deleteFile).toHaveBeenCalled();
+    expect(idbSpy.releaseFile).toHaveBeenCalled();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
   });
 
   // ─── deleteSoundInstruction ───────────────────────────────────────────────────
@@ -497,16 +506,17 @@ describe('ModifyScreenComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('deleteSoundStimuli → deleteFile appelé si soundId présent', async () => {
+  it('deleteSoundStimuli → releaseFile appelé si soundId présent', async () => {
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
     idbSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'sound', lastEdit: new Date()
+      id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'sound', lastEdit: new Date(), refCount: 1
     } as any));
 
     await component.deleteSoundStimuli();
 
-    expect(idbSpy.deleteFile).toHaveBeenCalled();
+    expect(idbSpy.releaseFile).toHaveBeenCalled();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
   });
 
   // ─── getText ──────────────────────────────────────────────────────────────────
@@ -821,5 +831,611 @@ describe('ModifyScreenComponent', () => {
     metaHandler();
 
     expect(component.fileDuration).toBe(42);
+  });
+
+  // ─── Barre d'outils ───────────────────────────────────────────────────────────
+
+  /** Construit un écran stimuli avec une grille rows×cols et des cellules personnalisables. */
+  function makeStimuliGrid(rows: number, cols: number, cells: { [key: number]: any }): any {
+    const screen = makeStimuli();
+    screen.values[0] = rows;
+    screen.values[1] = cols;
+    screen.values[12] = cells;
+    return screen;
+  }
+
+  function cell(overrides: any = {}): any {
+    return { imageName: '', imageId: '', imageFile: undefined, soundName: '', soundId: '', soundFile: undefined, goodAnswer: false, hidden: false, ...overrides };
+  }
+
+  // ─── toggleDuplicateMode ────────────────────────────────────────────────────
+
+  it('toggleDuplicateMode — active le mode et désactive les autres modes', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.deleteMode = true;
+    component.swapMode = true;
+    component.multiSelectMode = true;
+    component.selectedCells.add(0);
+
+    component.toggleDuplicateMode();
+
+    expect(component.duplicateMode).toBeTrue();
+    expect(component.deleteMode).toBeFalse();
+    expect(component.swapMode).toBeFalse();
+    expect(component.multiSelectMode).toBeFalse();
+    expect(component.selectedCells.size).toBe(0);
+  });
+
+  it('toggleDuplicateMode — second appel désactive le mode', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+
+    component.toggleDuplicateMode();
+    component.toggleDuplicateMode();
+
+    expect(component.duplicateMode).toBeFalse();
+  });
+
+  // ─── toggleDeleteMode ───────────────────────────────────────────────────────
+
+  it('toggleDeleteMode — active le mode et désactive les autres', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.duplicateMode = true;
+    component.swapMode = true;
+    component.multiSelectMode = true;
+
+    component.toggleDeleteMode();
+
+    expect(component.deleteMode).toBeTrue();
+    expect(component.duplicateMode).toBeFalse();
+    expect(component.swapMode).toBeFalse();
+    expect(component.multiSelectMode).toBeFalse();
+  });
+
+  // ─── toggleSwapMode ─────────────────────────────────────────────────────────
+
+  it('toggleSwapMode — active le mode et réinitialise la source', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.duplicateMode = true;
+    component.deleteMode = true;
+
+    component.toggleSwapMode();
+
+    expect(component.swapMode).toBeTrue();
+    expect(component.swapSourceIndex).toBeNull();
+    expect(component.duplicateMode).toBeFalse();
+    expect(component.deleteMode).toBeFalse();
+  });
+
+  // ─── toggleMultiSelectMode ──────────────────────────────────────────────────
+
+  it('toggleMultiSelectMode — active le mode et vide la sélection', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.duplicateMode = true;
+    component.deleteMode = true;
+
+    component.toggleMultiSelectMode();
+
+    expect(component.multiSelectMode).toBeTrue();
+    expect(component.selectedCells.size).toBe(0);
+    expect(component.duplicateMode).toBeFalse();
+    expect(component.deleteMode).toBeFalse();
+  });
+
+  // ─── onDeleteClick ──────────────────────────────────────────────────────────
+
+  it('onDeleteClick — hors multi-sélection → bascule le mode suppression', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    spyOn(component, 'toggleDeleteMode');
+
+    component.onDeleteClick();
+
+    expect(component.toggleDeleteMode).toHaveBeenCalled();
+  });
+
+  it('onDeleteClick — multi-sélection avec cases sélectionnées → supprime la sélection', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell({ imageName: 'a.png' }), 1: cell() }));
+    await fixture.whenStable();
+    component.multiSelectMode = true;
+    component.selectedCells.add(0);
+
+    component.onDeleteClick();
+
+    // une case avec données → confirmation en attente
+    expect(component.pendingDeleteCells).toEqual([0]);
+  });
+
+  it('onDeleteClick — multi-sélection sans sélection → ne fait rien', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.multiSelectMode = true;
+    spyOn(component, 'toggleDeleteMode');
+
+    component.onDeleteClick();
+
+    expect(component.toggleDeleteMode).not.toHaveBeenCalled();
+    expect(component.pendingDeleteCells).toBeNull();
+  });
+
+  // ─── duplicateCell ──────────────────────────────────────────────────────────
+
+  it('duplicateCell — copie image/son et incrémente le refCount des fichiers', async () => {
+    const cells = {
+      0: cell({ imageName: 'img.png', imageId: 'TestProject/img.png', soundName: 'snd.mp3', soundId: 'TestProject/snd.mp3' }),
+      1: cell({ hidden: true })
+    };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    component.duplicateCell(0, 1);
+
+    expect(component.screenToModify.values[12][1].imageId).toBe('TestProject/img.png');
+    expect(component.screenToModify.values[12][1].soundId).toBe('TestProject/snd.mp3');
+    expect(component.screenToModify.values[12][1].hidden).toBeFalse();
+    expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/img.png');
+    expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/snd.mp3');
+  });
+
+  it('duplicateCell — source sans fichier → aucun incrementRef', async () => {
+    const cells = { 0: cell({ imageName: 'libre' }), 1: cell({ hidden: true }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    component.duplicateCell(0, 1);
+
+    expect(idbSpy.incrementRef).not.toHaveBeenCalled();
+  });
+
+  it('duplicateCell — source identique à la cible → ne fait rien', async () => {
+    const cells = { 0: cell({ imageId: 'TestProject/img.png' }) };
+    createComponent(makeStimuliGrid(1, 1, cells));
+    await fixture.whenStable();
+
+    component.duplicateCell(0, 0);
+
+    expect(idbSpy.incrementRef).not.toHaveBeenCalled();
+  });
+
+  // ─── confirmOverwrite / cancelOverwrite ─────────────────────────────────────
+
+  it('confirmOverwrite — duplique vers la cible en attente puis ferme le mode', async () => {
+    const cells = {
+      0: cell({ imageId: 'TestProject/img.png' }),
+      1: cell({ imageName: 'occupe.png', imageId: 'TestProject/occupe.png' })
+    };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.duplicateSourceIndex = 0;
+    component.pendingDuplicateTarget = 1;
+
+    component.confirmOverwrite();
+
+    expect(component.screenToModify.values[12][1].imageId).toBe('TestProject/img.png');
+    expect(component.pendingDuplicateTarget).toBeNull();
+    expect(component.duplicateSourceIndex).toBeNull();
+    expect(component.duplicateMode).toBeFalse();
+  });
+
+  it('cancelOverwrite — réinitialise la cible en attente', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.pendingDuplicateTarget = 1;
+
+    component.cancelOverwrite();
+
+    expect(component.pendingDuplicateTarget).toBeNull();
+  });
+
+  // ─── confirmDelete / cancelDelete ───────────────────────────────────────────
+
+  it('confirmDelete — supprime les cases en attente et libère les fichiers', async () => {
+    const cells = {
+      0: cell({ imageName: 'img.png', imageId: 'TestProject/img.png' }),
+      1: cell()
+    };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+    component.pendingDeleteCells = [0];
+
+    component.confirmDelete();
+    await fixture.whenStable();
+
+    expect(component.screenToModify.values[12][0].hidden).toBeTrue();
+    expect(idbSpy.releaseFile).toHaveBeenCalled();
+    expect(component.pendingDeleteCells).toBeNull();
+  });
+
+  it('cancelDelete — réinitialise les cases en attente', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.pendingDeleteCells = [0, 1];
+
+    component.cancelDelete();
+
+    expect(component.pendingDeleteCells).toBeNull();
+  });
+
+  // ─── requestDelete (garde-fou dernière case) ────────────────────────────────
+
+  it('onDeleteClick (multi) — supprimer toutes les cases visibles → warning, aucune suppression', async () => {
+    const cells = { 0: cell({ imageName: 'a.png' }), 1: cell({ imageName: 'b.png' }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.multiSelectMode = true;
+    component.selectedCells.add(0);
+    component.selectedCells.add(1);
+
+    component.onDeleteClick();
+
+    expect(flashSpy.show).toHaveBeenCalledWith('warning', jasmine.any(String));
+    expect(component.pendingDeleteCells).toBeNull();
+  });
+
+  // ─── swapCells ──────────────────────────────────────────────────────────────
+
+  it('swapCells — échange le contenu de deux cases', async () => {
+    const cells = { 0: cell({ imageName: 'a.png' }), 1: cell({ imageName: 'b.png' }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    component.swapCells(0, 1);
+
+    expect(component.screenToModify.values[12][0].imageName).toBe('b.png');
+    expect(component.screenToModify.values[12][1].imageName).toBe('a.png');
+  });
+
+  // ─── openStimuliData — sélection multiple ───────────────────────────────────
+
+  it('openStimuliData — multi-sélection : ajoute puis retire une case de la sélection', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell(), 1: cell() }));
+    await fixture.whenStable();
+    component.multiSelectMode = true;
+
+    component.openStimuliData(0);
+    expect(component.selectedCells.has(0)).toBeTrue();
+
+    component.openStimuliData(0);
+    expect(component.selectedCells.has(0)).toBeFalse();
+  });
+
+  it('openStimuliData — mode suppression : déclenche requestDelete sur la case', async () => {
+    const cells = { 0: cell({ imageName: 'a.png' }), 1: cell() };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.deleteMode = true;
+
+    component.openStimuliData(0);
+
+    expect(component.pendingDeleteCells).toEqual([0]);
+  });
+
+  // ─── undo ───────────────────────────────────────────────────────────────────
+
+  it('undo — restaure le dernier snapshot et réinitialise les modes', async () => {
+    const cells = { 0: cell({ imageName: 'img.png', imageId: 'TestProject/img.png' }), 1: cell() };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    // Suppression (sauvegarde un snapshot), puis undo
+    component.pendingDeleteCells = [0];
+    component.confirmDelete();
+    await fixture.whenStable();
+    expect(component.canUndo).toBeTrue();
+
+    component.undo();
+
+    expect(component.screenToModify.values[12][0].imageName).toBe('img.png');
+    expect(component.deleteMode).toBeFalse();
+    expect(component.duplicateMode).toBeFalse();
+  });
+
+  it('undo — sans historique → ne lève pas d\'erreur', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+
+    expect(component.canUndo).toBeFalse();
+    expect(() => component.undo()).not.toThrow();
+  });
+
+  // ─── zoomIn / zoomOut ───────────────────────────────────────────────────────
+
+  it('zoomIn — augmente cellSize sans dépasser le maximum (160)', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.cellSize = 150;
+
+    component.zoomIn();
+
+    expect(component.cellSize).toBe(160); // 150 + 20 plafonné à 160
+  });
+
+  it('zoomOut — diminue cellSize sans descendre sous le minimum (40)', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.cellSize = 40;
+
+    component.zoomOut();
+
+    expect(component.cellSize).toBe(40); // plancher à 40
+  });
+
+  // ─── openStimuliData — mode échange ─────────────────────────────────────────
+
+  it('openStimuliData — mode échange : 1er clic définit la source, 2e clic échange', async () => {
+    const cells = { 0: cell({ imageName: 'a.png' }), 1: cell({ imageName: 'b.png' }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.swapMode = true;
+
+    component.openStimuliData(0);
+    expect(component.swapSourceIndex).toBe(0);
+
+    component.openStimuliData(1);
+
+    expect(component.screenToModify.values[12][0].imageName).toBe('b.png');
+    expect(component.screenToModify.values[12][1].imageName).toBe('a.png');
+    expect(component.swapMode).toBeFalse();
+    expect(component.swapSourceIndex).toBeNull();
+  });
+
+  it('openStimuliData — mode échange : re-cliquer la source l\'annule', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell(), 1: cell() }));
+    await fixture.whenStable();
+    component.swapMode = true;
+
+    component.openStimuliData(0);
+    component.openStimuliData(0);
+
+    expect(component.swapSourceIndex).toBeNull();
+  });
+
+  // ─── openStimuliData — mode duplication ─────────────────────────────────────
+
+  it('openStimuliData — duplication vers une case vide : duplique directement', async () => {
+    const cells = { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }), 1: cell({ hidden: true }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.duplicateMode = true;
+
+    component.openStimuliData(0);
+    expect(component.duplicateSourceIndex).toBe(0);
+
+    component.openStimuliData(1);
+
+    expect(component.screenToModify.values[12][1].imageName).toBe('a.png');
+    expect(component.duplicateMode).toBeFalse();
+  });
+
+  it('openStimuliData — duplication vers une case occupée : demande confirmation', async () => {
+    const cells = {
+      0: cell({ imageName: 'a.png' }),
+      1: cell({ imageName: 'occupe.png' })
+    };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+    component.duplicateMode = true;
+    component.duplicateSourceIndex = 0;
+
+    component.openStimuliData(1);
+
+    expect(component.pendingDuplicateTarget).toBe(1);
+  });
+
+  it('openStimuliData — mode normal : ouvre le panneau de configuration', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
+    await fixture.whenStable();
+    spyOn(component, 'openOffcanvasStimuli');
+
+    component.openStimuliData(0);
+
+    expect(component.activeCellIndex).toBe(0);
+    expect(component.stimuliOffcanvasReady).toBeTrue();
+  });
+
+  // ─── canAddAdjacent ─────────────────────────────────────────────────────────
+
+  it('canAddAdjacent — voisin masqué → true (ajout possible)', async () => {
+    const cells = { 0: cell(), 1: cell({ hidden: true }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    expect(component.canAddAdjacent(0, 'right')).toBeTrue();
+  });
+
+  it('canAddAdjacent — voisin visible → false (ajout impossible)', async () => {
+    const cells = { 0: cell(), 1: cell() };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    expect(component.canAddAdjacent(0, 'right')).toBeFalse();
+  });
+
+  it('canAddAdjacent — voisin hors grille → true', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
+    await fixture.whenStable();
+
+    expect(component.canAddAdjacent(0, 'left')).toBeTrue();
+  });
+
+  // ─── addAdjacent ────────────────────────────────────────────────────────────
+
+  function clickEvent(): Event {
+    const e = new Event('click');
+    spyOn(e, 'stopPropagation');
+    return e;
+  }
+
+  it('addAdjacent — voisin masqué dans la grille → matérialise la case sans agrandir', async () => {
+    const cells = { 0: cell(), 1: cell({ hidden: true }) };
+    createComponent(makeStimuliGrid(1, 2, cells));
+    await fixture.whenStable();
+
+    component.addAdjacent(clickEvent(), 0, 'right');
+
+    expect(component.screenToModify.values[12][1].hidden).toBeFalse();
+    expect(Number(component.screenToModify.values[1])).toBe(2); // pas d'agrandissement
+  });
+
+  it('addAdjacent — bas hors grille → ajoute une ligne', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
+    await fixture.whenStable();
+
+    component.addAdjacent(clickEvent(), 0, 'bottom');
+
+    expect(Number(component.screenToModify.values[0])).toBe(2); // +1 ligne
+  });
+
+  it('addAdjacent — haut hors grille → ajoute une ligne au-dessus et décale', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'base.png' }) }));
+    await fixture.whenStable();
+
+    component.addAdjacent(clickEvent(), 0, 'top');
+
+    expect(Number(component.screenToModify.values[0])).toBe(2);
+    // l'ancienne case 0 est décalée en bas (index = cols)
+    expect(component.screenToModify.values[12][1].imageName).toBe('base.png');
+  });
+
+  it('addAdjacent — droite hors grille → ajoute une colonne', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'base.png' }) }));
+    await fixture.whenStable();
+
+    component.addAdjacent(clickEvent(), 0, 'right');
+
+    expect(Number(component.screenToModify.values[1])).toBe(2);
+    expect(component.screenToModify.values[12][0].imageName).toBe('base.png');
+  });
+
+  it('addAdjacent — gauche hors grille → ajoute une colonne et décale', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'base.png' }) }));
+    await fixture.whenStable();
+
+    component.addAdjacent(clickEvent(), 0, 'left');
+
+    expect(Number(component.screenToModify.values[1])).toBe(2);
+    // l'ancienne case est décalée à droite (index 1)
+    expect(component.screenToModify.values[12][1].imageName).toBe('base.png');
+  });
+
+  // ─── getCandidateIds / extractFileNameFromId (entrées atypiques) ────────────
+
+  it('getCandidateIds — entrée null → tableau vide', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    expect((component as any).getCandidateIds(null)).toEqual([]);
+  });
+
+  it('getCandidateIds — entrée File → utilise le nom du fichier', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    const file = new File([''], 'photo.png');
+
+    const ids = (component as any).getCandidateIds(file);
+
+    expect(ids).toContain('photo.png');
+    expect(ids).toContain('TestProject/photo.png');
+  });
+
+  it('getCandidateIds — objet avec id → utilise l\'id', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+
+    const ids = (component as any).getCandidateIds({ id: 'TestProject/x.png' });
+
+    expect(ids).toContain('TestProject/x.png');
+  });
+
+  it('extractFileNameFromId — null → chaîne vide', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    expect((component as any).extractFileNameFromId(null)).toBe('');
+  });
+
+  it('extractFileNameFromId — File → nom du fichier', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    expect((component as any).extractFileNameFromId(new File([''], 'a.png'))).toBe('a.png');
+  });
+
+  it('extractFileNameFromId — chemin avec dossiers → dernier segment', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    expect((component as any).extractFileNameFromId('Projet/sous/fichier.png')).toBe('fichier.png');
+  });
+
+  // ─── setInstructionPreview / setStimuliPreview (révocation d'URL) ───────────
+
+  it('setInstructionPreview — remplace une URL existante → révoque l\'ancienne', async () => {
+    createComponent(makeInstruction('Image'));
+    await fixture.whenStable();
+
+    (component as any).setInstructionPreview('blob:url-1');
+    (component as any).setInstructionPreview('blob:url-2');
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:url-1');
+    expect(component.instructionFile).toBe('blob:url-2');
+  });
+
+  it('setStimuliPreview — URL vide → réinitialise sans conserver d\'objectUrl', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+
+    (component as any).setStimuliPreview('blob:url-1');
+    (component as any).setStimuliPreview('');
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:url-1');
+    expect(component.stimuliFile).toBe('');
+  });
+
+  // ─── resolveStimuliSoundFile (branches Blob et fallback) ────────────────────
+
+  it('checkStimuliSoundFileExist — IDB renvoie un Blob (pas File) → crée un File', async () => {
+    createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
+    await fixture.whenStable();
+    const blob = new Blob(['snd'], { type: 'audio/mp3' });
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/son.mp3', file: blob, type: 'sound', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    const result = await component.checkStimuliSoundFileExist();
+
+    expect(result).toBeTrue();
+    expect(component.screenToModify.values[11] instanceof File).toBeTrue();
+  });
+
+  it('checkStimuliSoundFileExist — getFile mauvais type → fallback getAllFiles', async () => {
+    createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
+    await fixture.whenStable();
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+      { id: 'TestProject/son.mp3', file: new File(['snd'], 'son.mp3'), type: 'sound', lastEdit: new Date(), refCount: 1 }
+    ] as any));
+
+    const result = await component.checkStimuliSoundFileExist();
+
+    expect(result).toBeTrue();
+  });
+
+  it('checkStimuliSoundFileExist — valeur vide → réinitialise la preview et retourne false', async () => {
+    createComponent(makeStimuli('', ''));
+    await fixture.whenStable();
+
+    const result = await component.checkStimuliSoundFileExist();
+
+    expect(result).toBeFalse();
+    expect(component.stimuliFile).toBe('');
   });
 });
