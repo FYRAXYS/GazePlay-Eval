@@ -18,7 +18,6 @@ import {OverwriteGuardService} from '../../../services/overwrite-guard/overwrite
 })
 export class GuideImportComponent {
   constructor(
-    private router: Router,
     private dialog: MatDialog,
     private loadServiceZip: LoadZipService,
     private autoSaveService: AutoSaveService,
