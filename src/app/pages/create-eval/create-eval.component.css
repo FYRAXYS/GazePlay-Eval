@@ -144,13 +144,14 @@ input:focus {
   cursor: grabbing;
 }
 
-/* Scroll sur la liste des écrans */
+/* Scroll pour la liste des écrans */
 .screen-list-scroll {
-  max-height: calc(5 * 52px);
+  max-height: calc(5 * 52px); /* On commence à scroll à partir de 5 écrans*/
   overflow-y: auto;
   overflow-x: hidden;
 }
 
+/* plus petite scroll bar sur le côté */
 .screen-list-scroll::-webkit-scrollbar {
   width: 4px;
 }
