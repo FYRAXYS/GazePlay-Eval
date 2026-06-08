@@ -99,7 +99,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   goToGuide() {
     this.closeMenu();
-    this.router.navigate(['/no-page']);
+    this.router.navigate(['/guide']);
   }
 
   goToOptions() {
