@@ -178,7 +178,7 @@ export class LoadZipService {
 
         case transitionScreenConstModel:
           return {
-            name: item['name'] ?? 'Ecran ' + (index + 1),
+            name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: transitionScreenConstModel,
             values: [
               item["Mettre un temps avant passage à l'écran suivant"],
@@ -193,10 +193,10 @@ export class LoadZipService {
           const fileName: string = item["Lien du fichier"] ?? item["Nom du fichier"] ?? '';
           const idbId = fileName ? `${evalName}/${fileName}` : '';
           return {
-            name: item['name'] ?? 'Ecran ' + (index + 1),
+            name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: instructionScreenConstModel,
             values: [
-              item["Mettre un temps avant passage à l'écran suivant"], // [0]
+              item["Mettre un temps avant passage à l'écran suivant"],  // [0]
               item["Combien de temps"],                                 // [1]
               item["Ajouter un media"],                                 // [2]
               item["Type de media"],                                    // [3]
@@ -221,7 +221,7 @@ export class LoadZipService {
           }
 
           return {
-            name: item['name'] ?? 'Ecran ' + (index + 1),
+            name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: stimuliScreenConstModel,
             values: [
               item["Nombre de lignes"],                                  // [0]

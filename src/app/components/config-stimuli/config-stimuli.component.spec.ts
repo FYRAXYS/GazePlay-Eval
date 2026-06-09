@@ -28,7 +28,7 @@ describe('ConfigStimuliComponent', () => {
 
   beforeEach(async () => {
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles']);
+    idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile']);
     saveServiceSpy = jasmine.createSpyObj('SaveService', ['getEvalName']);
     autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
 
@@ -37,6 +37,8 @@ describe('ConfigStimuliComponent', () => {
     idbServiceSpy.updateFile.and.returnValue(Promise.resolve());
     idbServiceSpy.deleteFile.and.returnValue(Promise.resolve());
     idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+    idbServiceSpy.incrementRef.and.returnValue(Promise.resolve());
+    idbServiceSpy.releaseFile.and.returnValue(Promise.resolve());
     saveServiceSpy.getEvalName.and.returnValue('TestProject');
     dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
 
@@ -231,25 +233,49 @@ describe('ConfigStimuliComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('deleteImage — imageId et imageName vides → deleteFileFromIDB non appelé', async () => {
+  it('deleteImage — imageId et imageName vides → releaseFile non appelé', async () => {
     component.data.screen[0] = makeCell(); // ids vides
     await component.deleteImage();
-    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('deleteSound — soundId et soundName vides → deleteFileFromIDB non appelé', async () => {
+  it('deleteSound — soundId et soundName vides → releaseFile non appelé', async () => {
     component.data.screen[0] = makeCell();
     await component.deleteSound();
-    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('deleteCell — imageId/soundId vides → deleteFileFromIDB non appelé', async () => {
+  it('deleteCell — imageId/soundId vides → releaseFile non appelé', async () => {
     component.data.screen[0] = makeCell();
     await component.deleteCell();
-    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+  });
+
+  it('deleteImage — image présente dans l\'IDB → releaseFile appelé (pas deleteFile direct)', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 2
+    } as any));
+
+    await component.deleteImage();
+
+    expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/img.png');
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('deleteCell — image et son présents → releaseFile appelé pour les deux', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', soundId: 'TestProject/snd.mp3' });
+    idbServiceSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], 'f'), type: id.includes('mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    await component.deleteCell();
+
+    expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/img.png');
+    expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/snd.mp3');
   });
 
   // ─── saveProgress ─────────────────────────────────────────────────────────
@@ -274,7 +300,7 @@ describe('ConfigStimuliComponent', () => {
     expect(component.data.screen[0].imageFile).toBe(file);
   });
 
-  it('getImageFile — addFile échoue → updateFile appelé en fallback', async () => {
+  it('getImageFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
     idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
     const file = new File(['img'], 'photo.png', { type: 'image/png' });
     const event = { target: { files: [file] } } as unknown as Event;
@@ -282,7 +308,37 @@ describe('ConfigStimuliComponent', () => {
 
     await component.getImageFile(event);
 
-    expect(idbServiceSpy.updateFile).toHaveBeenCalledWith('TestProject/photo.png', file, 'image');
+    expect(idbServiceSpy.incrementRef).toHaveBeenCalledWith('TestProject/photo.png');
+    expect(idbServiceSpy.updateFile).not.toHaveBeenCalled();
+  });
+
+  it('getImageFile — remplace une image existante → ancienne libérée puis nouvelle ajoutée', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/old.png', imageName: 'old.png' });
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/old.png', file: new File([''], 'old.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+    const file = new File(['img'], 'new.png', { type: 'image/png' });
+    const event = { target: { files: [file] } } as unknown as Event;
+    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe' as any);
+
+    await component.getImageFile(event);
+
+    expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/old.png');
+    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/new.png', file, 'image');
+    expect(component.data.screen[0].imageId).toBe('TestProject/new.png');
+  });
+
+  it('getImageFile — re-sélectionne le même fichier → ni release ni add (refCount inchangé)', async () => {
+    component.data.screen[0] = makeCell({ imageId: 'TestProject/photo.png', imageName: 'photo.png' });
+    const file = new File(['img'], 'photo.png', { type: 'image/png' });
+    const event = { target: { files: [file] } } as unknown as Event;
+    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe' as any);
+
+    await component.getImageFile(event);
+
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.incrementRef).not.toHaveBeenCalled();
   });
 
   it('getImageFile — aucun fichier sélectionné → rien ne se passe', async () => {

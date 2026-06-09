@@ -120,10 +120,16 @@ describe('MenuComponent', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/load-save']);
   });
 
-  it('goToGuide : devrait fermer le menu et naviguer vers \'/no-page\'', () => {
+  it('goToGuide : devrait fermer le menu et naviguer vers \'/guide\'', () => {
     component.ngOnInit();
     component.goToGuide();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/no-page']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/guide']);
+  });
+
+  it('goToAccueil : devrait fermer le menu et naviguer vers \'/home\'', () => {
+    component.ngOnInit();
+    component.goToAccueil();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
   });
 
   it('goToOptions : devrait fermer le menu et naviguer vers \'/option\'', () => {

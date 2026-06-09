@@ -3,4 +3,5 @@ export interface EvalFile {
   file: File | Blob;
   type: 'image' | 'sound' | 'video';
   lastEdit: Date;
+  refCount: number;
 }
