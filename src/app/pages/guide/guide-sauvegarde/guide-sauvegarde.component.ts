@@ -32,7 +32,7 @@ export class GuideSauvegardeComponent {
       this.flashService.setDefaultDuration(3000);
 
       // La durée des flash-message est hardcoded, car si l'utilisateur met un temps de 0 il n'aura pas de confirmation.
-      this.flashService.show('success', 'La durée d\'affichage des notifications a bien été rénitialisée.', 3000);
+      this.flashService.show('success', 'La durée d\'affichage des notifications a été définie à 3 secondes.', 3000);
     } catch (e) {
       this.flashService.show('error', 'Une erreur est survenue lors de la rénitialisation de la durée d\'affichage des notifications', 3000);
     }
