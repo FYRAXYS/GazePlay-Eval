@@ -4,10 +4,61 @@
   </div>
   <div class="card-body">
 
+    <div class="guide-section-intro">
+      <p>
+        Cette page explique le fonctionnement des systèmes de sauvegarde et de chargement d'évaluation sur le site GazePlay-Eval.
+        Ce guide est divisé en 3 sous-parties distinctes :
+      </p>
+
+      <ul>
+        <li>La sauvegarde automatique</li>
+        <li>La page de sauvegarde manuelle</li>
+        <li>La page de chargement</li>
+      </ul>
+    </div>
+
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 1 — Informations générales</div>
+      <div class="guide-section-title">Partie 1 — Sauvegarde automatique</div>
       <div class="guide-section-body">
-        <p>Contenu de la partie 1...</p>
+        <p>Lorsque vous créez une <a routerLink="/guide/creation">évaluation</a> dans GazePlay-Eval,
+          votre progression est enregistrée et conservée dans votre navigateur, à chaque étape que vous remplissez.
+          Cela signifie que même si vous rechargez la page ou fermez la fenêtre, votre progression n'a pas été perdue.
+        </p>
+
+        <div class="alert alert-warning fw-semibold w-100 mb-5">
+          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
+          Votre progression n'est pas sauvegardé à chacune de vos actions ! <br> Par défaut, l'évaluation est enregistrée à
+          chaque changement de page, qu'il s'agisse de la précédente, ou de la suivante. Certain ajouts d'éléments, tels
+          que les <a routerLink="/guide/creation">ajouts d'écrans</a>, entraînent également une sauvegarde automatique de
+          l'évaluation.
+        </div>
+
+        <p><strong>Comment savoir si mon évaluation a été enregistrée ?</strong></p>
+
+        <p>Le site fourni un moyen simple pour vérifier que votre évaluation s'est bien sauvegardé automatiquement :
+          les notifications. Si l'option "affichage des messages" est activée dans les <a routerLink="/options">options</a>,
+          Vous pouvez voir des messages ephémères apparaître en bas à droite de votre écran à chaque fois que l'évaluation est sauvegardée.
+          Si l'enregistrement ne peut pa s'effectuer, un message d'erreur remplacera le message de confirmation.
+        </p>
+
+        <div class="guide-section-card mb-3">
+          <div class="guide-section-title">Aide</div>
+          <div class="guide-section-body">
+            <p>
+              Vous ne voyez aucune notification apparaître ? Vous les avez peut-être désactivés en renseignant une durée d'affichage de <code>0 seconde</code>.
+              Si c'est le cas, vous pouvez augmenter la durée depuis les <a routerLink="/options">options</a> ou avec le bouton ci-dessous.
+            </p>
+
+            <div class="text-center">
+              <button class="btn btn-success mt-3" (click)="resetDuration()">
+                Rénitialiser la durée d'affichage des notifications
+              </button>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </div>
 
@@ -18,7 +69,7 @@
       </div>
     </div>
 
-    <button class="btn btn-outline-secondary" routerLink="/guide">
+    <button class="btn btn-primary" routerLink="/guide">
       ← Retour
     </button>
 
