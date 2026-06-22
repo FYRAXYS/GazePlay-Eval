@@ -16,17 +16,21 @@
   </div>
 
   <div class="guide-popup-body">
-    @if (currentGuide.intro) {
-      <p class="guide-content-sub">{{ currentGuide.intro }}</p>
-    }
+    @if (currentGuideComponent) {
+      <ng-container *ngComponentOutlet="currentGuideComponent"></ng-container>
+    } @else {
+      @if (currentGuide.intro) {
+        <p class="guide-content-sub">{{ currentGuide.intro }}</p>
+      }
 
-    @for (section of currentGuide.sections; track section.title) {
-      <div class="guide-section-card">
-        <div class="guide-section-title">{{ section.title }}</div>
-        <div class="guide-section-body">{{ section.body }}</div>
-      </div>
-    } @empty {
-      <p class="guide-section-intro text-muted">Contenu du guide à venir.</p>
+      @for (section of currentGuide.sections; track section.title) {
+        <div class="guide-section-card">
+          <div class="guide-section-title">{{ section.title }}</div>
+          <div class="guide-section-body">{{ section.body }}</div>
+        </div>
+      } @empty {
+        <p class="guide-section-intro text-muted">Contenu du guide à venir.</p>
+      }
     }
   </div>
 </aside>

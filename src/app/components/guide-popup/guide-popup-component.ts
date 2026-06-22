@@ -1,5 +1,7 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output, Type} from '@angular/core';
+import {NgComponentOutlet} from '@angular/common';
 import {Router} from '@angular/router';
+import {GuideSauvegardeComponent} from '../../pages/guide/guide-sauvegarde/guide-sauvegarde.component';
 
 interface GuideSection {
   title: string;
@@ -9,19 +11,20 @@ interface GuideSection {
 interface PageGuide {
   title: string;
   intro?: string;
-  sections: GuideSection[];
+  sections?: GuideSection[];
 }
 
 @Component({
   selector: 'app-guide-popup',
   standalone: true,
-  imports: [],
+  imports: [NgComponentOutlet],
   templateUrl: './guide-popup-component.html',
   styleUrl: './guide-popup-component.css',
 })
 export class GuidePopupComponent {
 
   router = inject(Router);
+
   @Input() isOpen = false;
   @Output() closed = new EventEmitter<void>();
 
@@ -37,7 +40,7 @@ export class GuidePopupComponent {
     sections: [],
   };
 
-  // Un guide personnalisé par page, indexé par le premier segment de l'URL.
+  // Titre + contenu de repli (texte) par page, indexé par le premier segment de l'URL.
   private readonly guides: Record<string, PageGuide> = {
     home: {
       title: "Accueil",
@@ -109,13 +112,6 @@ export class GuidePopupComponent {
     },
     sauvegarde: {
       title: "Sauvegardes",
-      intro: "Gérez les sauvegardes de vos évaluations.",
-      sections: [
-        {
-          title: "Enregistrer",
-          body: "Sauvegardez votre progression pour la retrouver plus tard.",
-        },
-      ],
     },
     'load-save': {
       title: "Chargement",
@@ -139,15 +135,28 @@ export class GuidePopupComponent {
     },
   };
 
-  // Guide correspondant à la page actuellement affichée.
-  get currentGuide(): PageGuide {
-    const segment = (this.router.url ?? '')
+  // Pages pour lesquelles on réutilise directement le composant du guide statique
+  // (rendu via NgComponentOutlet), au lieu de dupliquer son contenu.
+  private readonly guideComponents: Record<string, Type<unknown>> = {
+    sauvegarde: GuideSauvegardeComponent,
+  };
+
+  private get currentSegment(): string {
+    return (this.router.url ?? '')
       .split('?')[0]
       .split('#')[0]
       .split('/')
       .filter(Boolean)[0] ?? 'home';
+  }
 
-    return this.guides[segment] ?? this.defaultGuide;
+  // Guide correspondant à la page actuellement affichée.
+  get currentGuide(): PageGuide {
+    return this.guides[this.currentSegment] ?? this.defaultGuide;
+  }
+
+  // Composant de guide à charger pour la page courante, le cas échéant.
+  get currentGuideComponent(): Type<unknown> | null {
+    return this.guideComponents[this.currentSegment] ?? null;
   }
 
   close(): void {

@@ -67,7 +67,7 @@
   padding: 1.5rem;
 }
 
-/* ── Styles de texte repris du guide statique ── */
+/* ── Styles de texte repris du guide statique (pour le contenu de repli) ── */
 .guide-section-card {
   border-radius: 10px;
   border: 1px solid var(--bs-border-color);
@@ -95,28 +95,6 @@
   line-height: 1.7;
 }
 
-.guide-content-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
 .guide-content-sub {
   padding-bottom: 15px;
-}
-
-.guide-content-image {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  border-radius: 8px;
-  border: 1px solid var(--bs-border-color);
-  display: block;
-  margin: 0 auto;
-}
-
-.guide-content-image-desc {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  font-style: italic;
-  text-align: center;
 }
