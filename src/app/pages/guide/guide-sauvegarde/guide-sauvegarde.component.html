@@ -154,6 +154,30 @@
           <p>Visualisation de l'onglet de sauvegarde dans le menu déroulant.</p>
         </div>
 
+        <p><strong>Faut-il enregistrer à nouveau l'évaluation après des changements ?</strong></p>
+
+        <p>Non, les modifications apportés aux évaluations déjà enregistrés sont automatiquement conservés.
+        Une évaluation avec l'effet de surbrillance en vert, comme montré sur l'image, se sauvegarde automatiquement,
+        sans avoir besoin que l'utilisateur enregistre manuellement ses changements.</p>
+
+        <p><strong>Les évaluations sont-elles conservés indéfiniment ?</strong></p>
+        <p>La réponse courte est oui. Les évaluations sont conservés dans le stockage local (<i>LocalStorage</i>) de votre navigateur.
+        Cela signifie que vos données seront toujours présentes, même après avoir fermé la page, le navigateur ou même éteint votre
+        machine. Les données ne sont jamais transférés vers des serveurs et n'ont donc pas besoin d'une connexion en ligne.
+        Cependant, le stockage local peut être supprimé dans les cas suivants : </p>
+        <ul>
+          <li>Si vous utilisez le site en navigation privée/mode incognito (données supprimés lors de la fermeture de la fenêtre).</li>
+          <li>Si vous supprimez les données de navigation de votre navigateur (suppression totale ou spécifique sur GazePlay-Eval).</li>
+          <li>Si vous désinstallez/réinstallez votre navigateur, où si vous rénitialisez votre machine.</li>
+        </ul>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Le stockage local n'est pas partagé entre les navigateurs. Par exemple, les évaluations réalisés sur Firefox n'apparaîtront
+          pas si le site est chargé depuis Google Chrome ou Opera GX.
+        </div>
+
       </div>
     </div>
 
@@ -161,8 +185,38 @@
     <div class="guide-section-card mb-3">
       <div class="guide-section-title">Partie 3 — La page de chargement d'évaluation</div>
       <div class="guide-section-body">
-        <p>Lorem Ipsum.
+        <p>Une fois que des évaluations ont été sauvegardés, il est possible de les charger pour reprendre
+          à la dernière étape visitée, à l'aide de la page de chargement d'évaluation.
         </p>
+
+        <img src="assets/guide/images/page-load.png" class="guide-content-image"
+             alt="Image montrant la page de chargement d'évaluation, avec deux évaluations d'exemple.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation de la page de chargement des évaluations.</p>
+        </div>
+
+        <p>En cliquant sur un emplacement contenant une évaluation, vous avez la possibilité de la charger et de la reprendre
+        là où vous vous étiez arrêté.
+        De la même façon que pour la page de sauvegarde, pour pouvoir repérer plus facilement quelle évaluation sauvegardée est en cours de modification, un effet de surbrillance
+          en vert ainsi qu'une banderole avec le message "en cours" sont affichés sur l'emplacement concerné.</p>
+
+        <p>Pour accéder à la page de chargement, vous pouvez utiliser le menu latéral et cliquer sur "Charger".
+          Si vous avez des difficultés à accéder au menu latéral, vous pouvez directement accéder à la page de chargement
+          en cliquant <a routerLink="/load-save">ici</a>.
+        </p>
+
+        <img src="assets/guide/images/menu-load.png" class="guide-content-image"
+             alt="Image montrant le menu latéral, avec l'onglet de chargement mis en évidence via un effet de survol.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation de l'onglet de chargement dans le menu déroulant.</p>
+        </div>
+
+        <p><strong>Y a-t-il une différence entre la modification de la page de sauvegarde et la page de chargement ?</strong></p>
+
+        <p>Non, les deux systèmes sont identiques, ils chargent une évaluation sauvegardée et vous ramènent à la dernière étapes
+        que vous avez consultée. L'intérêt de la page de chargement est seulement de pouvoir relancer plus raidement une évaluation,
+        sans avoir à passer par la page de sauvegarde.</p>
+
       </div>
     </div>
 
