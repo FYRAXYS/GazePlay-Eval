@@ -5,10 +5,11 @@ import {filter} from 'rxjs';
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
 import {FlashComponent} from './components/flash-message/flash.component';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
+import {IconGuidePopupComponent} from './components/icon-guide-popup/icon-guide-popup-component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent, IconGuidePopupComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
