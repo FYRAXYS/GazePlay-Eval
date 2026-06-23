@@ -168,3 +168,71 @@ input:focus {
 .screen-list-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--bs-secondary-color);
 }
+
+/* Aperçu (lecture seule) de la grille de stimuli */
+.stimuli-preview-wrapper {
+  display: flex;
+  justify-content: center;
+  background: #1a1a2e;
+  padding: 16px 20px 20px;
+  border-radius: 12px;
+}
+
+.stimuli-preview-wrapper .grid-container {
+  display: inline-grid;
+  gap: 14px;
+  overflow: auto;
+  padding: 14px;
+  max-width: 100%;
+}
+
+.stimuli-preview-wrapper .cell {
+  position: relative;
+  width: 70px;
+  aspect-ratio: 1/1;
+  color: white;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 8px;
+  background: #1e3a8a;
+  cursor: default;
+}
+
+.stimuli-preview-wrapper .cell-hidden {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.stimuli-preview-wrapper .cell-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-size: 0.75rem;
+}
+
+.stimuli-preview-wrapper .cell-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.stimuli-preview-wrapper .cell-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 1rem;
+  z-index: 1;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.stimuli-preview-wrapper .icon {
+  align-self: flex-end;
+  font-size: 1rem;
+  margin-right: 5px;
+}
+
+.stimuli-preview-wrapper .valid { color: lawngreen !important; }
+.stimuli-preview-wrapper .invalid { color: #d41159 !important; }

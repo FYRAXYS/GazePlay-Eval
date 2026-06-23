@@ -1438,4 +1438,66 @@ describe('ModifyScreenComponent', () => {
     expect(result).toBeFalse();
     expect(component.stimuliFile).toBe('');
   });
+
+  // ─── toggleVisualizationMode (mode visualisation réel) ──────────────────────
+
+  it('toggleVisualizationMode — active le mode, sort des modes d\'édition et charge les images des cases', async () => {
+    const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
+    } as any));
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
+    await fixture.whenStable();
+    component.duplicateMode = true;
+    component.multiSelectMode = true;
+    component.selectedCells.add(0);
+
+    await component.toggleVisualizationMode();
+
+    expect(component.visualizationMode).toBeTrue();
+    expect(component.duplicateMode).toBeFalse();
+    expect(component.multiSelectMode).toBeFalse();
+    expect(component.selectedCells.size).toBe(0);
+    expect(component.cellImageUrls[0]).toBe('blob:fake-url');
+  });
+
+  it('toggleVisualizationMode — second appel désactive le mode et révoque les URLs d\'images', async () => {
+    const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
+    } as any));
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
+    await fixture.whenStable();
+
+    await component.toggleVisualizationMode();
+    expect(component.cellImageUrls[0]).toBe('blob:fake-url');
+
+    await component.toggleVisualizationMode();
+
+    expect(component.visualizationMode).toBeFalse();
+    expect(component.cellImageUrls[0]).toBeUndefined();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
+  });
+
+  it('toggleVisualizationMode — cases masquées ou sans image → aucune URL générée', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell({ hidden: true }), 1: cell({ imageName: '' }) }));
+    await fixture.whenStable();
+
+    await component.toggleVisualizationMode();
+
+    expect(Object.keys(component.cellImageUrls).length).toBe(0);
+  });
+
+  it('openStimuliData — en mode visualisation → ne fait rien', async () => {
+    createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
+    await fixture.whenStable();
+    component.visualizationMode = true;
+    spyOn(component, 'openOffcanvasStimuli');
+
+    component.openStimuliData(0);
+
+    expect(component.activeCellIndex).toBeNull();
+    expect(component.stimuliOffcanvasReady).toBeFalse();
+    expect(component.openOffcanvasStimuli).not.toHaveBeenCalled();
+  });
 });
