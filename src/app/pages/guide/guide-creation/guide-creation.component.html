@@ -12,7 +12,7 @@
 
       <ul>
         <li>Les informations de l'évaluation</li>
-        <li>Les informations du participant</li>
+        <li>Les informations du/de la participant·e</li>
         <li>Le mode de l'évaluation et ses paramètres globaux</li>
         <li>La création des écrans de l'évaluation</li>
         <li>Le téléchargement de l'évaluation</li>
@@ -53,14 +53,114 @@
       <div class="guide-section-body">
         <p>La première partie du processus de création d'évaluation consiste à renseigner des informations générales, tel
         que son nom. Il s'agira de celui utilisé par la suite pour les emplacements de <a routerLink="/guide/sauvegardes">sauvegarde</a>
-          et de <a routerLink="/guide/sauvegardes">chargement</a>.</p>
+          et de <a routerLink="/guide/sauvegardes">chargement</a>.
+        </p>
+
+        <p>Il vous est ensuite demandé de choisir un format pour récupérer les résultats d'une évaluation. Lorsqu'elle sera effectuée
+        sur l'application GazePlay-Learning, les résultats du/de la participant·e seront stockés dans un tableur. Si vous n'êtes pas familiers
+        avec les différents formats existants, laissez sur la valeur par défaut ("CSV & XLSX").</p>
       </div>
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 2 — Informations du participant</div>
+      <div class="guide-section-title">Partie 2 — Informations du/de la participant·e</div>
       <div class="guide-section-body">
-        <p>Contenu de la partie 2...</p>
+        <p>Cette partie facultative vous permet d'ajouter une liste d'information complémentaire sur le/la participant·e à cette évaluation.
+        Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span> situé à gauche de chaque élément vous permet
+        de le déplacer dans la liste. Le bouton rouge, à droite de chaque élément, permet de le supprimer.
+        </p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Aucune donnée n'est jamais transmise vers des serveurs. Personne ne peut y avoir accès, sauf si vous partagez vos évaluations
+          par la suite. Assurez vous toujours de la conformité au R.G.P.D des données que vous renseignez.
+        </div>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie 3 — Mode d'évaluation et paramètres globaux</div>
+      <div class="guide-section-body">
+        <p>La page suivante est en deux temps. Premièrement, il faut choisir le mode de création de l'évaluation. Le mode manuel permet de créer
+          chaque écran à la main, en partant de configurations globales. Le mode automatique permet de générer son évaluation à partir de médias
+          et de paramètres pré-renseignés.
+        </p>
+
+        <div class="alert alert-tip fw-semibold w-100 mb-5">
+          <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
+          Actuellement, le mode automatique n'a pas encore été totalement implémenté. Le sélectionner n'aura aucun effet sur la création de l'évaluation.
+          Nous vous conseillons donc de choisir le mode de création manuel d'évaluation.
+        </div>
+
+        <p>Une fois le mode sélectionné, il est possible de renseigner des paramètres par défaut pour les différents types d'écran. Ces paramètres seront
+        utilisés comme valeurs initiales pour tout écran nouvellement créé. Pour tout les types d'écrans, les durées demandés sont en seconde. La précision
+        est au dixième de seconde.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Notez que la plupart des éléments interactifs dans les évaluations (boutons, zone à sélectionner, croix de fixation, ...) nécessitent qu'une durée
+          de fixation en seconde soit renseignée pour que l'élément fonctionne correctement.
+        </div>
+
+        <p><strong>Ecrans de transition</strong></p>
+
+        <p>Les écrans de transition permettent de faire un lien entre d'autres types d'écrans (instruction, stimuli). Il est possible de renseigner un temps
+        d'affichage de l'écran. Vous avez également la possibilité d'ajouter une croix de fixation à l'écran de transition. Placée au centre de l'écran, elle
+        permet de recalibrer le regard et de s'assurer que le/la participant·e ne risque pas de sélectionner accidentellement un élément du prochain écran.
+        </p>
+
+        <p><strong>Ecrans d'instruction</strong></p>
+
+        <p>Les écrans d'instruction permettent de donner des informations à l'évalué·e. Il peut s'agir d'instruction sous forme de texte
+        ou d'un fichier multimédia. Il est également possible de faire apparaître un bouton à fixer pour passer à l'écran suivant.
+        Dans les paramètres globaux de ces écrans, vous pouvez déjà renseigner le format de l'instruction (un texte, une image, un son ou une vidéo).</p>
+
+        <p><strong>Ecrans de stimuli</strong></p>
+
+        <p>Les écrans de stimuli permettent de créer des grilles de sons ou d'images pour les évaluations. En raison de leur complexité par rapport aux
+        deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liés au nombre de lignes, de colonnes, ainsi que le nombre
+        minimum de bonnes réponses attendues.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Le nombre de bonne réponses à sélectionner ne peut pas être inférieur à 0, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
+          Dans le cas contraire, il serait impossible pour l'évalué·e de valider l'écran de stimuli.
+        </div>
+
+        <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
+             alt="Image montrant une grille de cellules d'un écran de stimuli. On voit aussi une barre d'outil au dessus de celles-ci.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation d'une grille d'un écran de stimuli, avec 3 lignes et 2 colonnes définis en paramètre.</p>
+        </div>
+
+        <p><strong>Les écrans existant sont-ils impactés si les paramètres par défaut sont modifiés ?</strong></p>
+
+        <p>Non, seuls les écrans créés après les modifications des paramètres par défaut auront les nouvelles valeurs.
+        De façon générale, une fois qu'un écran est créé, ses valeurs ne peuvent être changés qu'en modifiant cet écran
+        directement (voir partie suivante).</p>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie  — </div>
+      <div class="guide-section-body">
+        <p>
+        </p>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie  — </div>
+      <div class="guide-section-body">
+        <p>
+        </p>
+
       </div>
     </div>
 
