@@ -75,10 +75,42 @@
                   Prévisualisation de l’écran -> {{getNameCurrentScreen()}}
                 </div>
                 @if (selectedScreen !== null) {
-                  <div class="text-center">
+                  <div class="card-body text-center">
+                    <p class="fw-semibold mb-2">Type d'écran : {{getTypeCurrentScreen()}}</p>
                     <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="isModifyScreen = true;">
                       Modification de l'écran
                     </button>
+
+                    @if (selectedScreen.type === stimuliScreenConstModel) {
+                      <div class="stimuli-preview-wrapper mt-3">
+                        <div class="grid-container"
+                             [style.gridTemplateRows]="'repeat(' + selectedScreen.values[0] + ', ' + cellSize + 'px)'"
+                             [style.gridTemplateColumns]="'repeat(' + selectedScreen.values[1] + ', ' + cellSize + 'px)'">
+                          @for (n of getStimuliCells(); track $index; let i = $index) {
+                            <div class="cell"
+                                 [style.width.px]="cellSize"
+                                 [class.cell-hidden]="selectedScreen.values[12][i]?.hidden">
+                              @if (selectedScreen.values[12][i] && !selectedScreen.values[12][i].hidden) {
+                                @if (selectedScreen.values[12][i].goodAnswer === true) {
+                                  <span class="cell-badge valid">✓</span>
+                                } @else {
+                                  <span class="cell-badge invalid">✕</span>
+                                }
+                                @if (cellImageUrls[i]) {
+                                  <img class="cell-image" [src]="cellImageUrls[i]" [alt]="selectedScreen.values[12][i].imageName">
+                                } @else if (selectedScreen.values[12][i].imageName !== "") {
+                                  <span class="cell-text">{{selectedScreen.values[12][i].imageName}}</span>
+                                } @else if (selectedScreen.values[12][i].soundName !== "") {
+                                  <span class="cell-text">{{selectedScreen.values[12][i].soundName}}</span>
+                                } @else {
+                                  <span class="cell-text">{{ i + 1 }}</span>
+                                }
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
                   </div>
                 } @else {
                   <div class="card-body text-muted fw-semibold text-center">

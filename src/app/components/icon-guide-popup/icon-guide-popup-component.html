@@ -1,0 +1,10 @@
+<button
+  type="button"
+  class="guide-popup-button btn btn-primary rounded-circle shadow"
+  aria-label="Ouvrir le guide"
+  title="Ouvrir le guide"
+  (click)="openGuide()">
+  ?
+</button>
+
+<app-guide-popup [isOpen]="isGuideOpen" (closed)="closeGuide()"></app-guide-popup>
