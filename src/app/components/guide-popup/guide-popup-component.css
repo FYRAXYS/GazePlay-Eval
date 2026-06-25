@@ -98,3 +98,11 @@
 .guide-content-sub {
   padding-bottom: 15px;
 }
+
+.guide-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 5rem;
+}

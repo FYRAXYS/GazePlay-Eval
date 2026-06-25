@@ -29,7 +29,9 @@
           <div class="guide-section-body">{{ section.body }}</div>
         </div>
       } @empty {
-        <p class="guide-section-intro text-muted">Contenu du guide à venir.</p>
+        <div class="guide-empty">
+          <i class="bi bi-cone-striped"></i>
+        </div>
       }
     }
   </div>
