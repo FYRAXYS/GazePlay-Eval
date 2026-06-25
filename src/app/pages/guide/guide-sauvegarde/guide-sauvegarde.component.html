@@ -151,6 +151,95 @@
         <img src="assets/guide/images/menu-save.png" class="guide-content-image"
              alt="Image montrant le menu latéral, avec l'onglet de sauvegarde mis en évidence via un effet de survol.">
         <div class="guide-content-image-desc">
+          <p>Visualisation de l'onglet de sauvegarde dans le menu déroulant.</p>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie 2 — La page de sauvegarde</div>
+      <div class="guide-section-body">
+        <p>En complément à la sauvegarde automatique, il est également possible de placer une évaluation créée dans un emplacement
+        réservé et accessible à tout moment depuis la page de <a routerLink="/sauvegarde">sauvegarde</a>. Cette page permet de conserver les évaluations
+          créés, de les modifier, de les télécharger, ...
+        </p>
+
+        <img src="assets/guide/images/page-save.png" class="guide-content-image"
+             alt="Image montrant la page de sauvegarde, avec deux évaluations enregistrées.">
+        <div class="guide-content-image-desc">
+          <p>Page de sauvegarde contant deux évaluations enregistrés.</p>
+        </div>
+
+        <p>Cette page contient de nombreux boutons et indicateurs visuels pour vous aider à savoir quand sauvegarder
+        et quelles actions sont en train d'être effectués.</p>
+
+        <p>La partie principale de l'application est les 3 cases au centre. Il s'agit des emplacements de sauvegardes d'évaluation.
+          En fonction de leur état, ils peuvent être vides ou contenir une évaluation existente.
+        </p>
+
+        <div class="alert alert-tip fw-semibold w-100 mb-5">
+          <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
+          Pour des raisons de respect des quotas de votre navigateur, le nombre d'évaluations enregistrés simultanés est limité à 3.
+          Des évaluations complètes peuvent contenir un grand nombre de médias (images, sons, vidéos) et saturer la mémoire locale.
+          Si vous souhaitez conserver davantage d'évaluations, vous pouvez toujours les télécharger pour pouvoir les <a routerLink="/guide/imports">
+          importer</a> ultérieurement.
+        </div>
+
+        <p>Lorsque vous avez créé une évaluation pour la première fois et que vous vous rendez sur la page, une notification apparaîtra, vous indiquant
+        que l'évaluation en cours n'a pas encore été sauvegardée.</p>
+
+        <ul>
+          <li><p>S'il reste au moins un emplacement libre : un bouton "Sauvegarder" sera affiché sous tout emplacement
+            pouvant accueillir l'évaluation. Cliquer dessus assignera l'évaluation à cet emplacement. Elle sera conservé
+            et accessible à tout moment, même si vous créez une autre évaluation.
+          </p>
+          </li>
+
+          <li><p>S'il ne reste pas d'emplacement libre : en cliquant sur une évaluation déjà sauvegardée, différents boutons
+            apparaissent, ce qui permettent de gérer cette évaluation.
+            </p>
+
+            <img src="assets/guide/images/buttons-save.png" class="guide-content-image"
+                 alt="Image montrant les différentes actions possibles sur une évaluation enregistrée.">
+            <div class="guide-content-image-desc">
+              <p>Boutons représentant les différentes actions possibles sur une évaluation enregistrée.</p>
+            </div>
+
+            <p>Le bouton le plus à gauche, en jaune, permet d'écraser cette évaluation avec la nouvelle évaluation.
+            Vous pouvez donc utiliser ce bouton pour enregistrer votre nouvelle évaluation.
+            Le bouton central, en bleu, permet de modifier l'évaluation existante. Le bouton le plus à droite, également
+            en bleu, permet de télécharger l'évaluation. Enfin, le bouton en bas, en rouge, permet de supprimer l'évaluation
+            existante.</p>
+          </li>
+        </ul>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Les actions entraînant une suppression de données (comme la suppression ou la reprise
+          d'une ancienne évaluation) demandent toujours une seconde confirmation de l'utilisateur, pour s'assurer qu'il ne
+          s'agissait pas d'une action non-désirée.
+        </div>
+
+        <p>La page de sauvegarde possède également deux autres boutons : le premier, en bas au centre, en rouge, permet
+          de supprimer les dernières modifications. Il peut s'agir d'une nouvelle évaluation, ou des modifications sur une
+          évaluation déjà sauvegardée. Le second bouton, en bas à droite, en vert, permet de créer une nouvelle évaluation de 0.
+        </p>
+
+        <p>Enfin, pour pouvoir repérer plus facilement quelle évaluation sauvegardée est en cours de modification, un effet de surbrillance
+        en vert ainsi qu'une banderole avec le message "en cours" sont affichés sur l'emplacement concerné.</p>
+
+
+        <p>Pour accéder à la page de sauvegarde, vous pouvez utiliser le menu latéral et cliquer sur "Sauvegardes".
+          Si vous avez des difficultés à accéder au menu latéral, vous pouvez directement accéder à la page de sauvegardes
+          en cliquant <a routerLink="/sauvegarde">ici</a>.
+        </p>
+
+        <img src="assets/guide/images/menu-save.png" class="guide-content-image"
+             alt="Image montrant le menu latéral, avec l'onglet de sauvegarde mis en évidence via un effet de survol.">
+        <div class="guide-content-image-desc">
           <p>Visualisation de l'onglet de sauvegarde dans le menu latéral.</p>
         </div>
 
