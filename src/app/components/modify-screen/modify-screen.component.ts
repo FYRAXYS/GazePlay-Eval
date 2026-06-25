@@ -2,7 +2,7 @@ import {
   Component,
   EventEmitter,
   HostListener,
-  Input, OnInit,
+  Input, OnDestroy, OnInit,
   Output,
 } from '@angular/core';
 import {
@@ -38,7 +38,7 @@ import {MatTooltip} from '@angular/material/tooltip';
   standalone: true,
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent implements OnInit {
+export class ModifyScreenComponent implements OnInit, OnDestroy {
   tooltipFileSave: string = (
     `Tout les fichiers que vous importez dans le site sont sauvés dans le stockage de votre navigateur.
 
@@ -94,6 +94,8 @@ export class ModifyScreenComponent implements OnInit {
   private readonly maxCellSize = 160;
   gridMaxHeight: number = 0;
   multiSelectMode: boolean = false;
+  visualizationMode: boolean = false;
+  cellImageUrls: { [key: number]: string } = {};
   selectedCells: Set<number> = new Set<number>();
   pendingDeleteCells: number[] | null = null;
   private undoHistory: Array<{ rows: number, cols: number, cells: { [key: number]: any } }> = [];
@@ -112,6 +114,10 @@ export class ModifyScreenComponent implements OnInit {
     this.actualTypeScreen = this.screenToModify.type;
     void this.initializeMediaState();
     this.updateGridViewport();
+  }
+
+  ngOnDestroy(): void {
+    this.clearCellImageUrls();
   }
 
   @HostListener('window:resize')
@@ -576,6 +582,7 @@ export class ModifyScreenComponent implements OnInit {
   }
 
   openStimuliData(cellNumber: number) {
+    if (this.visualizationMode) return;
     const listScreenAll = this.screenToModify.values[12];
     if (this.multiSelectMode) {
       if (listScreenAll[cellNumber]?.hidden) return;
@@ -675,6 +682,109 @@ export class ModifyScreenComponent implements OnInit {
       this.swapSourceIndex = null;
       this.deleteMode = false;
     }
+  }
+
+  /**
+   * Bascule entre le mode gestion (édition de la grille) et le mode visualisation réel
+   * qui affiche les images des stimuli telles qu'elles apparaîtront, sans les outils d'édition.
+   */
+  async toggleVisualizationMode(): Promise<void> {
+    this.visualizationMode = !this.visualizationMode;
+    if (this.visualizationMode) {
+      // On sort de tous les modes d'édition.
+      this.duplicateMode = false;
+      this.duplicateSourceIndex = null;
+      this.pendingDuplicateTarget = null;
+      this.swapMode = false;
+      this.swapSourceIndex = null;
+      this.deleteMode = false;
+      this.multiSelectMode = false;
+      this.selectedCells.clear();
+      this.pendingDeleteCells = null;
+      await this.loadCellImages();
+    } else {
+      this.clearCellImageUrls();
+    }
+  }
+
+  /** Résout et crée les URLs d'aperçu des images de chaque case visible de la grille. */
+  private async loadCellImages(): Promise<void> {
+    this.clearCellImageUrls();
+    if (this.screenToModify.type !== stimuliScreenConstModel) return;
+    const listScreen = this.screenToModify.values[12];
+    const total = Number(this.screenToModify.values[0]) * Number(this.screenToModify.values[1]);
+    for (let i = 0; i < total; i++) {
+      const cell = listScreen[i];
+      if (!cell || cell.hidden) continue;
+
+      let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
+      if (!file && (cell.imageId || cell.imageName)) {
+        const match = await this.resolveCellImageFile(cell.imageId || cell.imageName);
+        if (match) {
+          cell.imageFile = match.file;
+          cell.imageId = match.id;
+          file = match.file;
+        }
+      }
+
+      if (file instanceof Blob) {
+        this.cellImageUrls[i] = URL.createObjectURL(file);
+      }
+    }
+  }
+
+  /** Révoque toutes les URLs d'aperçu des images de cases et vide la table. */
+  private clearCellImageUrls(): void {
+    for (const key of Object.keys(this.cellImageUrls)) {
+      URL.revokeObjectURL(this.cellImageUrls[Number(key)]);
+    }
+    this.cellImageUrls = {};
+  }
+
+  private async resolveCellImageFile(ref: any): Promise<{ file: File, id: string } | undefined> {
+    const candidateIds = this.getCandidateIds(ref);
+
+    for (const id of candidateIds) {
+      try {
+        const evalFile = await this.idbService.getFile(id);
+        if (evalFile.type !== 'image') continue;
+        if (!(evalFile.file instanceof Blob)) continue;
+
+        if (evalFile.file instanceof File) {
+          return { file: evalFile.file, id };
+        }
+
+        const inferredName = this.extractFileNameFromId(id);
+        return {
+          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
+          id
+        };
+      } catch {
+        // essaie le candidat suivant
+      }
+    }
+
+    try {
+      const allFiles = await this.idbService.getAllFiles();
+      const baseName = this.extractFileNameFromId(ref);
+      const match = allFiles.find((entry) =>
+        entry.type === 'image' && this.extractFileNameFromId(entry.id) === baseName
+      );
+
+      if (match?.file instanceof Blob) {
+        if (match.file instanceof File) {
+          return { file: match.file, id: match.id };
+        }
+        return {
+          file: new File([match.file], baseName, { type: match.file.type }),
+          id: match.id
+        };
+      }
+    } catch {
+      // ignore: fallback best-effort
+    }
+
+    return undefined;
   }
 
   /** Clic sur la corbeille : en multi-sélection on supprime la sélection, sinon on (dé)active le mode suppression simple. */

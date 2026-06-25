@@ -577,6 +577,31 @@ audio {
   font-size: 0.75rem;
 }
 
+.cell-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Pastille bonne/mauvaise réponse superposée à l'image en mode visualisation. */
+.cell-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 1rem;
+  z-index: 1;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.cell-readonly {
+  cursor: default;
+}
+
+.cell-readonly:hover {
+  background: #1e3a8a;
+}
+
 .icon {
   align-self: flex-end;
   font-size: 1rem;
