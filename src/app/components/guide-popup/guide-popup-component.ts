@@ -130,6 +130,8 @@ export class GuidePopupComponent {
   // (rendu via NgComponentOutlet), au lieu de dupliquer son contenu.
   private readonly guideComponents: Record<string, Type<unknown>> = {
     sauvegarde: GuideSauvegardeComponent,
+    'load-save': GuideSauvegardeComponent,
+
     'info-eval': GuideCreationComponent,
     'info-participant': GuideCreationComponent,
     'setup-eval': GuideCreationComponent,
@@ -145,12 +147,12 @@ export class GuidePopupComponent {
       .filter(Boolean)[0] ?? 'home';
   }
 
-  // Guide correspondant à la page actuellement affichée.
+  // Guide correspondant à la page actuellement affichée
   get currentGuide(): PageGuide {
     return this.guides[this.currentSegment] ?? this.defaultGuide;
   }
 
-  // Composant de guide à charger pour la page courante, le cas échéant.
+  // Composant de guide à charger pour la page courante
   get currentGuideComponent(): Type<unknown> | null {
     return this.guideComponents[this.currentSegment] ?? null;
   }
@@ -170,8 +172,7 @@ export class GuidePopupComponent {
   resize = (event: MouseEvent): void => {
     if (!this.isResizing) return;
 
-    // Le panneau est ancré à droite : la largeur correspond à l'espace
-    // entre la souris et le bord droit de la fenêtre.
+    // Le panneau est ancré à droite
     const newWidth = window.innerWidth - event.clientX;
     const maxWidth = window.innerWidth * 0.9;
 
