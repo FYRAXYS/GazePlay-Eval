@@ -4,38 +4,297 @@
   </div>
   <div class="card-body">
 
-    <div class="alert alert-warning fw-semibold w-100 mb-5">
-      <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
-      avertissement
-    </div>
-
-    <div class="alert alert-info fw-semibold w-100 mb-5">
-      <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-      information
-    </div>
-
-    <div class="alert alert-tip fw-semibold w-100 mb-5">
-      <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
-      important
-    </div>
-
     <div class="guide-section-intro">
-      <p>Introduction au guide</p>
+      <p>Cette page donne des indications et conseils pour l'ensemble du processus de création
+      d'une évaluation. Ce guide est divisé en plusieurs parties, qui sont chacune liés à une des pages de l'évaluation.
+      Vous pouvez retrouver dans l'ordre :
+      </p>
+
+      <ul>
+        <li>Les informations de l'évaluation</li>
+        <li>Les informations du/de la participant·e</li>
+        <li>Le mode de l'évaluation et ses paramètres globaux</li>
+        <li>La création des écrans de l'évaluation</li>
+        <li>Le téléchargement de l'évaluation</li>
+      </ul>
+
+
+      <div class="guide-section-card mb-3">
+        <div class="guide-section-title">Aide</div>
+        <div class="guide-section-body">
+          <p>
+            En cas de besoin, vous pouvez également retrouver une version vidéo complète du processus de création d'évaluation,
+            ainsi que la démonstration d'autres systèmes comme la sauvegarde, le chargement et l'importation.
+          </p>
+
+          <div class="text-center">
+            <iframe width="600" height="400"
+                    src="https://www.youtube.com/embed/2Nl7yLddWd8?controls=1">
+            </iframe>
+          </div>
+        </div>
+      </div>
+
+      <p>Tout au long de la création de votre évaluation, une barre de progression est affichée en haut de la page.</p>
+
+      <img src="assets/guide/images/progressbar.png" class="guide-content-image"
+           alt="Image montrant la barre de progression lors de la création d'une évaluation.">
+      <div class="guide-content-image-desc">
+        <p>Visualisation de la barre de progression lors de la création d'une évaluation.</p>
+      </div>
+
+      <p>Cette barre de progression permet de voir les étapes déjà remplies (celles en vert), l'étape en cours (celle en bleu
+      ) ainsi que les étapes suivantes (celles en gris). Il est toujours possible d'avancer ou de reculer en utilisant les boutons
+      de navigation en bas de chaque page.</p>
+
+      <p>Pour accéder à la page de création d'évaluation, vous pouvez utiliser le menu latéral et cliquer sur "Accueil".
+        Si vous avez des difficultés à accéder au menu latéral, vous pouvez directement accéder à la page en cliquant <a routerLink="/home">ici</a>.
+      </p>
+
+      <img src="assets/guide/images/menu-home.png" class="guide-content-image"
+           alt="Image montrant le menu latéral, avec l'onglet d'accueil mis en évidence via un effet de survol.">
+      <div class="guide-content-image-desc">
+        <p>Visualisation de l'onglet d'accueil dans le menu latéral.</p>
+      </div>
+
+      <p>Dans certaines pages, vous aurez également des icônes
+        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt="">
+        sur certains points techniques. En les survolant, vous pouvez bénéficier d'explications supplémentaires et de conseils.
+      </p>
+
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 1 — Informations générales</div>
+      <div class="guide-section-title">Partie 1 — Informations de l'évaluation</div>
       <div class="guide-section-body">
-        <p>Contenu de la partie 1...</p>
+        <p>La première partie du processus de création d'évaluation consiste à renseigner des informations générales, tel
+        que son nom. Il s'agira de celui utilisé par la suite pour les emplacements de <a routerLink="/guide/sauvegardes">sauvegarde</a>
+          et de <a routerLink="/guide/sauvegardes">chargement</a>.
+        </p>
+
+        <p>Il vous est ensuite demandé de choisir un format pour récupérer les résultats d'une évaluation. Lorsqu'elle sera effectuée
+        sur l'application GazePlay-Learning, les résultats du/de la participant·e seront stockés dans un tableur. Si vous n'êtes pas familiers
+        avec les différents formats existants, laissez sur la valeur par défaut ("CSV & XLSX").</p>
       </div>
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 2 — Les écrans</div>
+      <div class="guide-section-title">Partie 2 — Informations du/de la participant·e</div>
       <div class="guide-section-body">
-        <p>Contenu de la partie 2...</p>
+        <p>Cette partie facultative vous permet d'ajouter une liste d'information complémentaire sur le/la participant·e à cette évaluation.
+        Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span> situé à gauche de chaque élément vous permet
+        de le déplacer dans la liste. Le bouton rouge, à droite de chaque élément, permet de le supprimer.
+        </p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Aucune donnée n'est jamais transmise vers des serveurs. Personne ne peut y avoir accès, sauf si vous partagez vos évaluations
+          par la suite. Assurez vous toujours de la conformité au R.G.P.D des données que vous renseignez.
+        </div>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie 3 — Mode d'évaluation et paramètres globaux</div>
+      <div class="guide-section-body">
+        <p>La page suivante est en deux temps. Premièrement, il faut choisir le mode de création de l'évaluation. Le mode manuel permet de créer
+          chaque écran à la main, en partant de configurations globales. Le mode automatique permet de générer son évaluation à partir de médias
+          et de paramètres pré-renseignés.
+        </p>
+
+        <div class="alert alert-tip fw-semibold w-100 mb-5">
+          <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
+          Actuellement, le mode automatique n'a pas encore été totalement implémenté. Le sélectionner n'aura aucun effet sur la création de l'évaluation.
+          Nous vous conseillons donc de choisir le mode de création manuel d'évaluation.
+        </div>
+
+        <p>Une fois le mode sélectionné, il est possible de renseigner des paramètres par défaut pour les différents types d'écran. Ces paramètres seront
+        utilisés comme valeurs initiales pour tout écran nouvellement créé. Pour tout les types d'écrans, les durées demandés sont en seconde. La précision
+        est au dixième de seconde.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          La plupart des éléments interactifs dans les évaluations (boutons, zone à sélectionner, croix de fixation, ...) nécessitent qu'une durée
+          de fixation du regard en seconde soit renseignée pour que l'élément fonctionne correctement.
+        </div>
+
+        <p><strong>Ecrans de transition</strong></p>
+
+        <p>Les écrans de transition permettent de faire un lien entre d'autres types d'écrans (instruction, stimuli). Il est possible de renseigner un temps
+        d'affichage de l'écran. Vous avez également la possibilité d'ajouter une croix de fixation à l'écran de transition. Placée au centre de l'écran, elle
+        permet de recalibrer le regard et de s'assurer que le/la participant·e ne risque pas de sélectionner accidentellement un élément du prochain écran.
+        </p>
+
+        <p><strong>Ecrans d'instruction</strong></p>
+
+        <p>Les écrans d'instruction permettent de donner des informations à l'évalué·e. Il peut s'agir d'instruction sous forme de texte
+        ou d'un fichier multimédia. Il est également possible de faire apparaître un bouton à fixer pour passer à l'écran suivant.
+        Dans les paramètres globaux de ces écrans, vous pouvez déjà renseigner le format de l'instruction (un texte, une image, un son ou une vidéo).</p>
+
+        <p><strong>Ecrans de stimuli</strong></p>
+
+        <p>Les écrans de stimuli permettent de créer des grilles de sons ou d'images pour les évaluations. En raison de leur complexité par rapport aux
+        deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liés au nombre de lignes, de colonnes, ainsi que le nombre
+        minimum de bonnes réponses attendues.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Le nombre de bonne réponses à sélectionner ne peut pas être inférieur à 0, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
+          Dans le cas contraire, il serait impossible pour l'évalué·e de valider l'écran de stimuli.
+        </div>
+
+        <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
+             alt="Image montrant une grille de cellules d'un écran de stimuli. On voit aussi une barre d'outil au dessus de celles-ci.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation d'une grille d'un écran de stimuli, avec 3 lignes et 2 colonnes définis en paramètre.</p>
+        </div>
+
+        <p><strong>Les écrans existant sont-ils impactés si les paramètres par défaut sont modifiés ?</strong></p>
+
+        <p>Non, seuls les écrans créés après les modifications des paramètres par défaut auront les nouvelles valeurs.
+        De façon générale, une fois qu'un écran est créé, ses valeurs ne peuvent être changés qu'en modifiant cet écran
+        directement (voir partie suivante).</p>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie 4 — Création des écrans d'évaluation</div>
+      <div class="guide-section-body">
+        <p>Une fois les paramètres globaux renseignés, vous pouvez ensuite créer un ensemble d'écrans qui composeront votre évaluation.
+          Pour cela, vous pouvez utiliser la page suivante :
+        </p>
+
+        <img src="assets/guide/images/screen-creation.png" class="guide-content-image"
+             alt="Image montrant une liste d'écrans d'évaluation.">
+        <div class="guide-content-image-desc">
+          <p>Page de création des écrans d'une évaluation.</p>
+        </div>
+
+        <p>Cette page se compose de deux parties distinctes.</p>
+        <ul>
+          <li><p>La première, à gauche, permet de créer et d'organiser la liste des écrans. En cliquant sur le bouton vert
+          "Créer un nouvel écran", il est possible d'ajouter de nouvaux écrans à la liste existante. De la même façon qu'avec
+          la page d'information du/de la participant·e, vous pouvez organiser l'ordre de la liste avec
+          Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span>. Le bouton gris, à droite du nom
+          de chaque écran, permet de le renommer (vous pouvez aussi simplement cliquer sur le nom de l'écran). Enfin, le dernier bouton rouge,
+          le plus à droite, permet de supprimer l'écran.</p>
+          </li>
+
+          <li><p>La deuxième partie de l'écran permet de prévisualiser un écran et de le modifier, en cliquant dessus.</p>
+            <div class="alert alert-info fw-semibold w-100 mb-5">
+              <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+              <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+              La prévisualisation d'un écran est toujours en cours de développement, seule la modification est possible pour l'instant.
+            </div>
+          </li>
+        </ul>
+
+        <p>Après avoir cliqué sur le bouton de modification, vous allez retrouver une disposition des options similaire à celle des paramètres par défaut.
+        Les valeurs des écrans nouvellement créés seront aussi celles définies dans ces paramètres globaux, à l'écran précédent.
+        Pour pouvoir modifier le type d'écran, utilisez le menu déroulant dans la première option en haut de la page.</p>
+
+        <p><strong>Ecrans de transition</strong></p>
+
+        <p>Les paramètres des écrans de transitions sont identiques aux paramètres globaux de l'écran. Vous pouvez les personnaliser pour un écran précis
+          ou conserver les valeurs précédemment définies.
+        </p>
+
+        <p><strong>Ecrans d'instruction</strong></p>
+
+        <p>Selon les options globales choisies, vous aurez peut-être la possibilité de joindre un fichier multimédia à cet écran. Il peut s'agir d'une image,
+        d'un son ou encore d'une vidéo.</p>
+
+        <img src="assets/guide/images/media-upload.png" class="guide-content-image"
+             alt="Image montrant un espace des options dédié à l'importation d'une image, avec des boutons d'actions désactivés.">
+        <div class="guide-content-image-desc">
+          <p>Zone d'importation de fichier multimédia.</p>
+        </div>
+
+        <p>Dans l'exemple de l'image ci-dessus, vous pouvez importer une image en faisant un Glisser/Déposer de celle-ci dans la zone en pointillés. Vous pouvez
+        aussi cliquer directement sur la zone, ce qui ouvrira votre Explorateur de fichier et vous laissera choisir l'image de votre choix.
+        <br>Quand un média est importé dans un écran, vous pouvez le prévisualiser (ou l'écouter, dans le cas d'un son) et le supprimer à l'aide du bouton rouge
+        sous la zone d'importation.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Tout comme les évaluations, les fichiers multimédias importés sont stockés dans votre navigateur. Cela signifie que les fichiers originaux peuvent être
+          librement déplacés, modifiés, renommés ou supprimés sans avoir d'impact sur les évaluations qui les utilisent.
+        </div>
+
+        <p><strong>Ecrans de stimuli</strong></p>
+
+        <p>Les écrans de stimuli permettent de créer des grilles de sons ou d'images pour les évaluations. En raison de leur complexité par rapport aux
+          deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liés au nombre de lignes, de colonnes, ainsi que le nombre
+          minimum de bonnes réponses attendues.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Le nombre de bonne réponses à sélectionner ne peut pas être inférieur à 0, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
+          Dans le cas contraire, il serait impossible pour l'évalué·e de valider l'écran de stimuli.
+        </div>
+
+        <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
+             alt="Image montrant une grille de cellules d'un écran de stimuli. On voit aussi une barre d'outil au dessus de celles-ci.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation d'une grille d'un écran de stimuli, avec 3 lignes et 2 colonnes définis en paramètre.</p>
+        </div>
+
+        <p>En cliquant sur une des cellules de la grille, il est possible de la personnaliser : vous pouvez changer le type de réponse (bonne ou mauvaise),
+        ajouter une image ou un son qui sera joué quand l'évalué·e posera son regard sur cette cellule.</p>
+
+        <img src="assets/guide/images/stimuli-file.png" class="guide-content-image"
+             alt="Image montrant les paramètres d'une cellule d'une grille de stimuli. Elle contient une image de pomme, et est cochée comme étant une bonne réponse.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation des paramètres d'une cellule d'un écran de stimuli.</p>
+        </div>
+
+        <p>Sur cette image, vous pouvez voir d'autres boutons. Si l'image que vous avez utilisé est trop grosse ou n'est pas centrée, vous avez la possibilité de la redimensionner
+        avec le bouton "Recadrer". De la même façon, il est possible d'écouter un aperçu lorsqu'un son est ajouté à la cellule. Enfin, tout en bas de ce menu latéral,
+        vous pouvez retrouver deux boutons. Le premier, à gauche, permet de supprimer l'ensemble des fichiers (image et/ou son) qui ont été ajouté à cette cellule. Le second
+        permet d'enregistrer les changements effectués.</p>
+
+        <p>Bien qu'il soit possible de gérer toutes les cellules de la grille de stimuli en renseignant la taille des lignes et des colonnes, ce système n'est pas optimal à long terme,
+        en particulier si vous devez modifier votre grille ultérieument. Pour cette raison, une barre d'outils est à votre disposition, au dessus de l'espace de prévisualisation de la grille.
+        Elle permet de faire un ensemble d'actions sur vos cellules, sans avoir à modifier le nombre de ligne, de colonnes, ou de devoir renseigner à nouveau la valeur de la cellule ainsi que ses
+        pièces jointes.</p>
+
+        <img src="assets/guide/images/stimuli-add.png" class="guide-content-image"
+             alt="Image montrant une grille de cellules de stimuli avec la barre d'outils. On voit également qu'il est possible d'ajouter de nouvelles cases en cliquant dans un espace vide.">
+        <div class="guide-content-image-desc">
+          <p>Utilisation de la barre d'outil pour créer de nouvelles cellules.</p>
+        </div>
+
+        <p>Dans un premier temps, vous pouvez rajouter des nouvelles cellules de deux façons différentes : en cliquant sur une case vide, ou en cliquant sur un des petits "+", en survolant une case avec
+        votre souris, comme sur l'image ci-dessus. La barre d'outil vous permet d'effectuer d'autres actions. La liste ci-dessous décrit l'utilité de chaque bouton, de gauche à droite : </p>
+
+        <ul>
+          <li>Dupliquer : permet de copier une case et de la coller dans un autre emplacement (s'il s'agit d'une autre cellule, elle sera écrasée). La nouvelle case aura les mêmes paramètres et fichiers attachés
+          que la précédente.</li>
+          <li>Echanger : permet d'intervertir deux cellules entre elles, ou de déplacer une cellule existante vers un emplacement vide.</li>
+          <li>Sélection multiple : permet de sélectionner plusieurs cellules simultanément, pour les supprimer.</li>
+          <li>Supprimer : permet de supprimer une cellule.</li>
+          <li>Annuler : permet d'annuler la dernière action effectuée. Vous pouvez remonter jusqu'au 10 dernières.</li>
+          <li>Boutons de zoom et de dézoom : permet d'agrandir ou de rétrécir la zone de prévisualisation, utile pour les grilles assez larges.</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <div class="guide-section-title">Partie 5 — Téléchargement de l'évaluation</div>
+      <div class="guide-section-body">
+        <p>Une fois les écrans de l'évaluation créés, la dernière page permet de télécharger l'évaluation dans un format <code>.zip</code>. Elle peut ensuite être
+          importée dans l'application GazePlay-Learning pour pouvoir lancer votre évaluation et récupérer ses résultats.
+        </p>
+
       </div>
     </div>
 

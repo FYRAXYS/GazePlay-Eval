@@ -80,8 +80,9 @@
 .btn-section-card {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 200px;
   min-width: 160px;
+  max-width: 200px;
   padding: 1.25rem;
   border-radius: 12px;
   border: 1px solid var(--bs-border-color);
@@ -138,7 +139,7 @@
 
 .guide-content-image {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   height: auto;
   border-radius: 8px;
   border: 1px solid var(--bs-border-color);
@@ -152,3 +153,9 @@
   font-style: italic;
   text-align: center;
 }
+
+strong {
+  font-size: 1.4rem;
+  font-weight: bolder;
+}
+
