@@ -157,6 +157,11 @@ export class GuidePopupComponent {
     return this.guideComponents[this.currentSegment] ?? null;
   }
 
+  // Sous-partie du guide à afficher en premier
+  get currentGuideInputs(): Record<string, unknown> | undefined {
+    return {sectionId : this.currentSegment};
+  }
+
   close(): void {
     this.closed.emit();
   }

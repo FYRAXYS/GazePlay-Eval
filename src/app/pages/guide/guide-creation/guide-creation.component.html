@@ -65,7 +65,7 @@
 
     </div>
 
-    <div class="guide-section-card mb-3">
+    <div class="guide-section-card mb-3" [id]="'info-eval'">
       <div class="guide-section-title">Partie 1 — Informations de l'évaluation</div>
       <div class="guide-section-body">
         <p>La première partie du processus de création d'évaluation consiste à renseigner des informations générales, tel
@@ -79,7 +79,7 @@
       </div>
     </div>
 
-    <div class="guide-section-card mb-3">
+    <div class="guide-section-card mb-3" [id]="'info-participant'">
       <div class="guide-section-title">Partie 2 — Informations du/de la participant·e</div>
       <div class="guide-section-body">
         <p>Cette partie facultative vous permet d'ajouter une liste d'information complémentaire sur le/la participant·e à cette évaluation.
@@ -97,7 +97,7 @@
       </div>
     </div>
 
-    <div class="guide-section-card mb-3">
+    <div class="guide-section-card mb-3" [id]="'setup-eval'">
       <div class="guide-section-title">Partie 3 — Mode d'évaluation et paramètres globaux</div>
       <div class="guide-section-body">
         <p>La page suivante est en deux temps. Premièrement, il faut choisir le mode de création de l'évaluation. Le mode manuel permet de créer
@@ -163,7 +163,7 @@
       </div>
     </div>
 
-    <div class="guide-section-card mb-3">
+    <div class="guide-section-card mb-3" [id]="'create-eval'">
       <div class="guide-section-title">Partie 4 — Création des écrans d'évaluation</div>
       <div class="guide-section-body">
         <p>Une fois les paramètres globaux renseignés, vous pouvez ensuite créer un ensemble d'écrans qui composeront votre évaluation.
@@ -288,7 +288,7 @@
       </div>
     </div>
 
-    <div class="guide-section-card mb-3">
+    <div class="guide-section-card mb-3" [id]="'download-eval'">
       <div class="guide-section-title">Partie 5 — Téléchargement de l'évaluation</div>
       <div class="guide-section-body">
         <p>Une fois les écrans de l'évaluation créés, la dernière page permet de télécharger l'évaluation dans un format <code>.zip</code>. Elle peut ensuite être
