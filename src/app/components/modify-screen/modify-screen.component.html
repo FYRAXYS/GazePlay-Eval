@@ -434,24 +434,22 @@
 
               <div class="wrapper mt-3" [class.duplicate-mode]="duplicateMode" [class.delete-mode]="deleteMode">
                 <div class="stimuli-toolbar" [class.toolbar-locked]="configStimuliOpen">
-                  @if (!visualizationMode) {
-                    <button type="button" class="stimuli-tool-btn" [class.active]="duplicateMode" [disabled]="multiSelectMode" data-tooltip="Dupliquer : copie le contenu d'une case vers une autre" (click)="toggleDuplicateMode()">
-                      <i class="bi bi-files"></i>
-                    </button>
-                    <button type="button" class="stimuli-tool-btn" [class.active]="swapMode" [disabled]="multiSelectMode" data-tooltip="Échanger : intervertit le contenu de deux cases" (click)="toggleSwapMode()">
-                      <i class="bi bi-arrow-left-right"></i>
-                    </button>
-                    <button type="button" class="stimuli-tool-btn" [class.active]="multiSelectMode" data-tooltip="Sélection multiple : sélectionnez plusieurs cases puis supprimez-les" (click)="toggleMultiSelectMode()">
-                      <i class="bi bi-ui-checks-grid"></i>
-                    </button>
-                    <button type="button" class="stimuli-tool-btn stimuli-tool-btn-danger" [class.active]="deleteMode" [disabled]="multiSelectMode && selectedCells.size === 0" data-tooltip="Supprimer : masque la/les case(s)" (click)="onDeleteClick()">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                    <button type="button" class="stimuli-tool-btn" [disabled]="!canUndo" data-tooltip="Annuler la dernière action" (click)="undo()">
-                      <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                    <div class="stimuli-tool-separator"></div>
-                  }
+                  <button type="button" class="stimuli-tool-btn" [class.active]="duplicateMode" [disabled]="visualizationMode || multiSelectMode" data-tooltip="Dupliquer : copie le contenu d'une case vers une autre" (click)="toggleDuplicateMode()">
+                    <i class="bi bi-files"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [class.active]="swapMode" [disabled]="visualizationMode || multiSelectMode" data-tooltip="Échanger : intervertit le contenu de deux cases" (click)="toggleSwapMode()">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [class.active]="multiSelectMode" [disabled]="visualizationMode" data-tooltip="Sélection multiple : sélectionnez plusieurs cases puis supprimez-les" (click)="toggleMultiSelectMode()">
+                    <i class="bi bi-ui-checks-grid"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn stimuli-tool-btn-danger" [class.active]="deleteMode" [disabled]="visualizationMode || (multiSelectMode && selectedCells.size === 0)" data-tooltip="Supprimer : masque la/les case(s)" (click)="onDeleteClick()">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <button type="button" class="stimuli-tool-btn" [disabled]="visualizationMode || !canUndo" data-tooltip="Annuler la dernière action" (click)="undo()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </button>
+                  <div class="stimuli-tool-separator"></div>
                   <button type="button" class="stimuli-tool-btn" [class.active]="visualizationMode" [attr.data-tooltip]="visualizationMode ? 'Revenir au mode modification' : 'Mode visualisation : affiche les images des stimuli'" (click)="toggleVisualizationMode()">
                     <i class="bi bi-eye"></i>
                   </button>
@@ -531,10 +529,19 @@
                             <img class="cell-image" [src]="cellImageUrls[i]" [alt]="screenToModify.values[12][i].imageName">
                           } @else if (screenToModify.values[12][i].imageName !== "") {
                             <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
-                          } @else if (screenToModify.values[12][i].soundName !== "") {
-                            <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
-                          } @else {
+                          } @else if (screenToModify.values[12][i].soundName === "") {
                             <span class="cell-text">{{ i + 1 }}</span>
+                          }
+                          @if (screenToModify.values[12][i].soundName !== "") {
+                            <button type="button"
+                                    class="cell-sound-btn"
+                                    [class.has-visual]="cellImageUrls[i] || screenToModify.values[12][i].imageName !== ''"
+                                    [class.playing]="playingSoundCell === i"
+                                    [attr.title]="screenToModify.values[12][i].soundName"
+                                    [attr.aria-label]="'Écouter ' + screenToModify.values[12][i].soundName"
+                                    (click)="toggleCellSound(i, $event)">
+                              <i class="bi" [class.bi-volume-up-fill]="playingSoundCell !== i" [class.bi-pause-fill]="playingSoundCell === i"></i>
+                            </button>
                           }
                         } @else {
                           @if (!duplicateMode && !deleteMode && !swapMode && !multiSelectMode) {

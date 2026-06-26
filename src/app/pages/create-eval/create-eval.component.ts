@@ -40,7 +40,20 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
   /** Taille max (px) des miniatures générées pour la prévisualisation, pour limiter l'impact perf. */
   private readonly thumbnailMaxSize = 96;
 
+  /** Index de la case dont le son est en cours de lecture, ou null si aucun. */
+  playingSoundCell: number | null = null;
+  private currentAudio: HTMLAudioElement | null = null;
+  private currentAudioUrl: string | null = null;
+
+  /** Aperçu de l'écran d'instruction sélectionné (type de média, texte et URL du fichier). */
+  instructionPreviewType: string = '';
+  instructionPreviewText: string = '';
+  instructionPreviewUrl: string = '';
+  instructionSoundPlaying: boolean = false;
+  private instructionPreviewObjectUrl: string | null = null;
+
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
+  protected readonly instructionScreenConstModel = instructionScreenConstModel;
 
   constructor(private router: Router,
               private saveService: SaveService,
@@ -55,6 +68,8 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cellImageUrls = {};
+    this.stopSound();
+    this.clearInstructionPreview();
   }
 
   saveData(){
@@ -80,6 +95,8 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     this.listScreens.push(newScreen);
     this.indexSelectedScreen = this.listScreens.length - 1;
     this.cellImageUrls = {};
+    this.stopSound();
+    this.clearInstructionPreview();
 
     this.autoSaveService.autoSave('create-eval');
 
@@ -93,7 +110,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
   selectScreen(screen: screenTypeModel, index: number) {
     this.selectedScreen = screen;
     this.indexSelectedScreen = index;
-    void this.loadStimuliImages(screen);
+    void this.loadScreenPreview(screen);
   }
 
   editNameScreen(screen: screenTypeModel, value: boolean, index: number) {
@@ -115,6 +132,8 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     if (this.selectedScreen === screen) {
       this.selectedScreen = null;
       this.cellImageUrls = {};
+      this.stopSound();
+      this.clearInstructionPreview();
     }
     this.listScreens = this.listScreens.filter(s => s !== screen);
 
@@ -153,7 +172,61 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     this.selectedScreen = event.screen;
     this.listScreens[this.indexSelectedScreen] = event.screen;
     this.isModifyScreen = event.flag;
-    void this.loadStimuliImages(event.screen);
+    void this.loadScreenPreview(event.screen);
+  }
+
+  /** Prépare l'aperçu de l'écran sélectionné selon son type (stimuli ou instruction). */
+  private async loadScreenPreview(screen: screenTypeModel): Promise<void> {
+    await this.loadStimuliImages(screen);
+    await this.loadInstructionPreview(screen);
+  }
+
+  /**
+   * Charge le média (image, vidéo, son) ou le texte de l'écran d'instruction sélectionné
+   * pour l'afficher dans le panneau de prévisualisation de la page de gestion.
+   */
+  private async loadInstructionPreview(screen: screenTypeModel): Promise<void> {
+    this.clearInstructionPreview();
+    if (screen.type !== instructionScreenConstModel) return;
+    // values[2] = "Ajouter un media" : si désactivé, l'écran n'a aucun contenu à prévisualiser.
+    if (!screen.values[2]) return;
+
+    const type = screen.values[3];
+    this.instructionPreviewType = type;
+
+    if (type === 'Texte') {
+      this.instructionPreviewText = screen.values[4] || '';
+      return;
+    }
+
+    const name = screen.values[4];
+    if (!name) return;
+
+    const expectedType = type === 'Video' ? 'video' : type === 'Son' ? 'sound' : 'image';
+    let file: Blob | undefined = screen.values[5] instanceof Blob ? screen.values[5] : undefined;
+    if (!file) {
+      file = await this.resolveCellMediaFile(screen.values[8] || name, expectedType);
+    }
+    if (!(file instanceof Blob)) return;
+
+    // L'écran a pu changer pendant la résolution asynchrone : on ignore les résultats périmés.
+    if (this.selectedScreen !== screen) return;
+
+    const url = URL.createObjectURL(file);
+    this.instructionPreviewObjectUrl = url;
+    this.instructionPreviewUrl = url;
+  }
+
+  /** Réinitialise l'aperçu d'instruction, stoppe le son et libère l'URL objet associée. */
+  private clearInstructionPreview(): void {
+    this.stopSound();
+    if (this.instructionPreviewObjectUrl) {
+      URL.revokeObjectURL(this.instructionPreviewObjectUrl);
+      this.instructionPreviewObjectUrl = null;
+    }
+    this.instructionPreviewType = '';
+    this.instructionPreviewText = '';
+    this.instructionPreviewUrl = '';
   }
 
   /**
@@ -162,6 +235,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
    */
   private async loadStimuliImages(screen: screenTypeModel): Promise<void> {
     this.cellImageUrls = {};
+    this.stopSound();
     if (screen.type !== stimuliScreenConstModel) return;
 
     const listScreen = screen.values[12];
@@ -172,7 +246,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
       let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
       if (!file && (cell.imageId || cell.imageName)) {
-        file = await this.resolveCellImageFile(cell.imageId || cell.imageName);
+        file = await this.resolveCellMediaFile(cell.imageId || cell.imageName, 'image');
       }
 
       if (file instanceof Blob) {
@@ -214,11 +288,11 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async resolveCellImageFile(ref: any): Promise<File | undefined> {
+  private async resolveCellMediaFile(ref: any, expectedType: 'image' | 'sound' | 'video'): Promise<File | undefined> {
     for (const id of this.getCandidateIds(ref)) {
       try {
         const evalFile = await this.idbService.getFile(id);
-        if (evalFile?.type === 'image' && evalFile.file instanceof Blob) {
+        if (evalFile?.type === expectedType && evalFile.file instanceof Blob) {
           return evalFile.file instanceof File
             ? evalFile.file
             : new File([evalFile.file], this.extractFileNameFromId(id), {type: evalFile.file.type});
@@ -232,7 +306,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
       const allFiles = await this.idbService.getAllFiles();
       const baseName = this.extractFileNameFromId(ref);
       const match = allFiles.find((entry) =>
-        entry.type === 'image' && this.extractFileNameFromId(entry.id) === baseName);
+        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName);
       if (match?.file instanceof Blob) {
         return match.file instanceof File
           ? match.file
@@ -243,6 +317,87 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     }
 
     return undefined;
+  }
+
+  /**
+   * Lance (ou arrête si déjà en cours) la lecture du son de la case prévisualisée.
+   * Un seul son joue à la fois : relancer une autre case coupe le précédent.
+   */
+  async toggleCellSound(cellIndex: number): Promise<void> {
+    if (this.playingSoundCell === cellIndex) {
+      this.stopSound();
+      return;
+    }
+    this.stopSound();
+
+    const screen = this.selectedScreen;
+    if (!screen || screen.type !== stimuliScreenConstModel) return;
+    const cell = screen.values[12][cellIndex];
+    if (!cell || !cell.soundName) return;
+
+    let file: Blob | undefined = cell.soundFile instanceof Blob ? cell.soundFile : undefined;
+    if (!file && (cell.soundId || cell.soundName)) {
+      file = await this.resolveCellMediaFile(cell.soundId || cell.soundName, 'sound');
+      if (file) cell.soundFile = file;
+    }
+    if (!(file instanceof Blob)) return;
+
+    // L'écran a pu changer pendant la résolution asynchrone : on ignore les résultats périmés.
+    if (this.selectedScreen !== screen) return;
+
+    const url = URL.createObjectURL(file);
+    const audio = new Audio(url);
+    audio.onended = () => this.stopSound();
+    audio.onerror = () => this.stopSound();
+    this.currentAudio = audio;
+    this.currentAudioUrl = url;
+    this.playingSoundCell = cellIndex;
+    try {
+      await audio.play();
+    } catch {
+      this.stopSound();
+    }
+  }
+
+  /**
+   * Lance (ou arrête si déjà en cours) la lecture du son de l'écran d'instruction prévisualisé.
+   * On réutilise l'URL d'aperçu déjà créée ; elle est libérée par clearInstructionPreview().
+   */
+  async toggleInstructionSound(): Promise<void> {
+    if (this.instructionSoundPlaying) {
+      this.stopSound();
+      return;
+    }
+    this.stopSound();
+    if (!this.instructionPreviewUrl) return;
+
+    const audio = new Audio(this.instructionPreviewUrl);
+    audio.onended = () => this.stopSound();
+    audio.onerror = () => this.stopSound();
+    // On ne renseigne pas currentAudioUrl : l'URL appartient à l'aperçu, pas à la lecture.
+    this.currentAudio = audio;
+    this.instructionSoundPlaying = true;
+    try {
+      await audio.play();
+    } catch {
+      this.stopSound();
+    }
+  }
+
+  /** Arrête la lecture en cours et libère l'URL objet associée (si gérée par la lecture). */
+  private stopSound(): void {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.onended = null;
+      this.currentAudio.onerror = null;
+      this.currentAudio = null;
+    }
+    if (this.currentAudioUrl) {
+      URL.revokeObjectURL(this.currentAudioUrl);
+      this.currentAudioUrl = null;
+    }
+    this.playingSoundCell = null;
+    this.instructionSoundPlaying = false;
   }
 
   private getCandidateIds(ref: any): string[] {

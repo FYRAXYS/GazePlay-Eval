@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {SaveService} from '../../services/save/save.service';
 import {DownloadService} from '../../services/download/download.service';
 import {Router} from '@angular/router';
+import {saveModel} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-download-eval',
@@ -15,8 +16,16 @@ export class DownloadEvalComponent {
   constructor(private saveService: SaveService, private downloadService: DownloadService, private router: Router) {
   }
 
-  goDownload(){
+  goExport(): void{
     this.downloadService.generateEvalZip(this.saveService);
+  }
+
+  goDownload(): void {
+    this.downloadService.generateSlotZip({
+      ...this.saveService.dataAuto,
+      createdAt: new Date().toISOString(),
+      version: 1
+    });
   }
 
   backToCreateEval(){

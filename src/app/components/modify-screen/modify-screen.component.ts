@@ -96,6 +96,10 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   multiSelectMode: boolean = false;
   visualizationMode: boolean = false;
   cellImageUrls: { [key: number]: string } = {};
+  /** Index de la case dont le son est en cours de lecture en mode visualisation, ou null. */
+  playingSoundCell: number | null = null;
+  private currentCellAudio: HTMLAudioElement | null = null;
+  private currentCellAudioUrl: string | null = null;
   selectedCells: Set<number> = new Set<number>();
   pendingDeleteCells: number[] | null = null;
   private undoHistory: Array<{ rows: number, cols: number, cells: { [key: number]: any } }> = [];
@@ -118,6 +122,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearCellImageUrls();
+    this.stopCellSound();
   }
 
   @HostListener('window:resize')
@@ -704,6 +709,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       await this.loadCellImages();
     } else {
       this.clearCellImageUrls();
+      this.stopCellSound();
     }
   }
 
@@ -719,7 +725,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
 
       let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
       if (!file && (cell.imageId || cell.imageName)) {
-        const match = await this.resolveCellImageFile(cell.imageId || cell.imageName);
+        const match = await this.resolveCellMediaFile(cell.imageId || cell.imageName, 'image');
         if (match) {
           cell.imageFile = match.file;
           cell.imageId = match.id;
@@ -741,13 +747,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.cellImageUrls = {};
   }
 
-  private async resolveCellImageFile(ref: any): Promise<{ file: File, id: string } | undefined> {
+  private async resolveCellMediaFile(ref: any, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
     const candidateIds = this.getCandidateIds(ref);
 
     for (const id of candidateIds) {
       try {
         const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== 'image') continue;
+        if (evalFile.type !== expectedType) continue;
         if (!(evalFile.file instanceof Blob)) continue;
 
         if (evalFile.file instanceof File) {
@@ -768,7 +774,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       const allFiles = await this.idbService.getAllFiles();
       const baseName = this.extractFileNameFromId(ref);
       const match = allFiles.find((entry) =>
-        entry.type === 'image' && this.extractFileNameFromId(entry.id) === baseName
+        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
       );
 
       if (match?.file instanceof Blob) {
@@ -785,6 +791,65 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
 
     return undefined;
+  }
+
+  /**
+   * Lance (ou arrête si déjà en cours) la lecture du son d'une case en mode visualisation.
+   * Un seul son joue à la fois : relancer une autre case coupe le précédent.
+   */
+  async toggleCellSound(cellIndex: number, event: Event): Promise<void> {
+    event.stopPropagation();
+    if (this.playingSoundCell === cellIndex) {
+      this.stopCellSound();
+      return;
+    }
+    this.stopCellSound();
+
+    if (this.screenToModify.type !== stimuliScreenConstModel) return;
+    const cell = this.screenToModify.values[12][cellIndex];
+    if (!cell || !cell.soundName) return;
+
+    let file: Blob | undefined = cell.soundFile instanceof Blob ? cell.soundFile : undefined;
+    if (!file && (cell.soundId || cell.soundName)) {
+      const match = await this.resolveCellMediaFile(cell.soundId || cell.soundName, 'sound');
+      if (match) {
+        cell.soundFile = match.file;
+        cell.soundId = match.id;
+        file = match.file;
+      }
+    }
+    if (!(file instanceof Blob)) return;
+
+    // L'utilisateur a pu quitter le mode visualisation pendant la résolution asynchrone.
+    if (!this.visualizationMode) return;
+
+    const url = URL.createObjectURL(file);
+    const audio = new Audio(url);
+    audio.onended = () => this.stopCellSound();
+    audio.onerror = () => this.stopCellSound();
+    this.currentCellAudio = audio;
+    this.currentCellAudioUrl = url;
+    this.playingSoundCell = cellIndex;
+    try {
+      await audio.play();
+    } catch {
+      this.stopCellSound();
+    }
+  }
+
+  /** Arrête la lecture en cours et libère l'URL objet associée. */
+  private stopCellSound(): void {
+    if (this.currentCellAudio) {
+      this.currentCellAudio.pause();
+      this.currentCellAudio.onended = null;
+      this.currentCellAudio.onerror = null;
+      this.currentCellAudio = null;
+    }
+    if (this.currentCellAudioUrl) {
+      URL.revokeObjectURL(this.currentCellAudioUrl);
+      this.currentCellAudioUrl = null;
+    }
+    this.playingSoundCell = null;
   }
 
   /** Clic sur la corbeille : en multi-sélection on supprime la sélection, sinon on (dé)active le mode suppression simple. */

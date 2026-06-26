@@ -236,3 +236,118 @@ input:focus {
 
 .stimuli-preview-wrapper .valid { color: lawngreen !important; }
 .stimuli-preview-wrapper .invalid { color: #d41159 !important; }
+
+/* Aperçu d'un écran d'instruction : on simule un vrai écran (ratio 16:9, contenu centré). */
+.instruction-screen {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+  border: 3px solid #334155;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.instruction-screen-media {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.instruction-screen-text {
+  margin: 0;
+  padding: 16px 24px;
+  max-height: 100%;
+  overflow: auto;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: #1a1a2e;
+  text-align: center;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.instruction-screen-empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.instruction-sound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border: none;
+  border-radius: 50%;
+  background: #1e3a8a;
+  color: #fff;
+  font-size: 2.4rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.instruction-sound-btn:hover {
+  background: #1d4ed8;
+}
+
+.instruction-sound-btn:active {
+  transform: scale(0.95);
+}
+
+.instruction-sound-btn.playing {
+  background: #2563eb;
+}
+
+/* Bouton son cliquable : centré quand la case n'a pas de visuel, en pastille de coin sinon. */
+.stimuli-preview-wrapper .cell-sound-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42%;
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.stimuli-preview-wrapper .cell-sound-btn:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.stimuli-preview-wrapper .cell-sound-btn.playing {
+  background: #2563eb;
+}
+
+.stimuli-preview-wrapper .cell-sound-btn.has-visual {
+  top: auto;
+  left: 3px;
+  bottom: 3px;
+  transform: none;
+  width: 22px;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.stimuli-preview-wrapper .cell-sound-btn.has-visual:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.stimuli-preview-wrapper .cell-sound-btn.has-visual.playing {
+  background: #2563eb;
+}

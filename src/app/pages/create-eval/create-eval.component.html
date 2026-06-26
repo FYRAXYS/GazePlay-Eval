@@ -100,15 +100,64 @@
                                   <img class="cell-image" [src]="cellImageUrls[i]" [alt]="selectedScreen.values[12][i].imageName">
                                 } @else if (selectedScreen.values[12][i].imageName !== "") {
                                   <span class="cell-text">{{selectedScreen.values[12][i].imageName}}</span>
-                                } @else if (selectedScreen.values[12][i].soundName !== "") {
-                                  <span class="cell-text">{{selectedScreen.values[12][i].soundName}}</span>
-                                } @else {
+                                } @else if (selectedScreen.values[12][i].soundName === "") {
                                   <span class="cell-text">{{ i + 1 }}</span>
+                                }
+                                @if (selectedScreen.values[12][i].soundName !== "") {
+                                  <button type="button"
+                                          class="cell-sound-btn"
+                                          [class.has-visual]="cellImageUrls[i] || selectedScreen.values[12][i].imageName !== ''"
+                                          [class.playing]="playingSoundCell === i"
+                                          [attr.title]="selectedScreen.values[12][i].soundName"
+                                          [attr.aria-label]="'Écouter ' + selectedScreen.values[12][i].soundName"
+                                          (click)="toggleCellSound(i); $event.stopPropagation();">
+                                    <i class="bi" [class.bi-volume-up-fill]="playingSoundCell !== i" [class.bi-pause-fill]="playingSoundCell === i"></i>
+                                  </button>
                                 }
                               }
                             </div>
                           }
                         </div>
+                      </div>
+                    }
+
+                    @if (selectedScreen.type === instructionScreenConstModel) {
+                      <div class="instruction-screen mt-3">
+                        @if (!selectedScreen.values[2]) {
+                          <span class="instruction-screen-empty">Cet écran d'instruction n'affiche aucun média.</span>
+                        } @else if (instructionPreviewType === 'Texte') {
+                          @if (instructionPreviewText) {
+                            <p class="instruction-screen-text">{{ instructionPreviewText }}</p>
+                          } @else {
+                            <span class="instruction-screen-empty">Aucun texte saisi.</span>
+                          }
+                        } @else if (instructionPreviewType === 'Image') {
+                          @if (instructionPreviewUrl) {
+                            <img [src]="instructionPreviewUrl" alt="Aperçu de l'image" class="instruction-screen-media">
+                          } @else {
+                            <span class="instruction-screen-empty">Aucune image à afficher.</span>
+                          }
+                        } @else if (instructionPreviewType === 'Video') {
+                          @if (instructionPreviewUrl) {
+                            <video [src]="instructionPreviewUrl" controls class="instruction-screen-media"></video>
+                          } @else {
+                            <span class="instruction-screen-empty">Aucune vidéo à afficher.</span>
+                          }
+                        } @else if (instructionPreviewType === 'Son') {
+                          @if (instructionPreviewUrl) {
+                            <button type="button"
+                                    class="instruction-sound-btn"
+                                    [class.playing]="instructionSoundPlaying"
+                                    [attr.aria-label]="instructionSoundPlaying ? 'Arrêter le son' : 'Écouter le son'"
+                                    (click)="toggleInstructionSound()">
+                              <i class="bi" [class.bi-volume-up-fill]="!instructionSoundPlaying" [class.bi-pause-fill]="instructionSoundPlaying"></i>
+                            </button>
+                          } @else {
+                            <span class="instruction-screen-empty">Aucun son à afficher.</span>
+                          }
+                        } @else {
+                          <span class="instruction-screen-empty">Aucun média à afficher.</span>
+                        }
                       </div>
                     }
                   </div>

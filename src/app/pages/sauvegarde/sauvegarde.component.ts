@@ -131,7 +131,10 @@ export class SauvegardeComponent implements OnInit {
    */
   downloadSlot(slot: { index: FormatTypeConfig; data: saveModel | null }): void {
     console.log('[downloadSlot] slot:', slot);
-    if (!slot.data) return; // Si le slot est vide
+    if (!slot.data) {
+      this.flashMessageService.show('error', 'L\'évaluation n\'a pas pu être téléchargée car elle ne contient aucune donnée.');
+      return;
+    }
     this.downloadService.generateSlotZip(slot.data);
     this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
   }

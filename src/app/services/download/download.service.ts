@@ -187,6 +187,9 @@ export class DownloadService {
       delete entry.soundFile;
       delete entry.imageId;
       delete entry.soundId;
+      // L'attribut `hidden` est interne à l'éditeur (cases masquées de la grille) :
+      // on ne l'exporte pas dans le .gpeval final, contrairement au .gpSave.
+      delete entry.hidden;
     }
 
     let audioFile: File | Blob | null = this.isValidFile(stimuliValues[11]) ? stimuliValues[11] : null;
