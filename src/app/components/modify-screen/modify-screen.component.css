@@ -319,6 +319,23 @@ audio {
   transform: scale(0.95);
 }
 
+.stimuli-tool-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stimuli-tool-btn:disabled:active {
+  transform: none;
+}
+
+.stimuli-tool-btn:disabled:hover {
+  background: #1e3a8a;
+}
+
+.stimuli-tool-btn-danger:disabled:hover {
+  background: #b91c1c;
+}
+
 .stimuli-tool-separator {
   width: 1px;
   height: 24px;
@@ -600,6 +617,53 @@ audio {
 
 .cell-readonly:hover {
   background: #1e3a8a;
+}
+
+/* Bouton son cliquable : centré quand la case n'a pas de visuel, en pastille de coin sinon. */
+.cell-sound-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42%;
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.cell-sound-btn:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.cell-sound-btn.playing {
+  background: #2563eb;
+}
+
+.cell-sound-btn.has-visual {
+  top: auto;
+  left: 4px;
+  bottom: 4px;
+  transform: none;
+  width: 24px;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.cell-sound-btn.has-visual:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.cell-sound-btn.has-visual.playing {
+  background: #2563eb;
 }
 
 .icon {
