@@ -16,7 +16,7 @@ import {IconGuidePopupComponent} from './components/icon-guide-popup/icon-guide-
 export class App implements OnInit{
   protected title = 'GazePlay-Eval';
 
-  steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
+  steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et Exportation'];
   currentStepIndex = -1;
 
   constructor(private router: Router, private autoSaveService:AutoSaveService) {

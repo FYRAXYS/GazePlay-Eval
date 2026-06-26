@@ -8,7 +8,7 @@ import {screenTypeModel} from '../../shared/screenModel';
 })
 export class SaveService {
 
-  defaultEvalName: string = "GazePlayEvalDefaultName";
+  defaultEvalName: string = "Nouvelle Evaluation";
 
   activeSlotIndex: FormatTypeConfig | null = null;
 
