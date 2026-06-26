@@ -17,7 +17,7 @@
 
   <div class="guide-popup-body">
     @if (currentGuideComponent) {
-      <ng-container *ngComponentOutlet="currentGuideComponent"></ng-container>
+      <ng-container *ngComponentOutlet="currentGuideComponent; inputs: currentGuideInputs"></ng-container>
     } @else {
       @if (currentGuide.intro) {
         <p class="guide-content-sub">{{ currentGuide.intro }}</p>
@@ -29,7 +29,10 @@
           <div class="guide-section-body">{{ section.body }}</div>
         </div>
       } @empty {
-        <p class="guide-section-intro text-muted">Contenu du guide à venir.</p>
+        <!-- Icone de plot de chantier -->
+        <div class="guide-empty">
+          <i class="bi bi-cone-striped"></i>
+        </div>
       }
     }
   </div>

@@ -1,16 +1,23 @@
 <div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
   <div class="card shadow-lg w-100" style="max-width: 700px;">
     <div class="card-header">
-      <h2 class="card-title text-center">Téléchargement évaluation</h2>
+      <h2 class="card-title text-center">Téléchargement d'évaluation</h2>
     </div>
     <div class="card-body" style="text-align: -webkit-center;">
       <div class="card shadow-lg col-11">
         <div class="card-header bg-secondary text-white fw-semibold">
-          Téléchargement & avis
+          Téléchargement & Exportation
         </div>
         <div class="mb-3 mt-3">
+
+          <p style="text-align: left">Votre évaluation est terminée ! Vous pouvez désormais la télécharger pour la conserver dans votre ordinateur au format
+            <code>.gpSave</code>, ou l'exporter en format <code>.zip</code> pour pouvoir l'utiliser sur l'application
+            <a href="https://gazeplay.github.io/GazePlay/fr">GazePlay-Learning</a>.</p>
+
           <div class="d-flex justify-content-center mt-4">
-            <button class="btn btn-primary fw-semibold" (click)="goDownload()">Télécharger son évaluation</button>
+            <button class="btn btn-primary fw-semibold" (click)="goDownload()">Télécharger l'évaluation</button>
+
+            <button class="btn btn-primary fw-semibold" (click)="goExport()">Exporter pour GazePlay-Learning</button>
           </div>
         </div>
       </div>

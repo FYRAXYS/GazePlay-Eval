@@ -2,6 +2,7 @@ import {Component, EventEmitter, inject, Input, Output, Type} from '@angular/cor
 import {NgComponentOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {GuideSauvegardeComponent} from '../../pages/guide/guide-sauvegarde/guide-sauvegarde.component';
+import {GuideCreationComponent} from '../../pages/guide/guide-creation/guide-creation.component';
 
 interface GuideSection {
   title: string;
@@ -33,26 +34,26 @@ export class GuidePopupComponent {
 
   private readonly minWidth = 280;
 
-  // Guide affiché lorsque la page courante n'a pas de guide dédié.
+  // Guide affiché par défaut (pas de page dédiée)
   private readonly defaultGuide: PageGuide = {
     title: 'Guide',
-    intro: "Aucune aide dédiée pour cette page pour le moment.",
+    intro: "Le guide correspondant à cette page est en cours de développement.",
     sections: [],
   };
 
-  // Titre + contenu de repli (texte) par page, indexé par le premier segment de l'URL.
+  // Titre des différentes parties + contenu
   private readonly guides: Record<string, PageGuide> = {
     home: {
       title: "Accueil",
-      intro: "Point de départ pour créer ou reprendre une évaluation.",
+      intro: "Cette page permet d'accéder aux évaluations, de deux façons différentes : ",
       sections: [
         {
           title: "Nouvelle évaluation",
-          body: "Lancez la création d'une évaluation et laissez-vous guider pas à pas.",
+          body: "Lancez la création d'une évaluation de zéro et laissez-vous guider pas à pas.",
         },
         {
           title: "Reprendre l'évaluation précédente",
-          body: "Si une évaluation est en cours, reprenez-la là où vous vous étiez arrêté.",
+          body: "Si une évaluation est en cours, reprenez-la là où vous vous en étiez arrêté.",
         },
       ],
     },
@@ -123,22 +124,19 @@ export class GuidePopupComponent {
         },
       ],
     },
-    option: {
-      title: "Options",
-      intro: "Personnalisez le comportement et l'apparence de l'application.",
-      sections: [
-        {
-          title: "Préférences",
-          body: "Ajustez les options disponibles selon vos besoins.",
-        },
-      ],
-    },
   };
 
   // Pages pour lesquelles on réutilise directement le composant du guide statique
   // (rendu via NgComponentOutlet), au lieu de dupliquer son contenu.
   private readonly guideComponents: Record<string, Type<unknown>> = {
     sauvegarde: GuideSauvegardeComponent,
+    'load-save': GuideSauvegardeComponent,
+
+    'info-eval': GuideCreationComponent,
+    'info-participant': GuideCreationComponent,
+    'setup-eval': GuideCreationComponent,
+    'create-eval': GuideCreationComponent,
+    'download-eval': GuideCreationComponent,
   };
 
   private get currentSegment(): string {
@@ -149,14 +147,19 @@ export class GuidePopupComponent {
       .filter(Boolean)[0] ?? 'home';
   }
 
-  // Guide correspondant à la page actuellement affichée.
+  // Guide correspondant à la page actuellement affichée
   get currentGuide(): PageGuide {
     return this.guides[this.currentSegment] ?? this.defaultGuide;
   }
 
-  // Composant de guide à charger pour la page courante, le cas échéant.
+  // Composant de guide à charger pour la page courante
   get currentGuideComponent(): Type<unknown> | null {
     return this.guideComponents[this.currentSegment] ?? null;
+  }
+
+  // Sous-partie du guide à afficher en premier
+  get currentGuideInputs(): Record<string, unknown> | undefined {
+    return {sectionId : this.currentSegment};
   }
 
   close(): void {
@@ -174,8 +177,7 @@ export class GuidePopupComponent {
   resize = (event: MouseEvent): void => {
     if (!this.isResizing) return;
 
-    // Le panneau est ancré à droite : la largeur correspond à l'espace
-    // entre la souris et le bord droit de la fenêtre.
+    // Le panneau est ancré à droite
     const newWidth = window.innerWidth - event.clientX;
     const maxWidth = window.innerWidth * 0.9;
 
