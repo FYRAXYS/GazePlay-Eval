@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import {SaveService} from '../../services/save/save.service';
 import {DownloadService} from '../../services/download/download.service';
 import {Router} from '@angular/router';
-import {saveModel} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-download-eval',
