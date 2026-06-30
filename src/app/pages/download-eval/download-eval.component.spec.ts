@@ -12,11 +12,12 @@ describe('DownloadEvalComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    downloadSpy = jasmine.createSpyObj('DownloadService', ['generateEvalZip']);
+    downloadSpy = jasmine.createSpyObj('DownloadService', ['generateEvalZip', 'generateSlotZip']);
     saveSpy    = jasmine.createSpyObj('SaveService',  ['getEvalName']);
     routerSpy  = jasmine.createSpyObj('Router', ['navigate']);
 
     downloadSpy.generateEvalZip.and.returnValue(Promise.resolve());
+    downloadSpy.generateSlotZip.and.returnValue(Promise.resolve());
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
@@ -37,8 +38,15 @@ describe('DownloadEvalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('goDownload → appelle generateEvalZip avec le saveService', () => {
+  it('goDownload → appelle generateSlotZip avec le saveService', () => {
     component.goDownload();
+    expect(downloadSpy.generateSlotZip).toHaveBeenCalledOnceWith(
+      jasmine.objectContaining({ createdAt: jasmine.any(String), version: 1 })
+    );
+  });
+
+  it('goExport → appelle generateEvalZip avec le saveService', () => {
+    component.goExport();
     expect(downloadSpy.generateEvalZip).toHaveBeenCalledOnceWith(saveSpy as any);
   });
 

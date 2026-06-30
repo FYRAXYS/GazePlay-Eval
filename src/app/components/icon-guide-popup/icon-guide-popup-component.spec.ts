@@ -20,4 +20,14 @@ describe('IconGuidePopupComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('ouvrir et fermer le guide change la valeur du booléen isGuideOpen', () => {
+    fixture.detectChanges();
+
+    component.openGuide();
+    expect(component.isGuideOpen).toBeTrue();
+
+    component.closeGuide();
+    expect(component.isGuideOpen).toBeFalse();
+  });
 });
