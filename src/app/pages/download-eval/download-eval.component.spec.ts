@@ -45,6 +45,11 @@ describe('DownloadEvalComponent', () => {
     );
   });
 
+  it('goExport → appelle generateEvalZip avec le saveService', () => {
+    component.goExport();
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledOnceWith(saveSpy as any);
+  });
+
   it('backToCreateEval → navigue vers /create-eval', () => {
     component.backToCreateEval();
     expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/create-eval']);
