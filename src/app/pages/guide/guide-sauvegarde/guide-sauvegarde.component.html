@@ -1,12 +1,12 @@
 <div class="card mb-4">
   <div class="card-header">
-    <h2 class="card-title">Création d'évaluation</h2>
+    <h2 class="card-title">Sauvegarde et Chargement d'évaluation</h2>
   </div>
   <div class="card-body">
 
     <div class="guide-section-intro">
       <p>
-        Cette page explique le fonctionnement des systèmes de sauvegarde et de chargement d'évaluation sur le site GazePlay-Eval.
+        Cette page explique le fonctionnement des systèmes de sauvegarde et de chargement d'évaluations sur le site GazePlay-Eval.
         Ce guide est divisé en 3 sous-parties distinctes :
       </p>
 
@@ -36,17 +36,19 @@
 
         <p><strong>Comment savoir si mon évaluation a été enregistrée ?</strong></p>
 
-        <p>Le site fourni un moyen simple pour vérifier que votre évaluation s'est bien sauvegardé automatiquement :
-          les notifications. Si l'option "affichage des messages" est activée dans les <a routerLink="/option">options</a>,
-          Vous pouvez voir des messages ephémères apparaître en bas à droite de votre écran à chaque fois que l'évaluation est sauvegardée.
-          Si l'enregistrement ne peut pa s'effectuer, un message d'erreur remplacera le message de confirmation.
+        <p>Le site fournit un moyen simple pour vérifier que votre évaluation s'est bien sauvegardée automatiquement :
+          les notifications. Si l'option "affichage des messages" est activée dans les <a routerLink="/option">options</a>
+          (ce qui est le cas par défaut), vous pouvez voir des messages ephémères apparaître en bas à droite de votre écran
+          à chaque fois que l'évaluation est sauvegardée. Si l'enregistrement ne peut pa s'effectuer, un message d'erreur
+          remplacera le message de confirmation.
         </p>
 
         <div class="guide-section-card mb-3">
           <div class="guide-section-title">Aide</div>
           <div class="guide-section-body">
             <p>
-              Vous ne voyez aucune notification apparaître ? Vous les avez peut-être désactivés en renseignant une durée d'affichage de <code>0 seconde</code>.
+              Vous ne voyez aucune notification apparaître ? Vous les avez peut-être désactivées en renseignant une durée d'affichage de
+              <code>0 seconde</code> dans les options du site.
               Si c'est le cas, vous pouvez augmenter la durée depuis les <a routerLink="/option">options</a> ou avec le bouton ci-dessous.
             </p>
 
@@ -74,27 +76,28 @@
       <div class="guide-section-body">
         <p>En complément à la sauvegarde automatique, il est également possible de placer une évaluation créée dans un emplacement
         réservé et accessible à tout moment depuis la page de <a routerLink="/sauvegarde">sauvegarde</a>. Cette page permet de conserver les évaluations
-          créés, de les modifier, de les télécharger, ...
+          créées, de les modifier, de les télécharger, ...
         </p>
 
         <img src="assets/guide/images/page-save.png" class="guide-content-image"
              alt="Image montrant la page de sauvegarde, avec deux évaluations enregistrées.">
         <div class="guide-content-image-desc">
-          <p>Page de sauvegarde contant deux évaluations enregistrés.</p>
+          <p>Page de sauvegarde comptant deux évaluations enregistrés.</p>
         </div>
 
         <p>Cette page contient de nombreux boutons et indicateurs visuels pour vous aider à savoir quand sauvegarder
-        et quelles actions sont en train d'être effectués.</p>
+        et quelles actions peuvent être effectuées.</p>
 
-        <p>La partie principale de l'application est les 3 cases au centre. Il s'agit des emplacements de sauvegardes d'évaluation.
-          En fonction de leur état, ils peuvent être vides ou contenir une évaluation existente.
+        <p>Les 3 cases au centre de l'écran constituent la partie la plus importante du mode de sauvegarde. Il s'agit
+          des emplacements de sauvegardes d'évaluation. En fonction de leur état, ils peuvent être vides ou contenir
+          une évaluation existante.
         </p>
 
         <div class="alert alert-tip fw-semibold w-100 mb-5">
           <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
-          Pour des raisons de respect des quotas de votre navigateur, le nombre d'évaluations enregistrés simultanés est limité à 3.
+          Pour des raisons de respect des quotas de votre navigateur, le nombre d'évaluations enregistrées simultanément est limité à 3.
           Des évaluations complètes peuvent contenir un grand nombre de médias (images, sons, vidéos) et saturer la mémoire locale.
-          Si vous souhaitez conserver davantage d'évaluations, vous pouvez toujours les télécharger pour pouvoir les <a routerLink="/guide/imports">
+          Si vous souhaitez conserver davantage d'évaluations, vous pouvez les télécharger (voir partie suivante) pour pouvoir les <a routerLink="/guide/imports">
           importer</a> ultérieurement.
         </div>
 
@@ -103,13 +106,13 @@
 
         <ul>
           <li><p>S'il reste au moins un emplacement libre : un bouton "Sauvegarder" sera affiché sous tout emplacement
-            pouvant accueillir l'évaluation. Cliquer dessus assignera l'évaluation à cet emplacement. Elle sera conservé
-            et accessible à tout moment, même si vous créez une autre évaluation.
+            pouvant accueillir l'évaluation. Cliquer dessus assignera l'évaluation à cet emplacement. Elle sera conservée
+            et accessible à tout moment, même si vous créez une nouvelle évaluation.
           </p>
           </li>
 
           <li><p>S'il ne reste pas d'emplacement libre : en cliquant sur une évaluation déjà sauvegardée, différents boutons
-            apparaissent, ce qui permettent de gérer cette évaluation.
+            apparaissent, permettant de gérer cette évaluation.
             </p>
 
             <img src="assets/guide/images/buttons-save.png" class="guide-content-image"
@@ -118,11 +121,11 @@
               <p>Boutons représentant les différentes actions possibles sur une évaluation enregistrée.</p>
             </div>
 
-            <p>Le bouton le plus à gauche, en jaune, permet d'écraser cette évaluation avec la nouvelle évaluation.
-            Vous pouvez donc utiliser ce bouton pour enregistrer votre nouvelle évaluation.
-            Le bouton central, en bleu, permet de modifier l'évaluation existante. Le bouton le plus à droite, également
-            en bleu, permet de télécharger l'évaluation. Enfin, le bouton en bas, en rouge, permet de supprimer l'évaluation
-            existante.</p>
+            <p>Le bouton jaune le plus à gauche permet d'écraser l’évaluation occupant déjà l’emplacement de sauvegarde avec
+              la nouvelle évaluation. Cela signifie que vous enregistrez l’évaluation en cours de création et supprimez celle
+              qui avait été précédemment enregistrée sur cet emplacement. Le bouton bleu central permet de modifier l'évaluation
+              existante. Le bouton bleu le plus à droite permet de télécharger l'évaluation. Enfin, le bouton rouge en bas permet
+              de supprimer l'évaluation existante.</p>
           </li>
         </ul>
 
@@ -130,7 +133,7 @@
           <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
           <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
           Les actions entraînant une suppression de données (comme la suppression ou la reprise
-          d'une ancienne évaluation) demandent toujours une seconde confirmation de l'utilisateur, pour s'assurer qu'il ne
+          d'une ancienne évaluation) demandent toujours une seconde confirmation de l'utilisateur·trice, pour s'assurer qu'il ne
           s'agissait pas d'une action non-désirée.
         </div>
 
@@ -274,8 +277,8 @@
     <div class="guide-section-card mb-3">
       <div class="guide-section-title">Partie 3 — La page de chargement d'évaluation</div>
       <div class="guide-section-body">
-        <p>Une fois que des évaluations ont été sauvegardés, il est possible de les charger pour reprendre
-          à la dernière étape visitée, à l'aide de la page de chargement d'évaluation.
+        <p>La page de chargement d’évaluation vous permet, comme son nom l’indique, de charger les évaluations précédemment sauvegardées.
+        Charger une évaluation vous ramènera à la dernière étape visitée avant la sauvegarde de l’évaluation.
         </p>
 
         <img src="assets/guide/images/page-load.png" class="guide-content-image"
@@ -285,7 +288,7 @@
         </div>
 
         <p>En cliquant sur un emplacement contenant une évaluation, vous avez la possibilité de la charger et de la reprendre
-        là où vous vous étiez arrêté.
+        là où vous vous étiez arrêté·e.
         De la même façon que pour la page de sauvegarde, pour pouvoir repérer plus facilement quelle évaluation sauvegardée est en cours de modification, un effet de surbrillance
           en vert ainsi qu'une banderole avec le message "en cours" sont affichés sur l'emplacement concerné.</p>
 
@@ -302,7 +305,7 @@
 
         <p><strong>Y a-t-il une différence entre la modification de la page de sauvegarde et la page de chargement ?</strong></p>
 
-        <p>Non, les deux systèmes sont identiques, ils chargent une évaluation sauvegardée et vous ramènent à la dernière étapes
+        <p>Non, les deux systèmes sont identiques, ils chargent une évaluation sauvegardée et vous ramènent à la dernière étape
         que vous avez consultée. L'intérêt de la page de chargement est seulement de pouvoir relancer plus raidement une évaluation,
         sans avoir à passer par la page de sauvegarde.</p>
 

@@ -38,10 +38,10 @@ describe('DownloadEvalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('goDownload → appelle generateSlotZip avec les données de sauvegarde', () => {
+  it('goDownload → appelle generateSlotZip avec le saveService', () => {
     component.goDownload();
     expect(downloadSpy.generateSlotZip).toHaveBeenCalledOnceWith(
-      jasmine.objectContaining({ version: 1, createdAt: jasmine.any(String) }) as any
+      jasmine.objectContaining({ createdAt: jasmine.any(String), version: 1 })
     );
   });
 
