@@ -180,12 +180,14 @@ export class LoadZipService {
           return {
             name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: transitionScreenConstModel,
+            // `?? défaut` : un champ absent/null d'un fichier déjà corrompu est réparé
+            // ici plutôt que recopié en `undefined` (qui ressortirait en `null` à l'export).
             values: [
-              item["Mettre un temps avant passage à l'écran suivant"],
-              item["Combien de temps"],
-              item["Mettre une croix de fixation"],
-              item["Mettre un temps de fixation"],
-              item["Combien de temps de fixation"]
+              item["Mettre un temps avant passage à l'écran suivant"] ?? false,
+              item["Combien de temps"] ?? 0,
+              item["Mettre une croix de fixation"] ?? false,
+              item["Mettre un temps de fixation"] ?? false,
+              item["Combien de temps de fixation"] ?? 0
             ]
           };
 
@@ -196,14 +198,14 @@ export class LoadZipService {
             name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: instructionScreenConstModel,
             values: [
-              item["Mettre un temps avant passage à l'écran suivant"],  // [0]
-              item["Combien de temps"],                                 // [1]
-              item["Ajouter un media"],                                 // [2]
-              item["Type de media"],                                    // [3]
+              item["Mettre un temps avant passage à l'écran suivant"] ?? false,  // [0]
+              item["Combien de temps"] ?? 1,                            // [1]
+              item["Ajouter un media"] ?? false,                        // [2]
+              item["Type de media"] ?? 'Image',                         // [3]
               fileName,                                                 // [4] nom du fichier
               undefined,                                                // [5] File (non sérialisable)
-              item["Ajouter un bouton pour lancer evaluation"] ?? item["Mettre un temps de fixation"], // [6]
-              item["Combien de temps de fixation"],                     // [7]
+              (item["Ajouter un bouton pour lancer evaluation"] ?? item["Mettre un temps de fixation"]) ?? false, // [6]
+              item["Combien de temps de fixation"] ?? 1,                // [7]
               idbId                                                     // [8] clé IDB
             ]
           };
@@ -224,16 +226,16 @@ export class LoadZipService {
             name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: stimuliScreenConstModel,
             values: [
-              item["Nombre de lignes"],                                  // [0]
-              item["Nombre de colonnes"],                                // [1]
-              item["Mettre un temps avant passage à l'écran suivant"],  // [2]
-              item["Combien de temps"],                                  // [3]
-              item["Combien de temps de fixation"],                      // [4]
-              item["Choix de sélection"],                                // [5]
-              item["Combien à sélectionner"],                            // [6]
-              item["Position stimuli aléatoire"],                        // [7]
-              item["Caché stimuli après selection"],                     // [8]
-              item["Mettre un son"],                                     // [9]
+              item["Nombre de lignes"] ?? 1,                             // [0]
+              item["Nombre de colonnes"] ?? 1,                           // [1]
+              item["Mettre un temps avant passage à l'écran suivant"] ?? false, // [2]
+              item["Combien de temps"] ?? 10,                            // [3]
+              item["Combien de temps de fixation"] ?? 1,                 // [4]
+              item["Choix de sélection"] ?? 'Tout',                      // [5]
+              item["Combien à sélectionner"] ?? 1,                       // [6]
+              item["Position stimuli aléatoire"] ?? false,               // [7]
+              item["Caché stimuli après selection"] ?? false,            // [8]
+              item["Mettre un son"] ?? false,                            // [9]
               soundName,                                                 // [10] nom du son global
               undefined,                                                 // [11] File (non sérialisable)
               stimuliList,                                               // [12] dico des stimuli

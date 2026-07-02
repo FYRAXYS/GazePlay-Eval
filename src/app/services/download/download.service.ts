@@ -5,11 +5,14 @@ import {SaveService} from '../save/save.service';
 import {
   instructionScreenConstKey,
   instructionScreenConstModel,
+  instructionScreenConstValue,
   screenTypeModel,
   stimuliScreenConstKey,
   stimuliScreenConstModel,
+  stimuliScreenConstValue,
   transitionScreenConstKey,
-  transitionScreenConstModel
+  transitionScreenConstModel,
+  transitionScreenConstValue
 } from '../../shared/screenModel';
 import {saveModel} from '../../shared/saveModel';
 import {IndexedDBService} from '../indexedDB/indexed-db.service';
@@ -43,22 +46,23 @@ export class DownloadService {
     let jsonData: any[] = [];
 
     for (let i = 0; i < evalData.length; i++) {
-      switch (evalData[i].type) {
+      const screen = this.withDefaultValues(evalData[i]);
+      switch (screen.type) {
 
         case transitionScreenConstModel:
-          this.generateTransitionScreen(evalData[i], jsonData, true);
+          this.generateTransitionScreen(screen, jsonData, true);
           break;
 
         case instructionScreenConstModel:
-          if (evalData[i].values[3] === "Texte") {
-            this.generateInstructionScreenText(evalData[i], jsonData, true);
+          if (screen.values[3] === "Texte") {
+            this.generateInstructionScreenText(screen, jsonData, true);
           } else {
-            await this.generateInstructionScreenMedia(evalData[i], jsonData, saveService.getEvalName(), zip, true);
+            await this.generateInstructionScreenMedia(screen, jsonData, saveService.getEvalName(), zip, true);
           }
           break;
 
         case stimuliScreenConstModel:
-          await this.generateStimuliScreen(evalData[i], jsonData, saveService.getEvalName(), zip, true);
+          await this.generateStimuliScreen(screen, jsonData, saveService.getEvalName(), zip, true);
           break;
 
         default:
@@ -78,8 +82,82 @@ export class DownloadService {
     return {
       "Nom de l'évaluation": saveService.getEvalName(),
       "Format choisi": saveService.dataAuto.format,
-      "Informations participant": saveService.dataAuto.infoParticipant
+      "Informations participant": saveService.dataAuto.infoParticipant,
+      ...this.buildGlobalParamsInfo(
+        saveService.dataAuto.globalParamsTransitionScreen,
+        saveService.dataAuto.globalParamsInstructionScreen,
+        saveService.dataAuto.globalParamsStimuliScreen
+      )
     };
+  }
+
+  /**
+   * Sérialise les paramètres globaux (transition / instruction / stimuli) dans
+   * `evalInfo.json`, sous la forme d'objets nommés que `LoadZipService` sait relire.
+   *
+   * Sans cette sérialisation, les paramètres globaux étaient perdus à l'import :
+   * tout écran ajouté ensuite naissait depuis un tableau global vide, donc avec des
+   * `values` indéfinies — silencieusement supprimées par `JSON.stringify` au ré-export
+   * (champs manquants en fin d'écran). Les clés reflètent volontairement celles
+   * attendues par `parseGlobal*` du LoadZipService pour garantir l'aller-retour.
+   */
+  private buildGlobalParamsInfo(gt: any[] = [], gi: any[] = [], gs: any[] = []) {
+    return {
+      globalParamsTransitionScreen: {
+        "Mettre un temps avant passage à l'écran suivant": gt[0],
+        "Combien de temps": gt[1],
+        "Mettre une croix de fixation": gt[2],
+        "Mettre un temps de fixation": gt[3],
+        "Combien de temps de fixation": gt[4]
+      },
+      globalParamsInstructionScreen: {
+        "Mettre un temps avant passage à l'écran suivant": gi[0],
+        "Combien de temps": gi[1],
+        "Ajouter un media": gi[2],
+        "Type de media": gi[3],
+        "Ajouter un bouton pour lancer evaluation": gi[4],
+        "Combien de temps de fixation": gi[5]
+      },
+      globalParamsStimuliScreen: {
+        "Nombre de lignes": gs[0],
+        "Nombre de colonnes": gs[1],
+        "Mettre un temps avant passage à l'écran suivant": gs[2],
+        "Combien de temps": gs[3],
+        "Combien de temps de fixation": gs[4],
+        "Choix de sélection": gs[5],
+        "Combien à sélectionner": gs[6],
+        "Position stimuli aléatoire": gs[7]
+      }
+    };
+  }
+
+  /** Valeurs par défaut d'un écran selon son type (alignées sur le modèle, avant tout splice). */
+  private defaultValuesFor(type: string): any[] {
+    switch (type) {
+      case transitionScreenConstModel:  return transitionScreenConstValue;
+      case instructionScreenConstModel: return instructionScreenConstValue;
+      case stimuliScreenConstModel:     return stimuliScreenConstValue;
+      default:                          return [];
+    }
+  }
+
+  /**
+   * Renvoie une copie de l'écran dont chaque `values[i]` à `null`/`undefined` est
+   * remplacé par la valeur par défaut du modèle.
+   *
+   * Garantit qu'un modèle pollué (champs perdus lors d'un import antérieur, devenus
+   * `null` après un aller-retour localStorage) ne propage jamais de `null` dans
+   * `evalData.json` — ce qui rendait l'évaluation inexploitable dans GazePlay-Learning.
+   */
+  private withDefaultValues(screen: screenTypeModel): screenTypeModel {
+    const defaults = this.defaultValuesFor(screen.type);
+    const values = structuredClone(screen.values);
+    for (let i = 0; i < defaults.length; i++) {
+      if (values[i] === undefined || values[i] === null) {
+        values[i] = structuredClone(defaults[i]);
+      }
+    }
+    return { ...screen, values } as screenTypeModel;
   }
 
   generateTransitionScreen(evalData: screenTypeModel, jsonData: any[], zip:boolean = true) {
@@ -224,7 +302,8 @@ export class DownloadService {
       const evalName = saveData.nomEval || 'GazePlayEvalDefaultName';
       const jsonData: any[] = [];
 
-      for (const screen of saveData.listScreens) {
+      for (const rawScreen of saveData.listScreens) {
+        const screen = this.withDefaultValues(rawScreen);
         switch (screen.type) {
           case transitionScreenConstModel:
             this.generateTransitionScreen(screen, jsonData, false);
@@ -258,7 +337,12 @@ export class DownloadService {
     return {
       "Nom de l'évaluation": saveData.nomEval,
       "Format choisi": saveData.format,
-      "Informations participant": saveData.infoParticipant
+      "Informations participant": saveData.infoParticipant,
+      ...this.buildGlobalParamsInfo(
+        saveData.globalParamsTransitionScreen,
+        saveData.globalParamsInstructionScreen,
+        saveData.globalParamsStimuliScreen
+      )
     };
   }
 
