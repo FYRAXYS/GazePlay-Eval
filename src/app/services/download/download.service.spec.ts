@@ -128,6 +128,78 @@ describe('DownloadService', () => {
     expect(result["Informations participant"]).toEqual(['Nom']);
   });
 
+  // ─── globalParams dans evalInfo (anti-régression import) ──────────────────
+
+  it('getInfoEval → sérialise les paramètres globaux sous les clés attendues à l’import', () => {
+    const ss: any = {
+      getEvalName: () => 'TestEval',
+      dataAuto: {
+        format: 'Csv&Xlsx',
+        infoParticipant: [],
+        globalParamsTransitionScreen: [true, 10, false, true, 3],
+        globalParamsInstructionScreen: [true, 8, true, 'Video', false, 2],
+        globalParamsStimuliScreen: [2, 3, true, 12, 1, 'Un', 4, true]
+      }
+    };
+    const info: any = service.getInfoEval(ss);
+
+    expect(info.globalParamsTransitionScreen).toEqual({
+      "Mettre un temps avant passage à l'écran suivant": true,
+      "Combien de temps": 10,
+      "Mettre une croix de fixation": false,
+      "Mettre un temps de fixation": true,
+      "Combien de temps de fixation": 3
+    });
+    expect(info.globalParamsInstructionScreen["Type de media"]).toBe('Video');
+    expect(info.globalParamsInstructionScreen["Ajouter un bouton pour lancer evaluation"]).toBe(false);
+    expect(info.globalParamsStimuliScreen["Nombre de lignes"]).toBe(2);
+    expect(info.globalParamsStimuliScreen["Position stimuli aléatoire"]).toBe(true);
+  });
+
+  it('getInfoEvalFromSlot → inclut les paramètres globaux de la sauvegarde', () => {
+    const saveData = {
+      ...saveModelDefault,
+      nomEval: 'SlotEval',
+      globalParamsTransitionScreen: [false, 4, true, false, 0]
+    };
+    const info: any = service.getInfoEvalFromSlot(saveData as any);
+
+    expect(info.globalParamsTransitionScreen).toEqual({
+      "Mettre un temps avant passage à l'écran suivant": false,
+      "Combien de temps": 4,
+      "Mettre une croix de fixation": true,
+      "Mettre un temps de fixation": false,
+      "Combien de temps de fixation": 0
+    });
+  });
+
+  // ─── Export-healing : aucun null/undefined dans l'export ───────────────────
+
+  it('withDefaultValues → remplace null/undefined par les valeurs par défaut du modèle', () => {
+    const polluted: any = { name: 'T', type: 'transition', values: [true, 3, false, undefined, null] };
+
+    const healed = (service as any).withDefaultValues(polluted);
+
+    expect(healed.values).toEqual([true, 3, false, false, 0]);
+    expect(healed.values.some((v: any) => v === undefined || v === null)).toBeFalse();
+    expect(polluted.values[3]).toBeUndefined(); // n'altère pas l'original
+  });
+
+  it('generateEvalZip → evalData.json sans null même depuis un modèle pollué', async () => {
+    const polluted: any = { name: 'T', type: 'transition', values: [true, 3, false, undefined, null] };
+
+    await service.generateEvalZip(makeSaveService([polluted]));
+
+    const call = zipFileSpy.calls.all().find(c => String(c.args[0]).endsWith('evalData.json'));
+    expect(call).toBeDefined();
+    const json = call!.args[1] as string;
+    expect(json).not.toContain('null');
+
+    const parsed = JSON.parse(json);
+    expect(parsed[0]["Mettre un temps de fixation"]).toBe(false);
+    expect(parsed[0]["Combien de temps de fixation"]).toBe(0);
+  });
+
   // ─── generateTransitionScreen ────────────────────────────────────────────
 
   it('generateTransitionScreen → pousse une entrée JSON avec Type=transition et les bonnes clés', () => {
