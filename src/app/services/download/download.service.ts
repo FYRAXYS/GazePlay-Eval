@@ -14,7 +14,7 @@ import {
   transitionScreenConstModel,
   transitionScreenConstValue
 } from '../../shared/screenModel';
-import {saveModel} from '../../shared/saveModel';
+import {saveModel, saveModelDefault} from '../../shared/saveModel';
 import {IndexedDBService} from '../indexedDB/indexed-db.service';
 
 @Injectable({
@@ -78,57 +78,81 @@ export class DownloadService {
     });
   }
 
+  /**
+   * `evalInfo.json` du ZIP d'export final (`.zip`) destiné à GazePlay-Learning.
+   *
+   * Les paramètres globaux sont volontairement ABSENTS de l'export : ce sont des
+   * réglages propres à l'éditeur (valeurs pré-remplies à la création d'écran) et non
+   * des données d'évaluation. Ils ne sont conservés que dans le `.gpSave`
+   * (cf. `getInfoEvalFromSlot`) pour l'aller-retour d'édition.
+   */
   getInfoEval(saveService: SaveService) {
     return {
       "Nom de l'évaluation": saveService.getEvalName(),
       "Format choisi": saveService.dataAuto.format,
-      "Informations participant": saveService.dataAuto.infoParticipant,
-      ...this.buildGlobalParamsInfo(
-        saveService.dataAuto.globalParamsTransitionScreen,
-        saveService.dataAuto.globalParamsInstructionScreen,
-        saveService.dataAuto.globalParamsStimuliScreen
-      )
+      "Informations participant": saveService.dataAuto.infoParticipant
     };
   }
 
   /**
    * Sérialise les paramètres globaux (transition / instruction / stimuli) dans
-   * `evalInfo.json`, sous la forme d'objets nommés que `LoadZipService` sait relire.
+   * l'`evalInfo.json` du `.gpSave` UNIQUEMENT, sous la forme d'objets nommés que
+   * `LoadZipService` sait relire. Le ZIP d'export final n'en contient pas
+   * (cf. `getInfoEval`).
    *
-   * Sans cette sérialisation, les paramètres globaux étaient perdus à l'import :
-   * tout écran ajouté ensuite naissait depuis un tableau global vide, donc avec des
-   * `values` indéfinies — silencieusement supprimées par `JSON.stringify` au ré-export
+   * Sans cette sérialisation, les paramètres globaux étaient perdus au ré-import du
+   * `.gpSave` : tout écran ajouté ensuite naissait depuis un tableau global vide, donc
+   * avec des `values` indéfinies — silencieusement supprimées par `JSON.stringify`
    * (champs manquants en fin d'écran). Les clés reflètent volontairement celles
    * attendues par `parseGlobal*` du LoadZipService pour garantir l'aller-retour.
+   *
+   * Chaque tableau reçu est d'abord complété par les valeurs du modèle par défaut :
+   * un tableau vide ou partiel (évaluation jamais passée par l'étape des paramètres
+   * globaux, `dataAuto` retombé sur son état initial vide, ou fichier issu d'un ancien
+   * format) produisait sinon des champs `undefined` que `JSON.stringify` supprime,
+   * laissant des objets `{}` — les paramètres globaux n'étaient alors pas enregistrés
+   * dans le `.gpSave`.
    */
   private buildGlobalParamsInfo(gt: any[] = [], gi: any[] = [], gs: any[] = []) {
+    const t = this.coalesceGlobals(gt, saveModelDefault.globalParamsTransitionScreen);
+    const i = this.coalesceGlobals(gi, saveModelDefault.globalParamsInstructionScreen);
+    const s = this.coalesceGlobals(gs, saveModelDefault.globalParamsStimuliScreen);
     return {
       globalParamsTransitionScreen: {
-        "Mettre un temps avant passage à l'écran suivant": gt[0],
-        "Combien de temps": gt[1],
-        "Mettre une croix de fixation": gt[2],
-        "Mettre un temps de fixation": gt[3],
-        "Combien de temps de fixation": gt[4]
+        "Mettre un temps avant passage à l'écran suivant": t[0],
+        "Combien de temps": t[1],
+        "Mettre une croix de fixation": t[2],
+        "Mettre un temps de fixation": t[3],
+        "Combien de temps de fixation": t[4]
       },
       globalParamsInstructionScreen: {
-        "Mettre un temps avant passage à l'écran suivant": gi[0],
-        "Combien de temps": gi[1],
-        "Ajouter un media": gi[2],
-        "Type de media": gi[3],
-        "Ajouter un bouton pour lancer evaluation": gi[4],
-        "Combien de temps de fixation": gi[5]
+        "Mettre un temps avant passage à l'écran suivant": i[0],
+        "Combien de temps": i[1],
+        "Ajouter un media": i[2],
+        "Type de media": i[3],
+        "Ajouter un bouton pour lancer evaluation": i[4],
+        "Combien de temps de fixation": i[5]
       },
       globalParamsStimuliScreen: {
-        "Nombre de lignes": gs[0],
-        "Nombre de colonnes": gs[1],
-        "Mettre un temps avant passage à l'écran suivant": gs[2],
-        "Combien de temps": gs[3],
-        "Combien de temps de fixation": gs[4],
-        "Choix de sélection": gs[5],
-        "Combien à sélectionner": gs[6],
-        "Position stimuli aléatoire": gs[7]
+        "Nombre de lignes": s[0],
+        "Nombre de colonnes": s[1],
+        "Mettre un temps avant passage à l'écran suivant": s[2],
+        "Combien de temps": s[3],
+        "Combien de temps de fixation": s[4],
+        "Choix de sélection": s[5],
+        "Combien à sélectionner": s[6],
+        "Position stimuli aléatoire": s[7]
       }
     };
+  }
+
+  /**
+   * Complète `values` avec `defaults` : chaque entrée `null`/`undefined` (ou absente)
+   * reprend la valeur par défaut du modèle. Les valeurs légitimes `false`, `0` ou `''`
+   * sont conservées (seuls `null`/`undefined` déclenchent le repli).
+   */
+  private coalesceGlobals(values: any[] = [], defaults: any[]): any[] {
+    return defaults.map((def, idx) => values?.[idx] ?? def);
   }
 
   /** Valeurs par défaut d'un écran selon son type (alignées sur le modèle, avant tout splice). */

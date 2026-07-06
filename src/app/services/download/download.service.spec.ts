@@ -130,7 +130,7 @@ describe('DownloadService', () => {
 
   // ─── globalParams dans evalInfo (anti-régression import) ──────────────────
 
-  it('getInfoEval → sérialise les paramètres globaux sous les clés attendues à l’import', () => {
+  it('getInfoEval → n’inclut PAS les paramètres globaux (réservés au .gpSave)', () => {
     const ss: any = {
       getEvalName: () => 'TestEval',
       dataAuto: {
@@ -143,17 +143,35 @@ describe('DownloadService', () => {
     };
     const info: any = service.getInfoEval(ss);
 
-    expect(info.globalParamsTransitionScreen).toEqual({
-      "Mettre un temps avant passage à l'écran suivant": true,
-      "Combien de temps": 10,
-      "Mettre une croix de fixation": false,
-      "Mettre un temps de fixation": true,
-      "Combien de temps de fixation": 3
-    });
-    expect(info.globalParamsInstructionScreen["Type de media"]).toBe('Video');
-    expect(info.globalParamsInstructionScreen["Ajouter un bouton pour lancer evaluation"]).toBe(false);
-    expect(info.globalParamsStimuliScreen["Nombre de lignes"]).toBe(2);
-    expect(info.globalParamsStimuliScreen["Position stimuli aléatoire"]).toBe(true);
+    // Le ZIP d'export final ne doit contenir que les métadonnées d'évaluation.
+    expect(Object.keys(info)).toEqual([
+      "Nom de l'évaluation",
+      "Format choisi",
+      "Informations participant"
+    ]);
+    expect(info.globalParamsTransitionScreen).toBeUndefined();
+    expect(info.globalParamsInstructionScreen).toBeUndefined();
+    expect(info.globalParamsStimuliScreen).toBeUndefined();
+  });
+
+  it('generateEvalZip → evalInfo.json du .zip ne contient aucun paramètre global', async () => {
+    const ss: any = {
+      getEvalName: () => 'TestEval',
+      dataAuto: {
+        format: 'Csv&Xlsx',
+        infoParticipant: [],
+        globalParamsTransitionScreen: [true, 10, false, true, 3],
+        globalParamsInstructionScreen: [true, 8, true, 'Video', false, 2],
+        globalParamsStimuliScreen: [2, 3, true, 12, 1, 'Un', 4, true],
+        listScreens: []
+      }
+    };
+
+    await service.generateEvalZip(ss);
+
+    const call = zipFileSpy.calls.all().find(c => String(c.args[0]).endsWith('evalInfo.json'));
+    expect(call).toBeDefined();
+    expect(call!.args[1] as string).not.toContain('globalParams');
   });
 
   it('getInfoEvalFromSlot → inclut les paramètres globaux de la sauvegarde', () => {
@@ -171,6 +189,48 @@ describe('DownloadService', () => {
       "Mettre un temps de fixation": false,
       "Combien de temps de fixation": 0
     });
+  });
+
+  it('getInfoEvalFromSlot → tableaux globaux vides → remplis par les valeurs par défaut (non {})', () => {
+    const saveData = {
+      ...saveModelDefault,
+      nomEval: 'SlotEval',
+      globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [],
+      globalParamsStimuliScreen: []
+    };
+    const info: any = service.getInfoEvalFromSlot(saveData as any);
+
+    // Sans le repli sur saveModelDefault, JSON.stringify supprimait les champs undefined
+    // et le .gpSave enregistrait des objets vides {} — paramètres globaux perdus.
+    expect(info.globalParamsTransitionScreen).toEqual({
+      "Mettre un temps avant passage à l'écran suivant": true,
+      "Combien de temps": 10,
+      "Mettre une croix de fixation": false,
+      "Mettre un temps de fixation": false,
+      "Combien de temps de fixation": 0
+    });
+    expect(info.globalParamsInstructionScreen["Type de media"]).toBe('Image');
+    expect(info.globalParamsStimuliScreen["Nombre de lignes"]).toBe(1);
+    expect(info.globalParamsStimuliScreen["Combien de temps"]).toBe(10);
+
+    // Anti-régression : le JSON sérialisé ne doit plus contenir d'objet global vide.
+    const json = JSON.stringify(info);
+    expect(json).not.toContain('"globalParamsTransitionScreen":{}');
+    expect(json).not.toContain('"globalParamsInstructionScreen":{}');
+    expect(json).not.toContain('"globalParamsStimuliScreen":{}');
+  });
+
+  it('getInfoEvalFromSlot → conserve les valeurs légitimes false/0 (pas de repli abusif)', () => {
+    const saveData = {
+      ...saveModelDefault,
+      globalParamsStimuliScreen: [0, 0, false, 0, 0, 0, false, false]
+    };
+    const info: any = service.getInfoEvalFromSlot(saveData as any);
+
+    expect(info.globalParamsStimuliScreen["Nombre de lignes"]).toBe(0);
+    expect(info.globalParamsStimuliScreen["Mettre un temps avant passage à l'écran suivant"]).toBe(false);
+    expect(info.globalParamsStimuliScreen["Combien de temps"]).toBe(0);
   });
 
   // ─── Export-healing : aucun null/undefined dans l'export ───────────────────
