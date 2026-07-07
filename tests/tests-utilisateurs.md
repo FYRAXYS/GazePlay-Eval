@@ -3,22 +3,22 @@
 
 ## Test du parcours principal de l’application (créer une évaluation de zéro) : 
 
-- Sur l’écran d’accueil, cliquer sur le bouton “créer une nouvelle évaluation”.
-- Changer le nom de l’évaluation. Dans le cas contraire, elle s’appellera “Nouvelle évaluation”. Laisser le format sur “CSV & XLSX”.
+- Sur l’écran d’accueil, cliquer sur le bouton **“créer une nouvelle évaluation”**.
+- Changer le nom de l’évaluation. Dans le cas contraire, elle s’appellera **“Nouvelle évaluation”**. Laisser le format sur **“CSV & XLSX”**.
 - Dans la liste d’information, ajouter plusieurs champs. Les renommer et changer leur ordre.
 - Choisir le mode de création manuel. Concernant les paramètres globaux : 
-  - des écrans de transition : Mettre un temps avant passage à l'écran suivant de 5.5 secondes et mettre une croix de fixation.
-  - des écrans d’instruction : Ajouter un média par défaut de type image et mettre un bouton avec une durée de fixation de 1.5 seconde.
-  - des écrans de stimuli : Définir la grille à 2 lignes et 3 colonnes. Mettre le nombre de stimuli à valider pour passage à l'écran suivant à 2. Activer le placement des stimulis aléatoires.
+  - des écrans de transition : Mettre un temps avant passage à l'écran suivant de <code>5.5 secondes</code> et mettre une croix de fixation.
+  - des écrans d’instruction : Ajouter un média par défaut de type image et mettre un bouton avec une durée de fixation de <code>1.5 secondes</code>.
+  - des écrans de stimuli : Définir la grille à <code>2</code> lignes et <code>3</code> colonnes. Mettre le nombre de stimuli à valider pour passage à l'écran suivant à <code>2</code>. Activer le placement des stimulis aléatoires.
 - Créer 3 nouveaux écrans (un pour chaque type), et les renommer selon leur type (un d’instruction, un de transition, un de stimuli). Pour chaque écran, cliquer dessus et le modifier, en constatant que les paramètres globaux sont bien présents : 
-  - écran de transition : augmenter le temps avant le passage à l’écran suivant à 8 secondes.
-  - écran d’instruction : garder les paramètres par défaut. Ajouter l’image “gazeplay-mesange.png”.
+  - écran de transition : augmenter le temps avant le passage à l’écran suivant à <code>8 secondes</code>.
+  - écran d’instruction : garder les paramètres par défaut. Ajouter l’image [“gazeplay-mesange.png”](gazeplay-mesange.png).
   - écran de stimuli : garder les paramètres par défaut. Descendre jusqu’à la grille de stimuli et la modifier : 
-    - cliquer sur la première cellule pour l’éditer. La définir comme étant une bonne réponse, ajouter l’image “gazeplay-mesange.png” et le son “gazeplay-oiseau.mp3”. Valider.
+    - cliquer sur la première cellule pour l’éditer. La définir comme étant une bonne réponse, ajouter l’image [“gazeplay-mesange.png”](gazeplay-mesange.png) et le son [“gazeplay-oiseau.mp3”](gazeplay-oiseau.mp3). Valider.
     - Dupliquer cette cellule dans une autre cellule.
-    - Cliquer sur une autre cellule pour l’éditer. La laisser comme étant une mauvaise réponse, ajouter l’image “gazeplay-rouge-gorge.png”.
+    - Cliquer sur une autre cellule pour l’éditer. La laisser comme étant une mauvaise réponse, ajouter l’image [“gazeplay-rouge-gorge.png”](gazeplay-rouge-gorge.png).
     - Dupliquer cette cellule dans les autres cellules qui n’ont pas encore été modifiées.
-- Télécharger l’évaluation pour GazePlay-Learning avec le bouton “Exporter pour GazePlay-Learning”. Possiblement continuer le test sur GazePlay-Learning ?
+- Télécharger l’évaluation pour GazePlay-Learning avec le bouton “Exporter pour GazePlay-Learning”. Cela vous permettra de continuer le test sur *GazePlay-Learning*.
 
 - *Bonus : constater que l’avancée de l’évaluation est conservée si l’utilisateur recharge la page, la ferme ou quitte son navigateur.*
 
@@ -30,6 +30,6 @@
 
 
 ## Test d’importation d’évaluation : 
-- Ouvrir le menu latéral et cliquer sur le bouton “Importer”.
-- Dans la fenêtre qui s’ouvre, choisir le mode “Sauvegarder”. Choisir ensuite le fichier “gazeplay-eval-import.gpsave”. Enfin, sélectionner un emplacement de sauvegarde non-occupé et cliquer sur “Importer”.
-- Vérifier que le site nous amène bien sur une nouvelle évaluation appelée “Evaluation Importation”.
+- Ouvrir le menu latéral et cliquer sur le bouton **“Importer”**.
+- Dans la fenêtre qui s’ouvre, choisir le mode **“Sauvegarder”**. Choisir ensuite le fichier [“gazeplay-eval-import.gpsave”](gazeplay-eval-import.gpsave). Enfin, sélectionner un emplacement de sauvegarde non-occupé et cliquer sur **“Importer”**.
+- Vérifier que le site nous amène bien sur une nouvelle évaluation appelée **“évaluation Importation”**.
