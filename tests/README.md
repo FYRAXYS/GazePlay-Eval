@@ -31,5 +31,5 @@
 
 ## Test d’importation d’évaluation : 
 - Ouvrir le menu latéral et cliquer sur le bouton **“Importer”**.
-- Dans la fenêtre qui s’ouvre, choisir le mode **“Sauvegarder”**. Choisir ensuite le fichier [“gazeplay-eval-import.gpsave”](gazeplay-eval-import.gpsave). Enfin, sélectionner un emplacement de sauvegarde non-occupé et cliquer sur **“Importer”**.
+- Dans la fenêtre qui s’ouvre, choisir le mode **“Sauvegarder”**. Choisir ensuite le fichier [“gazeplay-eval-import.gpSave”](gazeplay-eval-import.gpSave). Enfin, sélectionner un emplacement de sauvegarde non-occupé et cliquer sur **“Importer”**.
 - Vérifier que le site nous amène bien sur une nouvelle évaluation appelée **“évaluation Importation”**.
