@@ -6,7 +6,7 @@
 
     <div class="guide-section-intro">
       <p>Cette page donne des indications et conseils pour l'ensemble du processus de création
-      d'une évaluation. Ce guide est divisé en plusieurs parties, qui sont chacune liés à une des pages de l'évaluation.
+      d'une évaluation. Ce guide est divisé en plusieurs parties, qui sont chacune liées à une des pages de l'évaluation.
       Vous pouvez retrouver dans l'ordre :
       </p>
 
@@ -43,8 +43,8 @@
         <p>Visualisation de la barre de progression lors de la création d'une évaluation.</p>
       </div>
 
-      <p>Cette barre de progression permet de voir les étapes déjà remplies (celles en vert), l'étape en cours (celle en bleu
-      ) ainsi que les étapes suivantes (celles en gris). Il est toujours possible d'avancer ou de reculer en utilisant les boutons
+      <p>Cette barre de progression permet de voir les étapes déjà remplies (en vert), l'étape en cours (en bleu
+      ) ainsi que les étapes suivantes (en gris). Il est toujours possible d'avancer ou de reculer en utilisant les boutons
       de navigation en bas de chaque page.</p>
 
       <p>Pour accéder à la page de création d'évaluation, vous pouvez utiliser le menu latéral et cliquer sur "Accueil".
@@ -60,7 +60,7 @@
       <p>Dans certaines pages, vous aurez également des icônes
         <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
         <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt="">
-        sur certains points techniques. En les survolant, vous pouvez bénéficier d'explications supplémentaires et de conseils.
+        concernant certains points techniques. En les survolant, vous pouvez bénéficier d'explications supplémentaires et de conseils.
       </p>
 
     </div>
@@ -74,7 +74,7 @@
         </p>
 
         <p>Il vous est ensuite demandé de choisir un format pour récupérer les résultats d'une évaluation. Lorsqu'elle sera effectuée
-        sur l'application GazePlay-Learning, les résultats du/de la participant·e seront stockés dans un tableur. Si vous n'êtes pas familiers
+        sur l'application GazePlay-Learning, les résultats du/de la participant·e seront stockés dans un tableur. Si vous n'êtes pas familier·ère
         avec les différents formats existants, laissez sur la valeur par défaut ("CSV & XLSX").</p>
       </div>
     </div>
@@ -82,16 +82,23 @@
     <div class="guide-section-card mb-3" [id]="'info-participant'">
       <div class="guide-section-title">Partie 2 — Informations du/de la participant·e</div>
       <div class="guide-section-body">
-        <p>Cette partie facultative vous permet d'ajouter une liste d'information complémentaire sur le/la participant·e à cette évaluation.
-        Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span> situé à gauche de chaque élément vous permet
-        de le déplacer dans la liste. Le bouton rouge, à droite de chaque élément, permet de le supprimer.
-        </p>
+        <p>Cette partie facultative vous permet d'ajouter une liste de champs (“Nom”, “Prénom”, “Âge”, ...). Lorsque vous ferez passer
+          l’évaluation à quelqu’un depuis Gazeplay Learning, ces champs seront affichés afin que vous puissiez les remplir avec les
+          données concernant le/la participant·e. Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span>
+          situé à gauche de chaque élément vous permet de le déplacer dans la liste.
+          Le bouton rouge, à droite de chaque élément, permet de le supprimer.</p>
 
         <div class="alert alert-info fw-semibold w-100 mb-5">
           <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
           <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
           Aucune donnée n'est jamais transmise vers des serveurs. Personne ne peut y avoir accès, sauf si vous partagez vos évaluations
           par la suite. Assurez vous toujours de la conformité au R.G.P.D des données que vous renseignez.
+        </div>
+
+        <img src="assets/guide/images/info-user.png" class="guide-content-image"
+             alt="Image montrant une liste d'informations, avec des champs pour le nom et l'âge.">
+        <div class="guide-content-image-desc">
+          <p>Visualisation des champs d'informations d'un·e utilisateur·trice qui seront remplis avec GazePlay-Learning.</p>
         </div>
 
       </div>
@@ -112,52 +119,52 @@
         </div>
 
         <p>Une fois le mode sélectionné, il est possible de renseigner des paramètres par défaut pour les différents types d'écran. Ces paramètres seront
-        utilisés comme valeurs initiales pour tout écran nouvellement créé. Pour tout les types d'écrans, les durées demandés sont en seconde. La précision
+        utilisés comme valeurs initiales pour tout écran nouvellement créé. Pour tous les types d'écrans, les durées demandées sont en secondes. La précision
         est au dixième de seconde.</p>
 
         <div class="alert alert-info fw-semibold w-100 mb-5">
           <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
           <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-          La plupart des éléments interactifs dans les évaluations (boutons, zone à sélectionner, croix de fixation, ...) nécessitent qu'une durée
-          de fixation du regard en seconde soit renseignée pour que l'élément fonctionne correctement.
+          La plupart des éléments interactifs dans les évaluations (boutons, zones à sélectionner, croix de fixation) nécessitent qu'une durée
+          de fixation du regard soit renseignée pour que l'élément fonctionne correctement. Cette durée est en secondes.
         </div>
-
-        <p><strong>Ecrans de transition</strong></p>
-
-        <p>Les écrans de transition permettent de faire un lien entre d'autres types d'écrans (instruction, stimuli). Il est possible de renseigner un temps
-        d'affichage de l'écran. Vous avez également la possibilité d'ajouter une croix de fixation à l'écran de transition. Placée au centre de l'écran, elle
-        permet de recalibrer le regard et de s'assurer que le/la participant·e ne risque pas de sélectionner accidentellement un élément du prochain écran.
-        </p>
 
         <p><strong>Ecrans d'instruction</strong></p>
 
-        <p>Les écrans d'instruction permettent de donner des informations à l'évalué·e. Il peut s'agir d'instruction sous forme de texte
+        <p>Les écrans d'instruction permettent de donner des informations à l'évalué·e. Il peut s'agir d'instructions sous forme de texte
         ou d'un fichier multimédia. Il est également possible de faire apparaître un bouton à fixer pour passer à l'écran suivant.
         Dans les paramètres globaux de ces écrans, vous pouvez déjà renseigner le format de l'instruction (un texte, une image, un son ou une vidéo).</p>
 
         <p><strong>Ecrans de stimuli</strong></p>
 
-        <p>Les écrans de stimuli permettent de créer des grilles de sons ou d'images pour les évaluations. En raison de leur complexité par rapport aux
-        deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liés au nombre de lignes, de colonnes, ainsi que le nombre
+        <p>Les écrans de stimuli permettent de créer des grilles d'images potentiellement accompagnées de sons pour les évaluations. En raison de leur complexité par rapport aux
+        deux autres types d'écrans, davantage de paramètres doivent être renseignés. On peut voir des options liées au nombre de lignes, de colonnes, ainsi que le nombre
         minimum de bonnes réponses attendues.</p>
 
         <div class="alert alert-info fw-semibold w-100 mb-5">
           <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
           <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-          Le nombre de bonne réponses à sélectionner ne peut pas être inférieur à 0, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
+          Le nombre de bonnes réponses à sélectionner ne peut pas être inférieur à zéro, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
           Dans le cas contraire, il serait impossible pour l'évalué·e de valider l'écran de stimuli.
         </div>
 
         <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
              alt="Image montrant une grille de cellules d'un écran de stimuli. On voit aussi une barre d'outil au dessus de celles-ci.">
         <div class="guide-content-image-desc">
-          <p>Visualisation d'une grille d'un écran de stimuli, avec 3 lignes et 2 colonnes définis en paramètre.</p>
+          <p>Visualisation d'une grille d'un écran de stimuli, avec trois lignes et deux colonnes définies en paramètres.</p>
         </div>
 
-        <p><strong>Les écrans existant sont-ils impactés si les paramètres par défaut sont modifiés ?</strong></p>
+        <p><strong>Ecrans de transition</strong></p>
 
-        <p>Non, seuls les écrans créés après les modifications des paramètres par défaut auront les nouvelles valeurs.
-        De façon générale, une fois qu'un écran est créé, ses valeurs ne peuvent être changés qu'en modifiant cet écran
+        <p>Les écrans de transition permettent de faire un sas entre d'autres types d'écrans (instruction, stimuli). Il est possible de renseigner un temps
+          d'affichage de l'écran de transition. Ce type d’écran permet à l’information précédente d’être intégrée avant l’arrivée de nouvelles informations,
+          ainsi que d’amener le regard du/de la participant.e au centre de l’écran grâce à la croix de fixation, si on a sélectionné son affichage.
+        </p>
+
+        <p><strong>Les écrans existants sont-ils impactés si les paramètres par défaut sont modifiés ?</strong></p>
+
+        <p>Non, seuls les écrans créés après la modification des paramètres par défaut auront les nouvelles valeurs.
+        De façon générale, une fois qu'un écran est créé, ses valeurs ne peuvent être changées qu'en modifiant cet écran
         directement (voir partie suivante).</p>
 
       </div>
@@ -166,7 +173,7 @@
     <div class="guide-section-card mb-3" [id]="'create-eval'">
       <div class="guide-section-title">Partie 4 — Création des écrans d'évaluation</div>
       <div class="guide-section-body">
-        <p>Une fois les paramètres globaux renseignés, vous pouvez ensuite créer un ensemble d'écrans qui composeront votre évaluation.
+        <p>Une fois les paramètres globaux renseignés, vous pouvez créer un ensemble d'écrans qui composeront votre évaluation.
           Pour cela, vous pouvez utiliser la page suivante :
         </p>
 
@@ -183,20 +190,16 @@
           la page d'information du/de la participant·e, vous pouvez organiser l'ordre de la liste avec
           Le bouton <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span>. Le bouton gris, à droite du nom
           de chaque écran, permet de le renommer (vous pouvez aussi simplement cliquer sur le nom de l'écran). Enfin, le dernier bouton rouge,
-          le plus à droite, permet de supprimer l'écran.</p>
+          le plus à droite, permet de supprimer l'écran. Attention, toute suppression d’écran est définitive. Prenez bien garde à l’écran que vous
+          souhaitez supprimer.</p>
           </li>
 
-          <li><p>La deuxième partie de l'écran permet de prévisualiser un écran et de le modifier, en cliquant dessus.</p>
-            <div class="alert alert-info fw-semibold w-100 mb-5">
-              <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-              <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-              La prévisualisation d'un écran est toujours en cours de développement, seule la modification est possible pour l'instant.
-            </div>
+          <li><p>La  partie droite de la page permet de prévisualiser un écran et de le modifier, en cliquant sur le bouton vert “Modification de l’écran”.</p>
           </li>
         </ul>
 
         <p>Après avoir cliqué sur le bouton de modification, vous allez retrouver une disposition des options similaire à celle des paramètres par défaut.
-        Les valeurs des écrans nouvellement créés seront aussi celles définies dans ces paramètres globaux, à l'écran précédent.
+        Les valeurs des écrans nouvellement créés seront aussi celles définies dans ces paramètres globaux.
         Pour pouvoir modifier le type d'écran, utilisez le menu déroulant dans la première option en haut de la page.</p>
 
         <p><strong>Ecrans de transition</strong></p>
@@ -216,7 +219,7 @@
           <p>Zone d'importation de fichier multimédia.</p>
         </div>
 
-        <p>Dans l'exemple de l'image ci-dessus, vous pouvez importer une image en faisant un Glisser/Déposer de celle-ci dans la zone en pointillés. Vous pouvez
+        <p>Dans l'exemple ci-dessus, vous pouvez importer une image en faisant un Glisser/Déposer de celle-ci dans la zone en pointillés. Vous pouvez
         aussi cliquer directement sur la zone, ce qui ouvrira votre Explorateur de fichier et vous laissera choisir l'image de votre choix.
         <br>Quand un média est importé dans un écran, vous pouvez le prévisualiser (ou l'écouter, dans le cas d'un son) et le supprimer à l'aide du bouton rouge
         sous la zone d'importation.</p>
@@ -231,20 +234,20 @@
         <p><strong>Ecrans de stimuli</strong></p>
 
         <p>Les écrans de stimuli permettent de créer des grilles de sons ou d'images pour les évaluations. En raison de leur complexité par rapport aux
-          deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liés au nombre de lignes, de colonnes, ainsi que le nombre
+          deux autres types d'écrans, ils possèdent davantage de paramètres. On peut voir des options liées au nombre de lignes, de colonnes, ainsi que le nombre
           minimum de bonnes réponses attendues.</p>
 
         <div class="alert alert-info fw-semibold w-100 mb-5">
           <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
           <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-          Le nombre de bonne réponses à sélectionner ne peut pas être inférieur à 0, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
+          Le nombre de bonnes réponses à sélectionner ne peut pas être inférieur à zéro, et ne peut pas dépasser le nombre de lignes multiplié par le nombre de colonnes.
           Dans le cas contraire, il serait impossible pour l'évalué·e de valider l'écran de stimuli.
         </div>
 
         <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
              alt="Image montrant une grille de cellules d'un écran de stimuli. On voit aussi une barre d'outil au dessus de celles-ci.">
         <div class="guide-content-image-desc">
-          <p>Visualisation d'une grille d'un écran de stimuli, avec 3 lignes et 2 colonnes définis en paramètre.</p>
+          <p>Visualisation d'une grille d'un écran de stimuli, avec trois lignes et deux colonnes définies en paramètre.</p>
         </div>
 
         <p>En cliquant sur une des cellules de la grille, il est possible de la personnaliser : vous pouvez changer le type de réponse (bonne ou mauvaise),
@@ -256,14 +259,14 @@
           <p>Visualisation des paramètres d'une cellule d'un écran de stimuli.</p>
         </div>
 
-        <p>Sur cette image, vous pouvez voir d'autres boutons. Si l'image que vous avez utilisé est trop grosse ou n'est pas centrée, vous avez la possibilité de la redimensionner
+        <p>Sur cette image, vous pouvez voir d'autres boutons. Si l'image que vous avez utilisée est trop grosse ou n'est pas centrée, vous avez la possibilité de la redimensionner
         avec le bouton "Recadrer". De la même façon, il est possible d'écouter un aperçu lorsqu'un son est ajouté à la cellule. Enfin, tout en bas de ce menu latéral,
-        vous pouvez retrouver deux boutons. Le premier, à gauche, permet de supprimer l'ensemble des fichiers (image et/ou son) qui ont été ajouté à cette cellule. Le second
+        vous pouvez retrouver deux boutons. Le premier, à gauche, permet de supprimer l'ensemble des fichiers (image et/ou son) qui ont été ajoutés à cette cellule. Le second
         permet d'enregistrer les changements effectués.</p>
 
         <p>Bien qu'il soit possible de gérer toutes les cellules de la grille de stimuli en renseignant la taille des lignes et des colonnes, ce système n'est pas optimal à long terme,
         en particulier si vous devez modifier votre grille ultérieument. Pour cette raison, une barre d'outils est à votre disposition, au dessus de l'espace de prévisualisation de la grille.
-        Elle permet de faire un ensemble d'actions sur vos cellules, sans avoir à modifier le nombre de ligne, de colonnes, ou de devoir renseigner à nouveau la valeur de la cellule ainsi que ses
+        Elle permet d'effectuer un ensemble d'actions sur vos cellules, sans avoir à modifier le nombre de lignes, de colonnes, ni de devoir renseigner à nouveau la valeur de la cellule ainsi que ses
         pièces jointes.</p>
 
         <img src="assets/guide/images/stimuli-add.png" class="guide-content-image"
@@ -272,8 +275,8 @@
           <p>Utilisation de la barre d'outil pour créer de nouvelles cellules.</p>
         </div>
 
-        <p>Dans un premier temps, vous pouvez rajouter des nouvelles cellules de deux façons différentes : en cliquant sur une case vide, ou en cliquant sur un des petits "+", en survolant une case avec
-        votre souris, comme sur l'image ci-dessus. La barre d'outil vous permet d'effectuer d'autres actions. La liste ci-dessous décrit l'utilité de chaque bouton, de gauche à droite : </p>
+        <p>Dans un premier temps, vous pouvez rajouter de nouvelles cellules de deux façons différentes : en cliquant sur une case vide, ou en cliquant sur un des petits "+". Ces derniers apparaissent lorsque vous
+        survolez une case avec votre souris, comme sur l'image ci-dessus. La barre d'outil vous permet d'effectuer d'autres actions. La liste ci-dessous décrit l'utilité de chaque bouton, de gauche à droite : </p>
 
         <ul>
           <li>Dupliquer : permet de copier une case et de la coller dans un autre emplacement (s'il s'agit d'une autre cellule, elle sera écrasée). La nouvelle case aura les mêmes paramètres et fichiers attachés
@@ -281,10 +284,13 @@
           <li>Echanger : permet d'intervertir deux cellules entre elles, ou de déplacer une cellule existante vers un emplacement vide.</li>
           <li>Sélection multiple : permet de sélectionner plusieurs cellules simultanément, pour les supprimer.</li>
           <li>Supprimer : permet de supprimer une cellule.</li>
-          <li>Annuler : permet d'annuler la dernière action effectuée. Vous pouvez remonter jusqu'au 10 dernières.</li>
-          <li>Mode de visualiation : permet d'afficher rapidement le contenu de chaque cellule de la grille.</li>
+          <li>Annuler : permet d'annuler la dernière action effectuée. Vous pouvez remonter jusqu'aux dix dernières actions réalisés.</li>
+          <li>Mode de visualiation : permet d'afficher rapidement le contenu de chaque cellule de la grille. Il est impossible de modifier la grille lorsque ce mode est activé. Il faut donc appuyer à nouveau sur
+            le bouton de visualisation pour en sortir.</li>
           <li>Boutons de zoom et de dézoom : permet d'agrandir ou de rétrécir la zone de prévisualisation, utile pour les grilles assez larges.</li>
         </ul>
+
+        <p>Lorsque tous les écrans de votre évaluation sont créés et que celle-ci est complète, le bouton “Suivant” en bas à droite vous permet d’accéder à la page de téléchargement.</p>
 
       </div>
     </div>
@@ -292,12 +298,13 @@
     <div class="guide-section-card mb-3" [id]="'download-eval'">
       <div class="guide-section-title">Partie 5 — Téléchargement de l'évaluation</div>
       <div class="guide-section-body">
-        <p>Une fois les écrans de l'évaluation créés, la dernière page permet de télécharger l'évaluation dans un format <code>.zip</code>. Elle peut ensuite être
-          importée dans l'application GazePlay-Learning pour pouvoir lancer votre évaluation et récupérer ses résultats.
+        <p>Une fois les écrans de l'évaluation créés, la dernière page permet de télécharger l'évaluation sous deux formats différents :
         </p>
 
-        <p>Vous pouvez également télécharger l'évaluation dans un format <code>.gpSave</code>. Ce type de fichier peut être importé sur GazePlay-Eval pour pouvoir
-        recharger l'évaluation à partir du fichier.</p>
+        <ul>
+          <li>Un format <code>.gpsave</code> avec le bouton “Télécharger l’évaluation”. Le fichier ainsi téléchargé pourra être importé à nouveau sur ce site afin d’apporter des modifications à l’évaluation dans le futur.</li>
+          <li>Un format <code>.zip</code> avec le bouton “Exporter pour GazePlay Learning”, ce qui vous permettra d’utiliser votre évaluation avec le logiciel GazePlay Learning.</li>
+        </ul>
 
       </div>
     </div>

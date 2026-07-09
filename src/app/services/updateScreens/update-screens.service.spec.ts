@@ -63,4 +63,36 @@ describe('UpdateScreensService', () => {
     const result = service.updateStimuliScreen(screen, 'S', [1, 1, false, 5, 1, 1, false, false]);
     expect(result).toBe(screen);
   });
+
+  // ─── Filet de sécurité : paramètres globaux absents/vides ──────────────────
+  // Reproduit le bug d'import (globaux perdus → tableau vide). Les valeurs par
+  // défaut de l'écran doivent être conservées, jamais remplacées par `undefined`.
+
+  it('updateTransitionScreen — global vide → conserve les valeurs par défaut (aucun undefined)', () => {
+    const screen: transitionScreenModel = { type: 'transition', name: '', values: [false, 0, false, false, 0] };
+
+    const updated = service.updateTransitionScreen(screen, 'T', []);
+
+    expect(updated.values).toEqual([false, 0, false, false, 0]);
+    expect(updated.values.some(v => v === undefined)).toBeFalse();
+  });
+
+  it('updateInstructionScreen — global undefined → conserve les valeurs par défaut', () => {
+    const screen: instructionScreenModel = {
+      type: 'instruction', name: '', values: [false, 1, false, 'Image', '', '', false, 1]
+    };
+
+    const updated = service.updateInstructionScreen(screen, 'I', undefined);
+
+    expect(updated.values).toEqual([false, 1, false, 'Image', '', '', false, 1]);
+    expect(updated.values.some(v => v === undefined)).toBeFalse();
+  });
+
+  it('updateScreen — préserve une valeur globale légitime false / 0 (pas de retour au défaut)', () => {
+    const screen: transitionScreenModel = { type: 'transition', name: '', values: [true, 9, true, true, 9] };
+
+    const updated = service.updateTransitionScreen(screen, 'T', [false, 0, false, false, 0]);
+
+    expect(updated.values).toEqual([false, 0, false, false, 0]);
+  });
 });

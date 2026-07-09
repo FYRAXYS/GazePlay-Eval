@@ -138,9 +138,10 @@
 }
 
 .guide-content-image {
-  width: 100%;
+  width: auto;
   max-width: 500px;
   height: auto;
+  max-height: 500px;
   border-radius: 8px;
   border: 1px solid var(--bs-border-color);
   display: block;
