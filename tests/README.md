@@ -14,7 +14,7 @@
   - écran de transition : augmenter le temps avant le passage à l’écran suivant à <code>8 secondes</code>.
   - écran d’instruction : garder les paramètres par défaut. Ajouter l’image [“gazeplay-mesange.png”](gazeplay-mesange.png).
   - écran de stimuli : garder les paramètres par défaut. Descendre jusqu’à la grille de stimuli et la modifier : 
-    - cliquer sur la première cellule pour l’éditer. La définir comme étant une bonne réponse, ajouter l’image [“gazeplay-mesange.png”](gazeplay-mesange.png) et le son [“gazeplay-oiseau.mp3”](gazeplay-oiseau.mp3). Valider.
+    - cliquer sur la première cellule pour l’éditer. La définir comme étant une bonne réponse, ajouter l’image [“gazeplay-mesange.png”](gazeplay-mesange.png) et le son [“gazeplay-oiseau.mp3”](gazeplay-oiseau.mp3).
     - Dupliquer cette cellule dans une autre cellule.
     - Cliquer sur une autre cellule pour l’éditer. La laisser comme étant une mauvaise réponse, ajouter l’image [“gazeplay-rouge-gorge.png”](gazeplay-rouge-gorge.png).
     - Dupliquer cette cellule dans les autres cellules qui n’ont pas encore été modifiées.
@@ -30,6 +30,6 @@
 
 
 ## Test d’importation d’évaluation : 
-- Ouvrir le menu latéral et cliquer sur le bouton **“Importer”**.
-- Dans la fenêtre qui s’ouvre, choisir le mode **“Sauvegarder”**. Choisir ensuite le fichier [“gazeplay-eval-import.gpSave”](gazeplay-eval-import.gpSave). Enfin, sélectionner un emplacement de sauvegarde non-occupé et cliquer sur **“Importer”**.
-- Vérifier que le site nous amène bien sur une nouvelle évaluation appelée **“évaluation Importation”**.
+- Ouvrir le menu latéral et se rendre sur la page d'importation.
+- Dans la fenêtre qui s’ouvre, choisir le mode **“Sauvegarder”**. Choisir ensuite le fichier [“gazeplay-eval-import.gpSave”](gazeplay-eval-import.gpSave). Enfin, sélectionner un emplacement de sauvegarde non-occupé. Importer l'évaluation.
+- Vérifier que le site nous charge bien une nouvelle évaluation appelée **“évaluation Importation”**.
