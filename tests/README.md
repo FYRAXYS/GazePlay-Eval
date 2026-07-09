@@ -5,7 +5,7 @@
 
 - Sur l’écran d’accueil, cliquer sur le bouton **“créer une nouvelle évaluation”**.
 - Changer le nom de l’évaluation. Dans le cas contraire, elle s’appellera **“Nouvelle évaluation”**. Laisser le format sur **“CSV & XLSX”**.
-- Dans la liste d’information, ajouter plusieurs champs. Les renommer et changer leur ordre.
+- Dans la liste d’informations, ajouter plusieurs champs. Les renommer et changer leur ordre. Si aucun champ n’est renseigné, l’évaluation associera automatiquement le nom du profil utilisé sur *Gazeplay-Learning* pour identifier l’évalué.e.
 - Choisir le mode de création manuel. Concernant les paramètres globaux : 
   - des écrans de transition : Mettre un temps avant passage à l'écran suivant de <code>5.5 secondes</code> et mettre une croix de fixation.
   - des écrans d’instruction : Ajouter un média par défaut de type image et mettre un bouton avec une durée de fixation de <code>1.5 secondes</code>.
