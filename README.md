@@ -288,10 +288,10 @@ Les tâches restantes sont représentés par les Issues dans le projet. Des comm
 ## Contact
 
 En cas de besoin d'éclaircissement sur des parties spécifiques du code, vous pouvez envoyer un mail aux adresses suivantes : 
+- *thomas.peterschmitt@gmail.com*
+- *fyraxys2006@gmail.com*
+
 
 ## Auteurs 
 - Simon F.
 - Thomas P.
-
-- *thomas.peterschmitt@gmail.com*
-- *fyraxys2006@gmail.com*
