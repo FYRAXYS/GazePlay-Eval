@@ -254,7 +254,7 @@ Pour lancer les tests sous IntelliJ Idea, vous pouvez lancer les commandes suiva
 ```bash
 ng test
 ```
---> Lance *Karma* (outil permettant de simuler un navigateur web) et déroule l'ensemble des tests
+--> Lance *Karma* (outil permettant de simuler un navigateur web) et déroule l'ensemble des tests.
 
 ```bash
 ng test --code-coverage GazePlay-Eval 
@@ -262,3 +262,32 @@ ng test --code-coverage GazePlay-Eval
 --> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
 
 ## Tâches restantes
+
+Les tâches restantes sont représentés par les Issues dans le projet. Des commentaires sont rajoutés pour apporter plus de contexte ou des propositions de solutions à mettre en place.
+
+### Guide utilisateur : 
+- [ ] [#56](https://github.com/Noars/GazePlay-Eval/issues/56)
+- [ ] [#55](https://github.com/Noars/GazePlay-Eval/issues/55)
+- [ ] [#51](https://github.com/Noars/GazePlay-Eval/issues/51)
+- [ ] [#49](https://github.com/Noars/GazePlay-Eval/issues/49)
+
+### Options : 
+- [ ] [#50](https://github.com/Noars/GazePlay-Eval/issues/50)
+- [ ] [#48](https://github.com/Noars/GazePlay-Eval/issues/48)
+
+### Tests : 
+- [ ] [#53](https://github.com/Noars/GazePlay-Eval/issues/53)
+- [ ] [#52](https://github.com/Noars/GazePlay-Eval/issues/52)
+
+### Autre : 
+- [ ] [#54](https://github.com/Noars/GazePlay-Eval/issues/54)
+- [X] [#47](https://github.com/Noars/GazePlay-Eval/issues/47) (techniquement déjà fait, mais une revérification serait bien)
+- [ ] [#23](https://github.com/Noars/GazePlay-Eval/issues/23)
+- [X] [#7](https://github.com/Noars/GazePlay-Eval/issues/7) (à faire au fur et à mesure de l'avancée du projet)
+
+## Contact
+
+En cas de besoin d'éclaircissement sur des parties spécifiques du code, vous pouvez envoyer un mail aux adresses suivantes : 
+
+- *thomas.peterschmitt@gmail.com*
+- *fyraxys2006@gmail.com*
